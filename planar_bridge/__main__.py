@@ -1,9 +1,9 @@
-import sys
+from sys import version_info
 
 from pull import pull_all
 
 
-if sys.version_info.major != 3 or sys.version_info.minor < 13:
+if version_info.major != 3 or version_info.minor < 13:
     raise SystemExit("Python version must be at least 3.13")
 
 
