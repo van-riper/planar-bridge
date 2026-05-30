@@ -4,4 +4,10 @@ imgs/
 json/
 
 config.toml
-Pipfile.lock
+
+# python / build artifacts
+__pycache__/
+*.egg-info/
+.pytest_cache/
+dist/
+build/
