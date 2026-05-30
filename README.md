@@ -49,22 +49,21 @@ To install Planar Bridge, start by cloning this repository.
 $ git clone --depth=1 https://github.com/maallaard/planar-bridge.git
 ```
 
-Then, install the [requests](https://pypi.org/project/requests/) and
-[colorama](https://pypi.org/project/colorama/) packages using pip.
+Then set up the environment with [uv](https://docs.astral.sh/uv/), which
+installs the runtime and development dependencies into a local virtual
+environment:
 
 ```sh
-$ python3 -m pip install requests colorama
+$ uv sync
 ```
-
-Alternatively, you can use [pipenv](https://github.com/pypa/pipenv/) to set
-up a virtual environment within your cloned repo using the included `Pipfile`.
 
 ## Usage
 
-To run Planar Bridge, execute `planar_bridge.py`.
+To run Planar Bridge, use the `planar-bridge` console script (or the
+equivalent module form, `uv run python -m planar_bridge`):
 
 ```sh
-$ python3 ./planar-bridge/planar-bridge.py
+$ uv run planar-bridge
 [12:34:56] INFO: Comparing local & source files...
 ...
 ```
@@ -107,10 +106,12 @@ planar-bridge/
 │  ├─ AllPrintings.json
 │  └─ Meta.json
 ├─ .gitignore
-├─ config-example.toml
+├─ config.example.toml
 ├─ LICENSE
-├─ Pipfile
-├─ planar_bridge/
+├─ pyproject.toml
+├─ uv.lock
+├─ src/planar_bridge/
+├─ tests/
 └─ README.md
 ```
 
@@ -132,6 +133,17 @@ their UUIDs. This file is also found in `imgs/`, which states for each set code
 whether or not every card in that set is at the highest resolution available.
 Do not modify or delete these files, as they are required for proper
 functionality.
+
+## Development
+
+Planar Bridge is developed with [uv](https://docs.astral.sh/uv/). After
+`uv sync`, the dev tooling runs through `uv run`:
+
+```sh
+$ uv run pytest                    # run the test suite
+$ uv run pylint src/planar_bridge  # lint
+$ uv run black src tests           # format
+```
 
 ## Configuration
 
