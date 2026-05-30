@@ -1,8 +1,8 @@
 from tomllib import loads
 from typing import Any
 
-from const import LANGUAGE_MAP, DEFAULT_CONFIG
-from paths import CONFIG_PATH
+from .constants import LANGUAGE_MAP, DEFAULT_CONFIG
+from .paths import CONFIG_PATH
 
 
 class Config:

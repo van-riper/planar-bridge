@@ -2,9 +2,9 @@ from typing import Any
 import json
 import signal
 
-from objects import CardObject, MetaObject, SetObject
-import paths
-import utils
+from .objects import CardObject, MetaObject, SetObject
+from . import paths
+from . import utils
 
 
 def remaining_sets(set_entries: dict[str, dict[str, Any]]) -> None:

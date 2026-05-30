@@ -7,10 +7,10 @@ import json
 
 from requests import Response, Session
 
-from config import CONFIG
-import const
-import paths
-import utils
+from .config import CONFIG
+from . import constants
+from . import paths
+from . import utils
 
 
 session = Session()
@@ -75,7 +75,7 @@ class CardFields:
         self.is_bad = self.__init_is_bad(card_dict)
         self.filename = self.__init_filename(card_dict)
 
-        if self.layout in const.LAYOUT_TWOSIDED:
+        if self.layout in constants.LAYOUT_TWOSIDED:
             if card_dict.get("side") == "a":
                 self.face = "front"
             else:
@@ -97,7 +97,7 @@ class CardFields:
             card_dict["language"] not in [CONFIG.card_lang, "Phyrexian"],
             card_dict["name"] in ["Checklist", "Double-Faced"],
             bool(card_dict.get("isOnlineOnly")),
-            self.layout in const.LAYOUT_BAD,
+            self.layout in constants.LAYOUT_BAD,
             bool(card_dict.get("isFunny")),
             len(promos_crosscheck) > 0,
         )
@@ -108,7 +108,7 @@ class CardFields:
 
         faces_list: list[str] | None = card_dict.get("otherFaceIds")
 
-        if self.layout in const.LAYOUT_COMBINED and faces_list is not None:
+        if self.layout in constants.LAYOUT_COMBINED and faces_list is not None:
             faces_list.append(self.uuid)
             faces_list.sort()
             return ("_").join(map(str, faces_list))
@@ -126,7 +126,7 @@ class CardObject:
 
         self.local_state: bool | None = states_obj.get_state(self.card.filename)
 
-        if self.card.layout in const.LAYOUT_TOKEN:
+        if self.card.layout in constants.LAYOUT_TOKEN:
             set_dir = set_dir / "tokens"
 
         self.img_path: Path = set_dir / (self.card.filename + ".jpg")
@@ -136,7 +136,7 @@ class CardObject:
 
         url: str
 
-        sleep(const.TIMEOUT)
+        sleep(constants.TIMEOUT)
 
         url = f"https://api.scryfall.com/cards/{self.card.scry_id}?format=json"
         source: Response | None = utils.handle_response(session, url)
@@ -162,7 +162,7 @@ class CardObject:
 
         self.img_path.parent.mkdir(exist_ok=True, parents=True)
 
-        sleep(const.TIMEOUT)
+        sleep(constants.TIMEOUT)
 
         url = f"https://api.scryfall.com/cards/{self.card.scry_id}?format=image"
 
@@ -292,12 +292,12 @@ class MetaObject:
         if same_date:
             raise SystemExit
 
-        if self.local["version"] != const.MTGJSON_VERS:
+        if self.local["version"] != constants.MTGJSON_VERS:
 
             message: tuple[str, ...] = (
                 "MTGJSON has been updated to v",
                 self.source["version"] + "\n",
-                const.VERS_WARNING,
+                constants.VERS_WARNING,
             )
 
             utils.status(("").join(message), 1)

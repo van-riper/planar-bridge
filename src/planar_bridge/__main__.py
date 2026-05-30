@@ -1,6 +1,6 @@
 from sys import version_info
 
-from pull import pull_all
+from .pull import pull_all
 
 
 if version_info.major != 3 or version_info.minor < 13:
