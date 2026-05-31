@@ -9,6 +9,7 @@ from requests import Response, Session
 
 from . import constants, utils
 from .config.loader import AppConfig
+from .domain import layouts
 from .paths import DataPaths
 
 type CardDict = dict[str, Any]
@@ -75,7 +76,7 @@ class CardFields:
         self.is_bad = self.__is_bad(card_dict, config)
         self.filename = self.__filename(card_dict)
 
-        if self.layout not in constants.LAYOUT_TWOSIDED:
+        if self.layout not in layouts.LAYOUT_TWOSIDED:
             self.face = None
         elif card_dict.get("side") == "a":
             self.face = "front"
@@ -96,7 +97,7 @@ class CardFields:
             card_dict["language"] not in [config.card_language, "Phyrexian"],
             card_dict["name"] in ["Checklist", "Double-Faced"],
             bool(card_dict.get("isOnlineOnly")),
-            self.layout in constants.LAYOUT_BAD,
+            self.layout in layouts.LAYOUT_BAD,
             bool(card_dict.get("isFunny")),
             len(promos_crosscheck) > 0,
         )
@@ -107,7 +108,7 @@ class CardFields:
 
         faces_list: list[str] | None = card_dict.get("otherFaceIds")
 
-        if self.layout in constants.LAYOUT_COMBINED and faces_list is not None:
+        if self.layout in layouts.LAYOUT_COMBINED and faces_list is not None:
             faces_list.append(self.uuid)
             faces_list.sort()
             return ("_").join(map(str, faces_list))
@@ -129,7 +130,7 @@ class CardObject:
 
         self.local_state: bool | None = states_obj.get_state(self.card.filename)
 
-        if self.card.layout in constants.LAYOUT_TOKEN:
+        if self.card.layout in layouts.LAYOUT_TOKEN:
             set_dir = set_dir / "tokens"
 
         self.img_path: Path = set_dir / (self.card.filename + ".jpg")
