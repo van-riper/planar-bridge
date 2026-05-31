@@ -1,22 +1,27 @@
-from typing import Any
 import json
 import signal
+from os import environ
+from typing import Any
 
+from . import utils
 from .config.loader import AppConfig, load_config
 from .objects import CardObject, MetaObject, SetObject
-from . import paths
-from . import utils
+from .paths import DataPaths, ensure_directories_exist, load_paths
 
 type SetEntries = dict[str, dict[str, Any]]
 
 
-def remaining_sets(set_entries: SetEntries, config: AppConfig) -> None:
+def remaining_sets(
+    set_entries: SetEntries,
+    config: AppConfig,
+    paths: DataPaths,
+) -> None:
 
     set_list: list[str] = []
 
     for set_entry in set_entries.values():
 
-        set_obj: SetObject = SetObject(set_entry, config)
+        set_obj: SetObject = SetObject(set_entry, config, paths)
 
         if (
             not set_obj.states_obj.is_all_highres()
@@ -28,11 +33,11 @@ def remaining_sets(set_entries: SetEntries, config: AppConfig) -> None:
     utils.status("Remaining sets with low res scans: " + sets_str, 0)
 
 
-def pull_meta() -> None:
+def pull_meta(paths: DataPaths) -> None:
 
     utils.status("Comparing local & source files...", 0)
 
-    meta_obj: MetaObject = MetaObject()
+    meta_obj: MetaObject = MetaObject(paths)
 
     if meta_obj.is_outdated():
         utils.status("Downloading bulk files...", 0)
@@ -114,14 +119,17 @@ def pull_all() -> None:
     set_obj: SetObject
     set_entries: SetEntries
 
-    config: AppConfig = load_config(paths.CONFIG_PATH)
+    paths: DataPaths = load_paths(environ)
+    ensure_directories_exist(paths)
 
-    pull_meta()
+    config: AppConfig = load_config(paths.config_path)
 
-    date: str = json.loads(paths.META_PATH.read_bytes())["meta"]["date"]
+    pull_meta(paths)
+
+    date: str = json.loads(paths.metadata_path.read_bytes())["meta"]["date"]
     utils.status(f"Loading bulk data ({date})...", 0)
 
-    set_entries = json.loads(paths.BULK_PATH.read_bytes())["data"]
+    set_entries = json.loads(paths.bulk_path.read_bytes())["data"]
 
     set_count: int = 0
     set_total: int = len(set_entries)
@@ -129,7 +137,7 @@ def pull_all() -> None:
     for set_entry in set_entries.values():
 
         set_count += 1
-        set_obj = SetObject(set_entry, config)
+        set_obj = SetObject(set_entry, config, paths)
 
         if set_obj.to_omit:
             continue
@@ -140,4 +148,4 @@ def pull_all() -> None:
 
     utils.status("Finished successfully.", 0)
 
-    remaining_sets(set_entries, config)
+    remaining_sets(set_entries, config, paths)
