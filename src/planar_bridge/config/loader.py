@@ -13,7 +13,7 @@ from .defaults import (
 )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class AppConfig:
     """Resolved, immutable application configuration.
 
