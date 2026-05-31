@@ -51,7 +51,7 @@ def load_config(config_path: Path | None) -> AppConfig:
         AppConfig: The resolved, immutable configuration.
 
     Raises:
-        KeyError: If ``card_language`` is not a recognized code.
+        ValueError: If ``card_language`` is not a recognized code.
     """
 
     file_data: dict[str, Any] = {}
@@ -65,7 +65,7 @@ def load_config(config_path: Path | None) -> AppConfig:
     language_name = LANGUAGE_MAP.get(language_code)
 
     if language_name is None:
-        raise KeyError(language_code)
+        raise ValueError(f"language code '{language_code}' not supported")
 
     filter_lists = DEFAULT_FILTER_LISTS | file_data
 

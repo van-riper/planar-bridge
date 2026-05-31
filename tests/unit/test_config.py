@@ -6,6 +6,8 @@ contract for `AppConfig` and `load_config`.
 
 from pathlib import Path
 
+from pytest import raises
+
 from planar_bridge.config import AppConfig, load_config
 
 
@@ -42,3 +44,11 @@ def test_exempt_collections_are_frozensets(tmp_path: Path) -> None:
     config = load_config(tmp_path / "absent.toml")
     assert isinstance(config.exempt_types, frozenset)
     assert "token" in config.exempt_types
+
+
+def test_unknown_language_code_raises(tmp_path: Path) -> None:
+    """An unrecognized card_language raises ValueError."""
+    config_path = tmp_path / "config.toml"
+    config_path.write_text('card_language = "xx"\n', encoding="UTF-8")
+    with raises(ValueError):
+        load_config(config_path)
