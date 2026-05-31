@@ -2,18 +2,21 @@ from typing import Any
 import json
 import signal
 
+from .config.loader import AppConfig, load_config
 from .objects import CardObject, MetaObject, SetObject
 from . import paths
 from . import utils
 
+type SetEntries = dict[str, dict[str, Any]]
 
-def remaining_sets(set_entries: dict[str, dict[str, Any]]) -> None:
+
+def remaining_sets(set_entries: SetEntries, config: AppConfig) -> None:
 
     set_list: list[str] = []
 
     for set_entry in set_entries.values():
 
-        set_obj: SetObject = SetObject(set_entry)
+        set_obj: SetObject = SetObject(set_entry, config)
 
         if (
             not set_obj.states_obj.is_all_highres()
@@ -59,7 +62,7 @@ def pull_card(card_obj: CardObject) -> tuple[str, bool]:
     return card_obj.card.filename, source_state
 
 
-def pull_set(set_obj: SetObject, progress: str) -> None:
+def pull_set(set_obj: SetObject, progress: str, config: AppConfig) -> None:
 
     card_obj: CardObject
 
@@ -82,6 +85,7 @@ def pull_set(set_obj: SetObject, progress: str) -> None:
             card_entry,
             set_obj.states_obj,
             set_obj.set_dir,
+            config,
         )
 
         img_name, source_state = pull_card(card_obj)
@@ -96,7 +100,11 @@ def pull_set(set_obj: SetObject, progress: str) -> None:
 
         set_obj.states_obj.take_state(img_name, source_state)
 
-        card_obj.messager(progress, set_obj.inner_progress(), set_obj.set_code)
+        card_obj.messager(
+            progress,
+            set_obj.inner_progress(),
+            set_obj.set_code,
+        )
 
     set_obj.states_obj.write_states()
 
@@ -104,7 +112,9 @@ def pull_set(set_obj: SetObject, progress: str) -> None:
 def pull_all() -> None:
 
     set_obj: SetObject
-    set_entries: dict[str, dict[str, Any]]
+    set_entries: SetEntries
+
+    config: AppConfig = load_config(paths.CONFIG_PATH)
 
     pull_meta()
 
@@ -119,15 +129,15 @@ def pull_all() -> None:
     for set_entry in set_entries.values():
 
         set_count += 1
-        set_obj = SetObject(set_entry)
+        set_obj = SetObject(set_entry, config)
 
         if set_obj.to_omit:
             continue
 
         progress: str = utils.progress_str(set_count, set_total, False)
 
-        pull_set(set_obj, progress)
+        pull_set(set_obj, progress, config)
 
     utils.status("Finished successfully.", 0)
 
-    remaining_sets(set_entries)
+    remaining_sets(set_entries, config)

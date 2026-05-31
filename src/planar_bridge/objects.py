@@ -7,11 +7,12 @@ import json
 
 from requests import Response, Session
 
-from .config import CONFIG
+from .config.loader import AppConfig
 from . import constants
 from . import paths
 from . import utils
 
+type CardDict = dict[str, Any]
 
 session = Session()
 
@@ -66,35 +67,34 @@ class CardFields:
     filename: str
     face: Literal["front", "back"] | None
 
-    def __init__(self, card_dict: dict[str, Any]) -> None:
+    def __init__(self, card_dict: CardDict, config: AppConfig) -> None:
 
         self.uuid = card_dict["uuid"]
         self.layout = card_dict["layout"]
         self.scry_id = card_dict["identifiers"]["scryfallId"]
         self.message_substr = self.uuid + " | " + card_dict["name"]
-        self.is_bad = self.__init_is_bad(card_dict)
-        self.filename = self.__init_filename(card_dict)
+        self.is_bad = self.__is_bad(card_dict, config)
+        self.filename = self.__filename(card_dict)
 
-        if self.layout in constants.LAYOUT_TWOSIDED:
-            if card_dict.get("side") == "a":
-                self.face = "front"
-            else:
-                self.face = "back"
-        else:
+        if self.layout not in constants.LAYOUT_TWOSIDED:
             self.face = None
+        elif card_dict.get("side") == "a":
+            self.face = "front"
+        else:
+            self.face = "back"
 
-    def __init_is_bad(self, card_dict: dict[str, Any]) -> bool:
+    def __is_bad(self, card_dict: CardDict, config: AppConfig) -> bool:
 
         promos: list[str] | None = card_dict.get("promoTypes")
 
         if promos is None:
             promos = []
 
-        promos_crosscheck: set[str] = set(CONFIG.exempt_promos) & set(promos)
+        promos_crosscheck: set[str] = set(config.exempt_promos) & set(promos)
 
         is_bad_conditions: tuple[bool, ...] = (
-            bool(card_dict.get("isReprint")) and not CONFIG.pull_reprints,
-            card_dict["language"] not in [CONFIG.card_lang, "Phyrexian"],
+            bool(card_dict.get("isReprint")) and not config.pull_reprints,
+            card_dict["language"] not in [config.card_language, "Phyrexian"],
             card_dict["name"] in ["Checklist", "Double-Faced"],
             bool(card_dict.get("isOnlineOnly")),
             self.layout in constants.LAYOUT_BAD,
@@ -104,7 +104,7 @@ class CardFields:
 
         return any(is_bad_conditions)
 
-    def __init_filename(self, card_dict: dict[str, Any]) -> str:
+    def __filename(self, card_dict: CardDict) -> str:
 
         faces_list: list[str] | None = card_dict.get("otherFaceIds")
 
@@ -119,10 +119,14 @@ class CardFields:
 class CardObject:
 
     def __init__(
-        self, card_dict: dict[str, Any], states_obj: StatesObject, set_dir: Path
+        self,
+        card_dict: CardDict,
+        states_obj: StatesObject,
+        set_dir: Path,
+        config: AppConfig,
     ) -> None:
 
-        self.card: CardFields = CardFields(card_dict)
+        self.card: CardFields = CardFields(card_dict, config)
 
         self.local_state: bool | None = states_obj.get_state(self.card.filename)
 
@@ -192,7 +196,7 @@ class CardObject:
 
 class SetObject:
 
-    def __init__(self, set_dict: dict[str, Any]) -> None:
+    def __init__(self, set_dict: CardDict, config: AppConfig) -> None:
 
         self.set_code: str = set_dict["code"]
         self.set_dir: Path = paths.DATA_DIR / self.set_code
@@ -202,18 +206,18 @@ class SetObject:
         )
 
         to_omit_conditions: tuple[bool, ...] = (
-            bool(str(set_dict["type"]) in CONFIG.exempt_types),
-            bool(self.set_code in CONFIG.exempt_sets),
+            bool(str(set_dict["type"]) in config.exempt_types),
+            bool(self.set_code in config.exempt_sets),
             bool(set_dict.get("isForeignOnly")),
             bool(set_dict.get("isOnlineOnly")),
         )
 
         self.to_omit: bool = any(to_omit_conditions)
 
-        if self.to_omit and self.set_code in CONFIG.pardoned_sets:
+        if self.to_omit and self.set_code in config.pardoned_sets:
             self.to_omit = False
 
-        self.card_entries: list[dict[str, Any]] = [
+        self.card_entries: list[CardDict] = [
             *list(set_dict["cards"]),
             *list(set_dict["tokens"]),
         ]
