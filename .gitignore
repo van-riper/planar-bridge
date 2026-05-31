@@ -1,13 +1,22 @@
-.venv/
-.vscode/
-imgs/
-json/
-
-config.toml
-
-# python / build artifacts
+# Python
 __pycache__/
 *.egg-info/
-.pytest_cache/
-dist/
 build/
+dist/
+
+# Virtual environment
+.venv/
+
+# Test & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Editor
+.vscode/
+
+# Local config & data
+config.toml
+imgs/
+json/
