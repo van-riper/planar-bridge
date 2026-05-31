@@ -1,35 +1,78 @@
+from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
-from os import getenv, name as os_name
+from sys import platform
 
 
-def default_path() -> Path:
+@dataclass(frozen=True, kw_only=True)
+class DataPaths:
+    """Absolute filesystem locations for the data directory.
 
-    path_env: str | None = getenv("PLANAR_BRIDGE_DIR")
-    is_posix: bool = os_name == "posix"
+    Attributes:
+        data_directory (Path): Root directory for all stored data.
+        json_directory (Path): Holds the MTGJSON bulk and meta files.
+        bulk_path (Path): AllPrintings.json inside json_directory.
+        metadata_path (Path): Meta.json inside json_directory.
+        config_path (Path): config.toml inside data_directory.
+    """
 
-    if path_env is None:
-
-        path_env = getenv(
-            "XDG_DATA_HOME" if is_posix else "AppData",
-            "~/.local/share" if is_posix else "%UserProfile%/AppData",
-        )
-
-        path_env += "/planar-bridge"
-
-    path_obj: Path = Path(path_env).resolve()
-
-    if not path_obj.exists():
-        raise FileNotFoundError(path_obj)
-
-    return path_obj
+    data_directory: Path
+    json_directory: Path
+    bulk_path: Path
+    metadata_path: Path
+    config_path: Path
 
 
-DATA_DIR: Path = default_path()
+def load_paths(environment: Mapping[str, str]) -> DataPaths:
+    """Load all absolute data paths from an ``environment`` mapping.
 
-JSON_DIR: Path = DATA_DIR / ".json"
-JSON_DIR.mkdir(exist_ok=True)
+    Pure: uses PLANAR_BRIDGE_DIR when set, otherwise falls back to
+    $HOME/.local/share (or %APPDATA% on Windows), then builds the
+    sub-paths under it. Does no filesystem work.
 
-BULK_PATH: Path = JSON_DIR / "AllPrintings.json"
-META_PATH: Path = JSON_DIR / "Meta.json"
+    Args:
+        environment (Mapping[str, str]): Environment variables to read.
 
-CONFIG_PATH: Path = DATA_DIR / "config.toml"
+    Returns:
+        DataPaths: The immutable set of absolute locations.
+    """
+
+    # TODO: rename PLANAR_BRIDGE_DIR to PLANAR_BRIDGE_PATH
+    # Assign if PLANAR_BRIDGE_DIR is set
+    data_directory = environment.get("PLANAR_BRIDGE_DIR")
+
+    # Fallback to system data folders otherwise
+    if data_directory is None:
+
+        match platform:
+            case "linux" | "darwin":
+                base_path = environment["HOME"] + "/.local/share"
+            case "win32":
+                base_path = environment["APPDATA"]
+            case _:
+                raise RuntimeError(f"platform '{platform}' is not supported")
+
+        data_directory = base_path + "/planar-bridge"
+
+    data_directory = Path(data_directory).absolute()
+    json_directory = Path(data_directory / ".json")
+
+    return DataPaths(
+        data_directory=data_directory,
+        json_directory=json_directory,
+        bulk_path=Path(json_directory / "AllPrintings.json"),
+        metadata_path=Path(json_directory / "Meta.json"),
+        config_path=Path(data_directory / "config.toml"),
+    )
+    # TODO: rename config.toml to planar-bridge.toml
+
+
+def ensure_directories_exist(paths: DataPaths) -> None:
+    """Create the data and json directories if they do not exist.
+
+    Args:
+        paths (DataPaths): The absolute locations to create.
+    """
+
+    paths.data_directory.mkdir(parents=True, exist_ok=True)
+    paths.json_directory.mkdir(exist_ok=True)

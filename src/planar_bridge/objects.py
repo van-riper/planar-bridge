@@ -1,16 +1,15 @@
+import gzip
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from time import sleep
 from typing import Any, Literal, NoReturn
-import gzip
-import json
 
 from requests import Response, Session
 
+from . import constants, utils
 from .config.loader import AppConfig
-from . import constants
-from . import paths
-from . import utils
+from .paths import DataPaths
 
 type CardDict = dict[str, Any]
 
@@ -196,10 +195,15 @@ class CardObject:
 
 class SetObject:
 
-    def __init__(self, set_dict: CardDict, config: AppConfig) -> None:
+    def __init__(
+        self,
+        set_dict: CardDict,
+        config: AppConfig,
+        paths: DataPaths,
+    ) -> None:
 
         self.set_code: str = set_dict["code"]
-        self.set_dir: Path = paths.DATA_DIR / self.set_code
+        self.set_dir: Path = paths.data_directory / self.set_code
         self.is_partial: bool = bool(set_dict.get("isPartialPreview"))
         self.states_obj: StatesObject = StatesObject(
             self.set_dir / ".states.json"
@@ -242,18 +246,19 @@ class SetObject:
 
 class MetaObject:
 
-    def __init__(self) -> None:
+    def __init__(self, paths: DataPaths) -> None:
 
+        self.paths: DataPaths = paths
         self.local: dict[str, str] = {}
         self.source: dict[str, str] = {}
 
         self.jsons_exist: bool = (
-            paths.BULK_PATH.exists() and paths.META_PATH.exists()
+            paths.bulk_path.exists() and paths.metadata_path.exists()
         )
 
         if self.jsons_exist:
             self.local = self.__fix_vers(
-                json.loads(paths.META_PATH.read_bytes())["meta"]
+                json.loads(paths.metadata_path.read_bytes())["meta"]
             )
 
         self.source = self.__init_source()
@@ -283,7 +288,7 @@ class MetaObject:
             if bulk_json is None:
                 raise RuntimeError
 
-            fob: Path = paths.JSON_DIR / f"{target}.json"
+            fob: Path = self.paths.json_directory / f"{target}.json"
             fob.write_bytes(gzip.decompress(bulk_json.content))
 
     def is_outdated(self) -> bool | NoReturn:
