@@ -10,7 +10,7 @@ from . import constants, utils
 from .aliases import CardData, SetData
 from .config.loader import AppConfig
 from .domain import layouts
-from .domain.card import CardFields, build_card_fields
+from .domain.card_model import CardFields, build_card_fields
 from .paths import DataPaths
 
 session = Session()
