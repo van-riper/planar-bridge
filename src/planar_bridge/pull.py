@@ -25,7 +25,7 @@ def remaining_sets(
             not set_obj.states_obj.is_all_highres()
             and set_obj.states_obj.states_path.exists()
         ):
-            set_list.append(set_obj.set_code)
+            set_list.append(set_obj.record.set_code)
 
     sets_str = (", ").join(map(str, set_list))
     utils.status("Remaining sets with low res scans: " + sets_str, 0)
@@ -71,7 +71,7 @@ def pull_set(set_obj: SetObject, progress: str, config: AppConfig) -> None:
 
     message: tuple[str, ...] = (
         progress,
-        set_obj.set_code.ljust(6),
+        set_obj.record.set_code.ljust(6),
         "AllHighRes:",
         str(set_obj.states_obj.is_all_highres()),
     )
@@ -80,14 +80,14 @@ def pull_set(set_obj: SetObject, progress: str, config: AppConfig) -> None:
 
     signal.signal(signal.SIGINT, set_obj.handle_sigint)
 
-    for card_entry in set_obj.card_entries:
+    for card_entry in set_obj.record.card_entries:
 
         set_obj.increase_progress()
 
         card_obj = CardObject(
             card_entry,
             set_obj.states_obj,
-            set_obj.set_dir,
+            set_obj.set_directory,
             config,
         )
 
@@ -106,7 +106,7 @@ def pull_set(set_obj: SetObject, progress: str, config: AppConfig) -> None:
         card_obj.messager(
             progress,
             set_obj.inner_progress(),
-            set_obj.set_code,
+            set_obj.record.set_code,
         )
 
     set_obj.states_obj.write_states()
@@ -137,7 +137,7 @@ def pull_all() -> None:
         set_count += 1
         set_obj = SetObject(set_entry, config, paths)
 
-        if set_obj.to_omit:
+        if set_obj.record.is_omitted:
             continue
 
         progress: str = utils.progress_str(set_count, set_total, False)
