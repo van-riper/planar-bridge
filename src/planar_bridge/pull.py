@@ -1,14 +1,12 @@
 import json
 import signal
 from os import environ
-from typing import Any
 
 from . import utils
+from .aliases import SetEntries
 from .config.loader import AppConfig, load_config
 from .objects import CardObject, MetaObject, SetObject
 from .paths import DataPaths, ensure_directories_exist, load_paths
-
-type SetEntries = dict[str, dict[str, Any]]
 
 
 def remaining_sets(

@@ -3,16 +3,15 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 from time import sleep
-from typing import Any, Literal, NoReturn
+from typing import NoReturn
 
 from requests import Response, Session
 
 from . import constants, utils
+from .aliases import CardData, Face, SetData
 from .config.loader import AppConfig
 from .domain import layouts
 from .paths import DataPaths
-
-type CardDict = dict[str, Any]
 
 session = Session()
 
@@ -65,9 +64,9 @@ class CardFields:
     message_substr: str
     is_bad: bool
     filename: str
-    face: Literal["front", "back"] | None
+    face: Face | None
 
-    def __init__(self, card_dict: CardDict, config: AppConfig) -> None:
+    def __init__(self, card_dict: CardData, config: AppConfig) -> None:
 
         self.uuid = card_dict["uuid"]
         self.layout = card_dict["layout"]
@@ -83,7 +82,7 @@ class CardFields:
         else:
             self.face = "back"
 
-    def __is_bad(self, card_dict: CardDict, config: AppConfig) -> bool:
+    def __is_bad(self, card_dict: CardData, config: AppConfig) -> bool:
 
         promos: list[str] | None = card_dict.get("promoTypes")
 
@@ -104,7 +103,7 @@ class CardFields:
 
         return any(is_bad_conditions)
 
-    def __filename(self, card_dict: CardDict) -> str:
+    def __filename(self, card_dict: CardData) -> str:
 
         faces_list: list[str] | None = card_dict.get("otherFaceIds")
 
@@ -120,7 +119,7 @@ class CardObject:
 
     def __init__(
         self,
-        card_dict: CardDict,
+        card_dict: CardData,
         states_obj: StatesObject,
         set_dir: Path,
         config: AppConfig,
@@ -198,7 +197,7 @@ class SetObject:
 
     def __init__(
         self,
-        set_dict: CardDict,
+        set_dict: SetData,
         config: AppConfig,
         paths: DataPaths,
     ) -> None:
@@ -222,7 +221,7 @@ class SetObject:
         if self.to_omit and self.set_code in config.pardoned_sets:
             self.to_omit = False
 
-        self.card_entries: list[CardDict] = [
+        self.card_entries: list[CardData] = [
             *list(set_dict["cards"]),
             *list(set_dict["tokens"]),
         ]
