@@ -1,6 +1,5 @@
 import gzip
 import json
-from dataclasses import dataclass
 from pathlib import Path
 from time import sleep
 from typing import NoReturn
@@ -8,9 +7,10 @@ from typing import NoReturn
 from requests import Response, Session
 
 from . import constants, utils
-from .aliases import CardData, Face, SetData
+from .aliases import CardData, SetData
 from .config.loader import AppConfig
 from .domain import layouts
+from .domain.card import CardFields, build_card_fields
 from .paths import DataPaths
 
 session = Session()
@@ -55,66 +55,6 @@ class StatesObject:
         return all(self.states_dict.values())
 
 
-@dataclass
-class CardFields:
-
-    uuid: str
-    layout: str
-    scry_id: str
-    message_substr: str
-    is_bad: bool
-    filename: str
-    face: Face | None
-
-    def __init__(self, card_dict: CardData, config: AppConfig) -> None:
-
-        self.uuid = card_dict["uuid"]
-        self.layout = card_dict["layout"]
-        self.scry_id = card_dict["identifiers"]["scryfallId"]
-        self.message_substr = self.uuid + " | " + card_dict["name"]
-        self.is_bad = self.__is_bad(card_dict, config)
-        self.filename = self.__filename(card_dict)
-
-        if self.layout not in layouts.LAYOUT_TWOSIDED:
-            self.face = None
-        elif card_dict.get("side") == "a":
-            self.face = "front"
-        else:
-            self.face = "back"
-
-    def __is_bad(self, card_dict: CardData, config: AppConfig) -> bool:
-
-        promos: list[str] | None = card_dict.get("promoTypes")
-
-        if promos is None:
-            promos = []
-
-        promos_crosscheck: set[str] = set(config.exempt_promos) & set(promos)
-
-        is_bad_conditions: tuple[bool, ...] = (
-            bool(card_dict.get("isReprint")) and not config.pull_reprints,
-            card_dict["language"] not in [config.card_language, "Phyrexian"],
-            card_dict["name"] in ["Checklist", "Double-Faced"],
-            bool(card_dict.get("isOnlineOnly")),
-            self.layout in layouts.LAYOUT_BAD,
-            bool(card_dict.get("isFunny")),
-            len(promos_crosscheck) > 0,
-        )
-
-        return any(is_bad_conditions)
-
-    def __filename(self, card_dict: CardData) -> str:
-
-        faces_list: list[str] | None = card_dict.get("otherFaceIds")
-
-        if self.layout in layouts.LAYOUT_COMBINED and faces_list is not None:
-            faces_list.append(self.uuid)
-            faces_list.sort()
-            return ("_").join(map(str, faces_list))
-
-        return self.uuid
-
-
 class CardObject:
 
     def __init__(
@@ -125,7 +65,7 @@ class CardObject:
         config: AppConfig,
     ) -> None:
 
-        self.card: CardFields = CardFields(card_dict, config)
+        self.card: CardFields = build_card_fields(card_dict, config)
 
         self.local_state: bool | None = states_obj.get_state(self.card.filename)
 
@@ -141,7 +81,7 @@ class CardObject:
 
         sleep(constants.TIMEOUT)
 
-        url = f"https://api.scryfall.com/cards/{self.card.scry_id}?format=json"
+        url = f"https://api.scryfall.com/cards/{self.card.scryfall_id}?format=json"
         source: Response | None = utils.handle_response(session, url)
 
         if source is None:
@@ -167,7 +107,7 @@ class CardObject:
 
         sleep(constants.TIMEOUT)
 
-        url = f"https://api.scryfall.com/cards/{self.card.scry_id}?format=image"
+        url = f"https://api.scryfall.com/cards/{self.card.scryfall_id}?format=image"
 
         if self.card.face is not None:
             url += "&face=" + self.card.face
@@ -187,7 +127,7 @@ class CardObject:
             progress,
             set_code.ljust(6),
             set_progress,
-            self.card.message_substr,
+            self.card.display_label,
         )
 
         utils.status((" ").join(message), 5 if self.path_exists else 4)
