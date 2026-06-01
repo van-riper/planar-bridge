@@ -11,6 +11,7 @@ from .aliases import CardData, SetData
 from .config.loader import AppConfig
 from .domain import layouts
 from .domain.card_model import CardFields, build_card_fields
+from .domain.set_model import SetRecord, build_set_record
 from .paths import DataPaths
 
 session = Session()
@@ -61,7 +62,7 @@ class CardObject:
         self,
         card_dict: CardData,
         states_obj: StatesObject,
-        set_dir: Path,
+        set_directory: Path,
         config: AppConfig,
     ) -> None:
 
@@ -70,9 +71,9 @@ class CardObject:
         self.local_state: bool | None = states_obj.get_state(self.card.filename)
 
         if self.card.layout in layouts.LAYOUT_TOKEN:
-            set_dir = set_dir / "tokens"
+            set_directory = set_directory / "tokens"
 
-        self.img_path: Path = set_dir / (self.card.filename + ".jpg")
+        self.img_path: Path = set_directory / (self.card.filename + ".jpg")
         self.path_exists: bool = self.img_path.exists()
 
     def parse_source_state(self) -> tuple[bool, bool]:
@@ -142,31 +143,12 @@ class SetObject:
         paths: DataPaths,
     ) -> None:
 
-        self.set_code: str = set_dict["code"]
-        self.set_dir: Path = paths.data_directory / self.set_code
-        self.is_partial: bool = bool(set_dict.get("isPartialPreview"))
+        self.record: SetRecord = build_set_record(set_dict, config)
+        self.set_directory: Path = paths.data_directory / self.record.set_code
         self.states_obj: StatesObject = StatesObject(
-            self.set_dir / ".states.json"
+            self.set_directory / ".states.json"
         )
-
-        to_omit_conditions: tuple[bool, ...] = (
-            bool(str(set_dict["type"]) in config.exempt_types),
-            bool(self.set_code in config.exempt_sets),
-            bool(set_dict.get("isForeignOnly")),
-            bool(set_dict.get("isOnlineOnly")),
-        )
-
-        self.to_omit: bool = any(to_omit_conditions)
-
-        if self.to_omit and self.set_code in config.pardoned_sets:
-            self.to_omit = False
-
-        self.card_entries: list[CardData] = [
-            *list(set_dict["cards"]),
-            *list(set_dict["tokens"]),
-        ]
-
-        self.progress: tuple[int, int] = (0, len(self.card_entries))
+        self.progress: tuple[int, int] = (0, len(self.record.card_entries))
 
     def increase_progress(self) -> None:
 
