@@ -1,0 +1,162 @@
+"""Typed events emitted during a download run.
+
+The engine emits these as plain facts about what happened; reporters
+subscribe and decide how to present them. Events carry data only: color,
+the timestamp, label text, and all other formatting live in the reporter,
+never here. This is what lets a console reporter and a future Textual
+reporter consume the same stream without the engine knowing either exists.
+"""
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, kw_only=True)
+class Event:
+    """Base class for every event. Carries no data on its own."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class RunStarted(Event):
+    """A download run has begun."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class MetadataCheckStarted(Event):
+    """Local and source MTGJSON metadata are about to be compared."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class MetadataChecked(Event):
+    """The metadata comparison has finished.
+
+    Attributes:
+        is_outdated (bool): True when local data is missing or older than
+            the source, i.e. a bulk download is needed.
+        version_matches_pinned (bool): True when the source version equals
+            the pinned MTGJSON version the code was validated against.
+        source_version (str): The MTGJSON version reported by the source.
+    """
+
+    is_outdated: bool
+    version_matches_pinned: bool
+    source_version: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class VersionMismatch(Event):
+    """The source MTGJSON version differs from the pinned version.
+
+    Attributes:
+        source_version (str): The newer MTGJSON version reported by the source.
+    """
+
+    source_version: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class BulkDownloadStarted(Event):
+    """The bulk MTGJSON files are about to be downloaded."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class BulkDataLoaded(Event):
+    """The bulk set data has been read into memory.
+
+    Attributes:
+        date (str): The build date of the loaded bulk data.
+    """
+
+    date: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class SetStarted(Event):
+    """Processing of one set has begun.
+
+    Attributes:
+        set_code (str): The set's MTGJSON code.
+        progress (str): The run-level progress string for this set.
+        is_all_high_resolution (bool): True when every recorded scan in the
+            set is already high resolution.
+    """
+
+    set_code: str
+    progress: str
+    is_all_high_resolution: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class SetSkipped(Event):
+    """A set was omitted from the run.
+
+    Attributes:
+        set_code (str): The omitted set's MTGJSON code.
+    """
+
+    set_code: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class CardEvent(Event):
+    """Shared payload for the two card-image outcomes that report a line.
+
+    Attributes:
+        set_code (str): The card's set code.
+        run_progress (str): The run-level progress string.
+        set_progress (str): The within-set progress string.
+        display_label (str): The card's human-readable label.
+    """
+
+    set_code: str
+    run_progress: str
+    set_progress: str
+    display_label: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class CardDownloaded(CardEvent):
+    """A new card image was downloaded for the first time."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class CardUpgraded(CardEvent):
+    """An existing card image was replaced with a higher-resolution scan."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class CardSkipped(Event):
+    """A card needed no download (bad card or already up to date).
+
+    Attributes:
+        set_code (str): The skipped card's set code.
+    """
+
+    set_code: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class CardFailed(Event):
+    """A card image could not be retrieved after exhausting retries.
+
+    Attributes:
+        set_code (str): The failed card's set code.
+    """
+
+    set_code: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class RunFinished(Event):
+    """The run completed successfully.
+
+    Attributes:
+        low_resolution_set_codes (tuple[str, ...]): Set codes that still hold
+            at least one low-resolution scan after the run.
+    """
+
+    low_resolution_set_codes: tuple[str, ...]
+
+
+@dataclass(frozen=True, kw_only=True)
+class Interrupted(Event):
+    """The run received SIGINT (Ctrl-C) and is saving state before exiting."""
