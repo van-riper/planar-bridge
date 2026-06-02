@@ -11,6 +11,12 @@ from .aliases import CardData, SetData
 from .config.loader import AppConfig
 from .domain import layouts
 from .domain.card_model import CardFields, build_card_fields
+from .domain.metadata import (
+    MetadataComparison,
+    MetadataInfo,
+    compare_metadata,
+    normalize_version,
+)
 from .domain.set_model import SetRecord, build_set_record
 from .paths import DataPaths
 
@@ -171,26 +177,26 @@ class MetaObject:
     def __init__(self, paths: DataPaths) -> None:
 
         self.paths: DataPaths = paths
-        self.local: dict[str, str] = {}
-        self.source: dict[str, str] = {}
+        self.local: MetadataInfo | None = None
 
         self.jsons_exist: bool = (
             paths.bulk_path.exists() and paths.metadata_path.exists()
         )
 
         if self.jsons_exist:
-            self.local = self.__fix_vers(
-                json.loads(paths.metadata_path.read_bytes())["meta"]
-            )
+            local_meta = json.loads(paths.metadata_path.read_bytes())["meta"]
+            self.local = self.__parse_info(local_meta)
 
-        self.source = self.__init_source()
+        self.source: MetadataInfo = self.__fetch_source()
 
-    def __fix_vers(self, to_fix: dict[str, str]) -> dict[str, str]:
+    def __parse_info(self, meta: dict[str, str]) -> MetadataInfo:
 
-        to_fix.update({"version": to_fix["version"].split("+")[0]})
-        return to_fix
+        return MetadataInfo(
+            date=meta["date"],
+            version=normalize_version(meta["version"]),
+        )
 
-    def __init_source(self) -> dict[str, str] | NoReturn:
+    def __fetch_source(self) -> MetadataInfo | NoReturn:
 
         url: str = "https://mtgjson.com/api/v5/Meta.json"
         meta: Response | None = utils.handle_response(session, url)
@@ -198,7 +204,7 @@ class MetaObject:
         if meta is None:
             raise RuntimeError
 
-        return self.__fix_vers(meta.json()["meta"])
+        return self.__parse_info(meta.json()["meta"])
 
     def pull_bulk(self) -> None | NoReturn:
 
@@ -215,19 +221,18 @@ class MetaObject:
 
     def is_outdated(self) -> bool | NoReturn:
 
-        if not self.jsons_exist and not self.local:
-            return True
+        comparison: MetadataComparison = compare_metadata(
+            self.local, self.source, constants.MTGJSON_VERS
+        )
 
-        same_date: bool = self.local["date"] == self.source["date"]
-
-        if same_date:
+        if not comparison.is_outdated:
             raise SystemExit
 
-        if self.local["version"] != constants.MTGJSON_VERS:
+        if not comparison.version_matches_pinned:
 
             message: tuple[str, ...] = (
                 "MTGJSON has been updated to v",
-                self.source["version"] + "\n",
+                self.source.version + "\n",
                 constants.VERS_WARNING,
             )
 
@@ -237,4 +242,4 @@ class MetaObject:
             if not utils.boolify_str(proceed, False):
                 raise KeyboardInterrupt
 
-        return not same_date
+        return comparison.is_outdated
