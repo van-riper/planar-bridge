@@ -5,21 +5,33 @@ from os import environ
 from . import utils
 from .aliases import SetEntries
 from .config.loader import AppConfig, load_config
+from .events import (
+    BulkDataLoaded,
+    BulkDownloadStarted,
+    CardDownloaded,
+    CardUpgraded,
+    EventBus,
+    MetadataCheckStarted,
+    RunFinished,
+    SetStarted,
+)
 from .objects import CardObject, MetaObject, SetObject
 from .paths import DataPaths, ensure_directories_exist, load_paths
+from .reporters.console import ConsoleReporter
 
 
 def remaining_sets(
     set_entries: SetEntries,
     config: AppConfig,
     paths: DataPaths,
-) -> None:
+    bus: EventBus,
+) -> tuple[str, ...]:
 
     set_list: list[str] = []
 
     for set_entry in set_entries.values():
 
-        set_obj: SetObject = SetObject(set_entry, config, paths)
+        set_obj: SetObject = SetObject(set_entry, config, paths, bus)
 
         if (
             not set_obj.states_obj.is_all_highres()
@@ -27,18 +39,17 @@ def remaining_sets(
         ):
             set_list.append(set_obj.record.set_code)
 
-    sets_str = (", ").join(map(str, set_list))
-    utils.status("Remaining sets with low res scans: " + sets_str, 0)
+    return tuple(set_list)
 
 
-def pull_meta(paths: DataPaths) -> None:
+def pull_meta(paths: DataPaths, bus: EventBus) -> None:
 
-    utils.status("Comparing local & source files...", 0)
+    bus.emit(MetadataCheckStarted())
 
-    meta_obj: MetaObject = MetaObject(paths)
+    meta_obj: MetaObject = MetaObject(paths, bus)
 
     if meta_obj.is_outdated():
-        utils.status("Downloading bulk files...", 0)
+        bus.emit(BulkDownloadStarted())
         meta_obj.pull_bulk()
 
 
@@ -65,18 +76,22 @@ def pull_card(card_obj: CardObject) -> tuple[str, bool]:
     return card_obj.card.filename, source_state
 
 
-def pull_set(set_obj: SetObject, progress: str, config: AppConfig) -> None:
+def pull_set(
+    set_obj: SetObject,
+    progress: str,
+    config: AppConfig,
+    bus: EventBus,
+) -> None:
 
     card_obj: CardObject
 
-    message: tuple[str, ...] = (
-        progress,
-        set_obj.record.set_code.ljust(6),
-        "AllHighRes:",
-        str(set_obj.states_obj.is_all_highres()),
+    bus.emit(
+        SetStarted(
+            set_code=set_obj.record.set_code,
+            progress=progress,
+            is_all_high_resolution=set_obj.states_obj.is_all_highres(),
+        )
     )
-
-    utils.status((" ").join(map(str, message)), 2)
 
     signal.signal(signal.SIGINT, set_obj.handle_sigint)
 
@@ -103,10 +118,15 @@ def pull_set(set_obj: SetObject, progress: str, config: AppConfig) -> None:
 
         set_obj.states_obj.take_state(img_name, source_state)
 
-        card_obj.messager(
-            progress,
-            set_obj.inner_progress(),
-            set_obj.record.set_code,
+        card_event = CardUpgraded if card_obj.path_exists else CardDownloaded
+
+        bus.emit(
+            card_event(
+                set_code=set_obj.record.set_code,
+                run_progress=progress,
+                set_progress=set_obj.inner_progress(),
+                display_label=card_obj.card.display_label,
+            )
         )
 
     set_obj.states_obj.write_states()
@@ -117,15 +137,18 @@ def pull_all() -> None:
     set_obj: SetObject
     set_entries: SetEntries
 
+    bus: EventBus = EventBus()
+    bus.subscribe(ConsoleReporter().handle)
+
     paths: DataPaths = load_paths(environ)
     ensure_directories_exist(paths)
 
     config: AppConfig = load_config(paths.config_path)
 
-    pull_meta(paths)
+    pull_meta(paths, bus)
 
     date: str = json.loads(paths.metadata_path.read_bytes())["meta"]["date"]
-    utils.status(f"Loading bulk data ({date})...", 0)
+    bus.emit(BulkDataLoaded(date=date))
 
     set_entries = json.loads(paths.bulk_path.read_bytes())["data"]
 
@@ -135,15 +158,17 @@ def pull_all() -> None:
     for set_entry in set_entries.values():
 
         set_count += 1
-        set_obj = SetObject(set_entry, config, paths)
+        set_obj = SetObject(set_entry, config, paths, bus)
 
         if set_obj.record.is_omitted:
             continue
 
         progress: str = utils.progress_str(set_count, set_total, False)
 
-        pull_set(set_obj, progress, config)
+        pull_set(set_obj, progress, config, bus)
 
-    utils.status("Finished successfully.", 0)
+    low_resolution_set_codes: tuple[str, ...] = remaining_sets(
+        set_entries, config, paths, bus
+    )
 
-    remaining_sets(set_entries, config, paths)
+    bus.emit(RunFinished(low_resolution_set_codes=low_resolution_set_codes))
