@@ -1,5 +1,6 @@
 """Event taxonomy and bus for decoupling the engine from its reporters."""
 
+from .bus import EventBus, EventHandler
 from .types import (
     BulkDataLoaded,
     BulkDownloadStarted,
@@ -28,6 +29,8 @@ __all__ = [
     "CardSkipped",
     "CardUpgraded",
     "Event",
+    "EventBus",
+    "EventHandler",
     "Interrupted",
     "MetadataCheckStarted",
     "MetadataChecked",
