@@ -18,6 +18,7 @@ from .domain.metadata import (
     normalize_version,
 )
 from .domain.set_model import SetRecord, build_set_record
+from .events import EventBus, Interrupted, MetadataChecked
 from .paths import DataPaths
 
 session = Session()
@@ -128,17 +129,6 @@ class CardObject:
 
         return True
 
-    def messager(self, progress: str, set_progress: str, set_code: str) -> None:
-
-        message: tuple[str, ...] = (
-            progress,
-            set_code.ljust(6),
-            set_progress,
-            self.card.display_label,
-        )
-
-        utils.status((" ").join(message), 5 if self.path_exists else 4)
-
 
 class SetObject:
 
@@ -147,6 +137,7 @@ class SetObject:
         set_dict: SetData,
         config: AppConfig,
         paths: DataPaths,
+        bus: EventBus,
     ) -> None:
 
         self.record: SetRecord = build_set_record(set_dict, config)
@@ -155,6 +146,7 @@ class SetObject:
             self.set_directory / ".states.json"
         )
         self.progress: tuple[int, int] = (0, len(self.record.card_entries))
+        self.bus: EventBus = bus
 
     def increase_progress(self) -> None:
 
@@ -167,16 +159,17 @@ class SetObject:
     # pylint: disable=unused-argument
     def handle_sigint(self, signum, frame) -> NoReturn:
 
-        utils.status("SIGINT recieved (Ctrl-C), saving & exiting...", 6)
+        self.bus.emit(Interrupted())
         self.states_obj.write_states()
         raise KeyboardInterrupt
 
 
 class MetaObject:
 
-    def __init__(self, paths: DataPaths) -> None:
+    def __init__(self, paths: DataPaths, bus: EventBus) -> None:
 
         self.paths: DataPaths = paths
+        self.bus: EventBus = bus
         self.local: MetadataInfo | None = None
 
         self.jsons_exist: bool = (
@@ -223,6 +216,14 @@ class MetaObject:
 
         comparison: MetadataComparison = compare_metadata(
             self.local, self.source, constants.MTGJSON_VERS
+        )
+
+        self.bus.emit(
+            MetadataChecked(
+                is_outdated=comparison.is_outdated,
+                version_matches_pinned=comparison.version_matches_pinned,
+                source_version=self.source.version,
+            )
         )
 
         if not comparison.is_outdated:
