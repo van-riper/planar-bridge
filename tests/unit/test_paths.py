@@ -70,6 +70,13 @@ def test_derived_paths_sit_under_data_directory() -> None:
     assert paths.config_path == Path("/data/pb/config.toml")
 
 
+def test_database_path_sits_under_data_directory() -> None:
+    """The catalog database is catalog.db in the data directory."""
+
+    paths = load_paths({"PLANAR_BRIDGE_DIR": "/data/pb"})
+    assert paths.database_path == Path("/data/pb/catalog.db")
+
+
 def test_load_paths_does_no_filesystem_work(tmp_path: Path) -> None:
     """load_paths neither raises on a missing dir nor creates it."""
 

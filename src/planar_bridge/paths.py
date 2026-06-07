@@ -14,6 +14,8 @@ class DataPaths:
         bulk_path (Path): AllPrintings.json inside json_directory.
         metadata_path (Path): Meta.json inside json_directory.
         config_path (Path): config.toml inside data_directory.
+        database_path (Path): catalog.db (the SQLite catalog) inside
+            data_directory.
     """
 
     data_directory: Path
@@ -21,6 +23,7 @@ class DataPaths:
     bulk_path: Path
     metadata_path: Path
     config_path: Path
+    database_path: Path
 
 
 def load_paths(environment: Mapping[str, str]) -> DataPaths:
@@ -63,6 +66,7 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
         bulk_path=Path(json_directory / "AllPrintings.json"),
         metadata_path=Path(json_directory / "Meta.json"),
         config_path=Path(data_directory / "config.toml"),
+        database_path=Path(data_directory / "catalog.db"),
     )
     # TODO: rename config.toml to planar-bridge.toml
 
