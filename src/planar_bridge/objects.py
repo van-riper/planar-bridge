@@ -1,5 +1,6 @@
 import gzip
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from time import sleep
 from typing import NoReturn
@@ -8,6 +9,7 @@ from requests import Response, Session
 
 from . import constants, utils
 from .aliases import CardData, SetData
+from .catalog.repository import CardRow, CatalogRepository
 from .config.loader import AppConfig
 from .domain import layouts
 from .domain.card_model import CardFields, build_card_fields
@@ -24,64 +26,54 @@ from .paths import DataPaths
 session = Session()
 
 
-class StatesObject:
-
-    def __init__(self, states_path: Path) -> None:
-
-        self.states_path: Path = states_path
-        self.states_dict: dict[str, bool] = self.read_states()
-
-    def read_states(self) -> dict[str, bool]:
-
-        states_dict: dict[str, bool] = {}
-
-        if self.states_path.exists():
-            states_dict = json.loads(self.states_path.read_bytes())
-
-        return states_dict
-
-    def write_states(self) -> None:
-
-        if self.states_dict == self.read_states() or not self.states_dict:
-            return
-
-        self.states_path.write_text(
-            json.dumps(self.states_dict, sort_keys=True),
-            encoding="UTF-8",
-        )
-
-    def get_state(self, name: str) -> bool | None:
-
-        return self.states_dict.get(name)
-
-    def take_state(self, name: str, res: bool) -> None:
-
-        self.states_dict[name] = res
-
-    def is_all_highres(self) -> bool:
-
-        return all(self.states_dict.values())
-
-
 class CardObject:
 
     def __init__(
         self,
         card_dict: CardData,
-        states_obj: StatesObject,
+        repository: CatalogRepository,
         set_directory: Path,
         config: AppConfig,
     ) -> None:
 
         self.card: CardFields = build_card_fields(card_dict, config)
 
-        self.local_state: bool | None = states_obj.get_state(self.card.filename)
+        row: CardRow | None = repository.get_card(self.card.filename)
+        self.local_state: bool | None = (
+            row.is_high_resolution if row is not None else None
+        )
 
+        self.set_code: str = set_directory.name
+        data_directory: Path = set_directory.parent
+
+        image_directory: Path = set_directory
         if self.card.layout in layouts.LAYOUT_TOKEN:
-            set_directory = set_directory / "tokens"
+            image_directory = set_directory / "tokens"
 
-        self.img_path: Path = set_directory / (self.card.filename + ".jpg")
+        self.img_path: Path = image_directory / (self.card.filename + ".jpg")
         self.path_exists: bool = self.img_path.exists()
+        self.relative_path: str = self.img_path.relative_to(
+            data_directory
+        ).as_posix()
+
+    def to_row(self, is_high_resolution: bool) -> CardRow:
+        """Build the catalog row recording this card's stored resolution.
+
+        Args:
+            is_high_resolution (bool): Whether the stored scan is high-res.
+
+        Returns:
+            CardRow: The row to persist for this card.
+        """
+
+        return CardRow(
+            filename=self.card.filename,
+            set_code=self.set_code,
+            uuid=self.card.uuid,
+            is_high_resolution=is_high_resolution,
+            relative_path=self.relative_path,
+            updated_at=datetime.now(timezone.utc).isoformat(),
+        )
 
     def parse_source_state(self) -> tuple[bool, bool]:
 
@@ -142,9 +134,6 @@ class SetObject:
 
         self.record: SetRecord = build_set_record(set_dict, config)
         self.set_directory: Path = paths.data_directory / self.record.set_code
-        self.states_obj: StatesObject = StatesObject(
-            self.set_directory / ".states.json"
-        )
         self.progress: tuple[int, int] = (0, len(self.record.card_entries))
         self.bus: EventBus = bus
 
@@ -160,7 +149,6 @@ class SetObject:
     def handle_sigint(self, signum, frame) -> NoReturn:
 
         self.bus.emit(Interrupted())
-        self.states_obj.write_states()
         raise KeyboardInterrupt
 
 
