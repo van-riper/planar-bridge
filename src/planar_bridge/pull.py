@@ -4,6 +4,7 @@ from os import environ
 
 from . import utils
 from .aliases import SetEntries
+from .catalog.repository import CatalogRepository
 from .config.loader import AppConfig, load_config
 from .events import (
     BulkDataLoaded,
@@ -18,28 +19,6 @@ from .events import (
 from .objects import CardObject, MetaObject, SetObject
 from .paths import DataPaths, ensure_directories_exist, load_paths
 from .reporters.console import ConsoleReporter
-
-
-def remaining_sets(
-    set_entries: SetEntries,
-    config: AppConfig,
-    paths: DataPaths,
-    bus: EventBus,
-) -> tuple[str, ...]:
-
-    set_list: list[str] = []
-
-    for set_entry in set_entries.values():
-
-        set_obj: SetObject = SetObject(set_entry, config, paths, bus)
-
-        if (
-            not set_obj.states_obj.is_all_highres()
-            and set_obj.states_obj.states_path.exists()
-        ):
-            set_list.append(set_obj.record.set_code)
-
-    return tuple(set_list)
 
 
 def pull_meta(paths: DataPaths, bus: EventBus) -> None:
@@ -78,6 +57,7 @@ def pull_card(card_obj: CardObject) -> tuple[str, bool]:
 
 def pull_set(
     set_obj: SetObject,
+    repository: CatalogRepository,
     progress: str,
     config: AppConfig,
     bus: EventBus,
@@ -89,7 +69,9 @@ def pull_set(
         SetStarted(
             set_code=set_obj.record.set_code,
             progress=progress,
-            is_all_high_resolution=set_obj.states_obj.is_all_highres(),
+            is_all_high_resolution=repository.is_set_high_resolution(
+                set_obj.record.set_code
+            ),
         )
     )
 
@@ -101,7 +83,7 @@ def pull_set(
 
         card_obj = CardObject(
             card_entry,
-            set_obj.states_obj,
+            repository,
             set_obj.set_directory,
             config,
         )
@@ -111,12 +93,11 @@ def pull_set(
         if not img_name:
 
             if not source_state:
-                set_obj.states_obj.write_states()
                 raise RuntimeError
 
             continue
 
-        set_obj.states_obj.take_state(img_name, source_state)
+        repository.upsert_card(card_obj.to_row(source_state))
 
         card_event = CardUpgraded if card_obj.path_exists else CardDownloaded
 
@@ -128,8 +109,6 @@ def pull_set(
                 display_label=card_obj.card.display_label,
             )
         )
-
-    set_obj.states_obj.write_states()
 
 
 def pull_all() -> None:
@@ -155,20 +134,20 @@ def pull_all() -> None:
     set_count: int = 0
     set_total: int = len(set_entries)
 
-    for set_entry in set_entries.values():
+    with CatalogRepository.open(paths.database_path) as repository:
 
-        set_count += 1
-        set_obj = SetObject(set_entry, config, paths, bus)
+        for set_entry in set_entries.values():
 
-        if set_obj.record.is_omitted:
-            continue
+            set_count += 1
+            set_obj = SetObject(set_entry, config, paths, bus)
 
-        progress: str = utils.progress_str(set_count, set_total, False)
+            if set_obj.record.is_omitted:
+                continue
 
-        pull_set(set_obj, progress, config, bus)
+            progress: str = utils.progress_str(set_count, set_total, False)
 
-    low_resolution_set_codes: tuple[str, ...] = remaining_sets(
-        set_entries, config, paths, bus
-    )
+            pull_set(set_obj, repository, progress, config, bus)
 
-    bus.emit(RunFinished(low_resolution_set_codes=low_resolution_set_codes))
+        low_resolution_set_codes = repository.low_resolution_sets()
+
+        bus.emit(RunFinished(low_resolution_set_codes=low_resolution_set_codes))

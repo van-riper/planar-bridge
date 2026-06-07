@@ -8,6 +8,7 @@ immediately so a killed run resumes from confirmed state, matching the old
 
 import sqlite3
 from dataclasses import dataclass
+from pathlib import Path
 
 from .schema import apply_schema
 
@@ -48,6 +49,32 @@ class CatalogRepository:
         self._connection = connection
         self._connection.row_factory = sqlite3.Row
         apply_schema(self._connection)
+
+    @classmethod
+    def open(cls, database_path: Path) -> "CatalogRepository":
+        """Open (or create) the catalog database at a filesystem path.
+
+        Keeps sqlite3 confined to this package: callers hand over a path and
+        get back a ready repository without touching the database driver.
+
+        Args:
+            database_path (Path): Where the SQLite catalog file lives.
+
+        Returns:
+            CatalogRepository: A repository wrapping a connection to that file.
+        """
+
+        return cls(sqlite3.connect(database_path))
+
+    def __enter__(self) -> "CatalogRepository":
+        """Enter a context that closes the repository on exit."""
+
+        return self
+
+    def __exit__(self, *exc_info: object) -> None:
+        """Close the repository when the context block exits."""
+
+        self.close()
 
     def get_card(self, filename: str) -> CardRow | None:
         """Return the stored row for a filename, or None when absent.
