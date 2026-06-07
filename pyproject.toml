@@ -8,6 +8,7 @@ license = { file = "LICENSE" }
 dependencies = [
     "requests~=2.32",
     "colorama~=0.4",
+    "httpx>=0.28.1",
 ]
 
 [project.scripts]
