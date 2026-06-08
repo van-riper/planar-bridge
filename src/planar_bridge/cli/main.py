@@ -13,6 +13,7 @@ from ..events import EventBus, Interrupted
 from ..pipeline import pull_all
 from ..reporters.console import ConsoleReporter
 from .args import parse_args
+from .prompt import approval_for
 
 if version_info.major != 3 or version_info.minor < 13:
     raise SystemExit("Python version must be at least 3.13")
@@ -37,12 +38,13 @@ def run(argv: Sequence[str] | None = None) -> None:
     """
 
     options = parse_args(argv)
+    approve_version = approval_for(assume_yes=options.assume_yes)
 
     bus = EventBus()
     bus.subscribe(ConsoleReporter().handle)
 
     try:
-        asyncio.run(pull_all(bus, options))
+        asyncio.run(pull_all(bus, options, approve_version))
     except KeyboardInterrupt:
         bus.emit(Interrupted())
         raise SystemExit(INTERRUPT_EXIT_CODE) from None
