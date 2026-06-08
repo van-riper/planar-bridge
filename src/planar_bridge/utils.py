@@ -1,10 +1,25 @@
-from time import sleep, strftime
+"""Console logging and small string helpers used by the pull pipeline.
+
+These are the remaining utilities pending their branch-7 move: ``status`` and
+``boolify_str`` go to the CLI and prompt layer, ``progress_str`` to the
+reporters.
+"""
+
+from time import strftime
 
 from colorama import Fore
-from requests import HTTPError, Response, Session
 
 
 def status(msg: str, lvl: int) -> None:
+    """Print a timestamped, color-coded status line for each message line.
+
+    Args:
+        msg (str): The message; each line is printed with the same prefix.
+        lvl (int): The severity level 0-6 selecting the colored label.
+
+    Raises:
+        ValueError: When ``lvl`` is outside the 0-6 range.
+    """
 
     prefix: str
 
@@ -33,35 +48,17 @@ def status(msg: str, lvl: int) -> None:
         print(timestamp, prefix, line)
 
 
-def handle_response(session: Session, url: str) -> Response | None:
-
-    message: tuple[str, ...]
-    response: Response = session.get(url, timeout=30)
-
-    for i in range(1, 5):
-
-        try:
-            response.raise_for_status()
-            return response
-
-        except HTTPError:
-            message = (
-                f"HTTP status code {response.status_code},",
-                int_to_ordinal(i) + " retry...",
-            )
-            status((" ").join(message), 1)
-            sleep(i * 30)
-
-    message = (
-        f"HTTP status code {response.status_code},",
-        "too many retries, saving & exiting...",
-    )
-    status((" ").join(message), 6)
-
-    return None
-
-
 def progress_str(count: int, total: int, arrow: bool) -> str:
+    """Format a count over a total as a padded percentage string.
+
+    Args:
+        count (int): The number done so far.
+        total (int): The total to reach.
+        arrow (bool): When True, append a ``>`` arrow to the string.
+
+    Returns:
+        str: The formatted progress label, such as ``(45%)>``.
+    """
 
     progress: str = f"({format(count / total, ".1%").zfill(5).rjust(5)})"
 
@@ -74,6 +71,18 @@ def progress_str(count: int, total: int, arrow: bool) -> str:
 
 
 def boolify_str(bool_str: str, default: bool | None = None) -> bool:
+    """Interpret a yes/no string as a boolean.
+
+    Args:
+        bool_str (str): The user input to interpret.
+        default (bool | None): Returned when the input is empty.
+
+    Returns:
+        bool: True for y/t/1, False for n/f/0.
+
+    Raises:
+        ValueError: When the input resembles neither yes nor no.
+    """
 
     if not bool_str and default is not None:
         return default
@@ -86,15 +95,3 @@ def boolify_str(bool_str: str, default: bool | None = None) -> bool:
         return False
 
     raise ValueError(f"Input '{bool_str}' does not resemble a yes/no response.")
-
-
-def int_to_ordinal(n: int) -> str:
-
-    suffix: str
-
-    if 11 <= (n % 100) <= 13:
-        suffix = "th"
-    else:
-        suffix = ["th", "st", "nd", "rd", "th"][min(n % 10, 4)]
-
-    return str(n) + suffix

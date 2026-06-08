@@ -1,32 +1,27 @@
-import gzip
-import json
+"""Per-card and per-set context objects used by the pull pipeline.
+
+These bundle the pure domain facts with the runtime state the pipeline needs:
+a card's stored resolution and image path, and a set's directory and progress.
+The network work lives in ``sources/`` and the download decision in
+``domain.decisions``; these objects hold no I/O beyond reading the catalog.
+"""
+
 from datetime import datetime, timezone
 from pathlib import Path
-from time import sleep
-from typing import NoReturn
 
-from requests import Response, Session
-
-from . import constants, utils
+from . import utils
 from .aliases import CardData, SetData
 from .catalog.repository import CardRow, CatalogRepository
 from .config.loader import AppConfig
 from .domain import layouts
 from .domain.card_model import CardFields, build_card_fields
-from .domain.metadata import (
-    MetadataComparison,
-    MetadataInfo,
-    compare_metadata,
-    normalize_version,
-)
 from .domain.set_model import SetRecord, build_set_record
-from .events import EventBus, Interrupted, MetadataChecked
+from .events import EventBus
 from .paths import DataPaths
 
-session = Session()
 
-
-class CardObject:
+class CardObject:  # pylint: disable=too-few-public-methods
+    """One card's derived facts, image path, and stored resolution."""
 
     def __init__(
         self,
@@ -35,6 +30,15 @@ class CardObject:
         set_directory: Path,
         config: AppConfig,
     ) -> None:
+        """Derive a card's facts, paths, and catalog state.
+
+        Args:
+            card_dict (CardData): One MTGJSON card entry.
+            repository (CatalogRepository): The catalog, queried for the card's
+                recorded resolution.
+            set_directory (Path): The set's image directory.
+            config (AppConfig): Resolved filtering configuration.
+        """
 
         self.card: CardFields = build_card_fields(card_dict, config)
 
@@ -75,54 +79,9 @@ class CardObject:
             updated_at=datetime.now(timezone.utc).isoformat(),
         )
 
-    def parse_source_state(self) -> tuple[bool, bool]:
-
-        url: str
-
-        sleep(constants.TIMEOUT)
-
-        url = f"https://api.scryfall.com/cards/{self.card.scryfall_id}?format=json"
-        source: Response | None = utils.handle_response(session, url)
-
-        if source is None:
-            return False, False
-
-        source_res: str = source.json()["image_status"]
-
-        if source_res in ["placeholder", "missing"]:
-            return False, True
-
-        source_state: bool = source_res == "highres_scan"
-
-        if source_state == self.local_state and self.path_exists:
-            return False, True
-
-        return True, source_state
-
-    def download(self) -> bool:
-
-        url: str
-
-        self.img_path.parent.mkdir(exist_ok=True, parents=True)
-
-        sleep(constants.TIMEOUT)
-
-        url = f"https://api.scryfall.com/cards/{self.card.scryfall_id}?format=image"
-
-        if self.card.face is not None:
-            url += "&face=" + self.card.face
-
-        img: Response | None = utils.handle_response(session, url)
-
-        if img is None:
-            return False
-
-        self.img_path.write_bytes(img.content)
-
-        return True
-
 
 class SetObject:
+    """One set's derived facts, image directory, and download progress."""
 
     def __init__(
         self,
@@ -131,6 +90,14 @@ class SetObject:
         paths: DataPaths,
         bus: EventBus,
     ) -> None:
+        """Derive a set's record, image directory, and progress counter.
+
+        Args:
+            set_dict (SetData): One MTGJSON set entry.
+            config (AppConfig): Resolved filtering configuration.
+            paths (DataPaths): The resolved data paths.
+            bus (EventBus): The event bus for progress events.
+        """
 
         self.record: SetRecord = build_set_record(set_dict, config)
         self.set_directory: Path = paths.data_directory / self.record.set_code
@@ -138,97 +105,11 @@ class SetObject:
         self.bus: EventBus = bus
 
     def increase_progress(self) -> None:
+        """Advance the count of cards handled in this set by one."""
 
         self.progress = (self.progress[0] + 1, self.progress[1])
 
     def inner_progress(self) -> str:
+        """Return the set's progress as a formatted percentage string."""
 
         return utils.progress_str(*self.progress, True)
-
-    # pylint: disable=unused-argument
-    def handle_sigint(self, signum, frame) -> NoReturn:
-
-        self.bus.emit(Interrupted())
-        raise KeyboardInterrupt
-
-
-class MetaObject:
-
-    def __init__(self, paths: DataPaths, bus: EventBus) -> None:
-
-        self.paths: DataPaths = paths
-        self.bus: EventBus = bus
-        self.local: MetadataInfo | None = None
-
-        self.jsons_exist: bool = (
-            paths.bulk_path.exists() and paths.metadata_path.exists()
-        )
-
-        if self.jsons_exist:
-            local_meta = json.loads(paths.metadata_path.read_bytes())["meta"]
-            self.local = self.__parse_info(local_meta)
-
-        self.source: MetadataInfo = self.__fetch_source()
-
-    def __parse_info(self, meta: dict[str, str]) -> MetadataInfo:
-
-        return MetadataInfo(
-            date=meta["date"],
-            version=normalize_version(meta["version"]),
-        )
-
-    def __fetch_source(self) -> MetadataInfo | NoReturn:
-
-        url: str = "https://mtgjson.com/api/v5/Meta.json"
-        meta: Response | None = utils.handle_response(session, url)
-
-        if meta is None:
-            raise RuntimeError
-
-        return self.__parse_info(meta.json()["meta"])
-
-    def pull_bulk(self) -> None | NoReturn:
-
-        for target in ("AllPrintings", "Meta"):
-
-            url: str = f"https://mtgjson.com/api/v5/{target}.json.gz"
-            bulk_json: Response | None = utils.handle_response(session, url)
-
-            if bulk_json is None:
-                raise RuntimeError
-
-            fob: Path = self.paths.json_directory / f"{target}.json"
-            fob.write_bytes(gzip.decompress(bulk_json.content))
-
-    def is_outdated(self) -> bool | NoReturn:
-
-        comparison: MetadataComparison = compare_metadata(
-            self.local, self.source, constants.MTGJSON_VERS
-        )
-
-        self.bus.emit(
-            MetadataChecked(
-                is_outdated=comparison.is_outdated,
-                version_matches_pinned=comparison.version_matches_pinned,
-                source_version=self.source.version,
-            )
-        )
-
-        if not comparison.is_outdated:
-            raise SystemExit
-
-        if not comparison.version_matches_pinned:
-
-            message: tuple[str, ...] = (
-                "MTGJSON has been updated to v",
-                self.source.version + "\n",
-                constants.VERS_WARNING,
-            )
-
-            utils.status(("").join(message), 1)
-            proceed: str = input("Do you want to proceed? [y/N]: ")
-
-            if not utils.boolify_str(proceed, False):
-                raise KeyboardInterrupt
-
-        return comparison.is_outdated

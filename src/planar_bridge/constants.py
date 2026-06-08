@@ -2,8 +2,6 @@
 
 MTGJSON_VERS: str = "5.2.2"
 
-TIMEOUT: float = 0.33
-
 # Held under Scryfall's ~10 requests-per-second limit (Terms of Use). The
 # shared RateLimiter enforces this across all in-flight requests; load-bearing,
 # do not raise above 10.
@@ -15,7 +13,8 @@ MAX_CONCURRENT_DOWNLOADS: int = 8
 
 # Scryfall requires an accurate User-Agent and an Accept header on every request
 # to api.scryfall.com, and refuses the default HTTP-library User-Agent. Bump the
-# User-Agent version alongside the project version.
+# User-Agent version alongside the project version. Refer to Scryfall's API
+# documentation for more info: https://scryfall.com/docs/api
 HTTP_HEADERS: dict[str, str] = {
     "User-Agent": "planar-bridge/0.1.0",
     "Accept": "application/json;q=0.9,*/*;q=0.8",
