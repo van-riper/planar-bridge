@@ -1,6 +1,6 @@
 """Console reporter: renders engine events as colorized status lines.
 
-This reproduces the historical ``utils.status`` output (the old integer
+This reproduces the output of the old ``status()`` logger (the integer
 levels 0 to 6) exactly, now driven by typed events instead of
 ``(message, level)`` calls. It is the only place that knows about color and
 the timestamp: the engine emits plain facts and this reporter decides how

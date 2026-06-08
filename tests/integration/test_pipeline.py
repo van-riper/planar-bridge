@@ -18,6 +18,7 @@ from planar_bridge.events import (
     Event,
     EventBus,
     SetSkipped,
+    VersionMismatch,
 )
 from planar_bridge.objects import SetObject
 from planar_bridge.paths import load_paths
@@ -175,6 +176,32 @@ def test_pull_set_emits_card_skipped_for_a_bad_card(
 
     assert CardSkipped(set_code="TST") in received
     assert repository.get_card("uuid-1") is None
+
+
+def test_prompt_version_mismatch_emits_the_event(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The version-drift warning is emitted as a VersionMismatch event."""
+
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+    bus = EventBus()
+    received: list[Event] = []
+    bus.subscribe(received.append)
+
+    pipeline._prompt_version_mismatch(bus, "5.3.0")
+
+    assert VersionMismatch(source_version="5.3.0") in received
+
+
+def test_prompt_version_mismatch_aborts_when_declined(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Declining the prompt raises KeyboardInterrupt to stop the run."""
+
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+
+    with pytest.raises(KeyboardInterrupt):
+        pipeline._prompt_version_mismatch(EventBus(), "5.3.0")
 
 
 def test_pull_meta_exits_when_up_to_date(tmp_path: Path) -> None:

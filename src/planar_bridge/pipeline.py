@@ -36,6 +36,7 @@ from .events import (
     RunFinished,
     SetSkipped,
     SetStarted,
+    VersionMismatch,
 )
 from .objects import CardObject, SetObject
 from .paths import DataPaths, ensure_directories_exist, load_paths
@@ -84,18 +85,18 @@ def _read_local_metadata(paths: DataPaths) -> MetadataInfo | None:
     )
 
 
-def _prompt_version_mismatch(source_version: str) -> None:
-    """Warn about a version drift and abort unless the user opts to proceed."""
+def _prompt_version_mismatch(bus: EventBus, source_version: str) -> None:
+    """Warn about a version drift and abort unless the user opts to proceed.
 
-    message = "".join(
-        (
-            "MTGJSON has been updated to v",
-            source_version + "\n",
-            constants.VERS_WARNING,
-        )
-    )
+    Args:
+        bus (EventBus): The event bus the warning is emitted on.
+        source_version (str): The newer MTGJSON version reported by the source.
 
-    utils.status(message, 1)
+    Raises:
+        KeyboardInterrupt: When the user declines to proceed.
+    """
+
+    bus.emit(VersionMismatch(source_version=source_version))
 
     if not utils.boolify_str(input("Do you want to proceed? [y/N]: "), False):
         raise KeyboardInterrupt
@@ -140,7 +141,7 @@ async def pull_meta(
         raise SystemExit
 
     if not comparison.version_matches_pinned:
-        _prompt_version_mismatch(source_info.version)
+        _prompt_version_mismatch(bus, source_info.version)
 
     bus.emit(BulkDownloadStarted())
 
