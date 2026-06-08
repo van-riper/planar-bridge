@@ -18,6 +18,7 @@ from planar_bridge.events import (
     Event,
     EventBus,
     SetSkipped,
+    SetStarted,
     VersionMismatch,
 )
 from planar_bridge.objects import SetObject
@@ -134,6 +135,43 @@ def test_pull_sets_emits_set_skipped_for_an_omitted_set(
     asyncio.run(pipeline._pull_sets(context, paths, set_entries))
 
     assert SetSkipped(set_code="TST") in received
+
+
+def test_pull_sets_restricts_to_requested_set_codes(
+    connection: sqlite3.Connection,
+    tmp_path: Path,
+    make_config: Callable[..., Any],
+) -> None:
+    """--set limits the run to the named codes; the run total reflects it."""
+
+    repository = CatalogRepository(connection)
+    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
+    bus = EventBus()
+    received: list[Event] = []
+    bus.subscribe(received.append)
+    context = PullContext(
+        repository,
+        StubScryfall(),
+        make_config(),
+        bus,
+        RunOptions(only_sets=frozenset({"AAA"})),
+    )
+    set_entries: dict[str, Any] = {
+        "AAA": {"code": "AAA", "type": "expansion", "cards": [], "tokens": []},
+        "BBB": {"code": "BBB", "type": "expansion", "cards": [], "tokens": []},
+    }
+
+    asyncio.run(pipeline._pull_sets(context, paths, set_entries))
+
+    started = [event for event in received if isinstance(event, SetStarted)]
+    assert started == [
+        SetStarted(
+            set_code="AAA",
+            run_count=1,
+            run_total=1,
+            is_all_high_resolution=True,
+        )
+    ]
 
 
 def test_pull_set_emits_card_failed_and_continues(

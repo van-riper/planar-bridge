@@ -57,3 +57,19 @@ def test_unknown_language_code_raises(tmp_path: Path) -> None:
     config_path.write_text('card_language = "xx"\n', encoding="UTF-8")
     with pytest.raises(ValueError):
         load_config(config_path)
+
+
+def test_language_override_beats_file_and_default(tmp_path: Path) -> None:
+    """A language override takes precedence over the file and the default."""
+
+    config_path = tmp_path / "config.toml"
+    config_path.write_text('card_language = "de"\n', encoding="UTF-8")
+    config = load_config(config_path, language_override="ja")
+    assert config.card_language == "Japanese"
+
+
+def test_unknown_language_override_raises(tmp_path: Path) -> None:
+    """An unrecognized override code raises ValueError like the file path."""
+
+    with pytest.raises(ValueError):
+        load_config(tmp_path / "absent.toml", language_override="xx")
