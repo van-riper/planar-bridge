@@ -3,7 +3,7 @@
 import asyncio
 from sys import version_info
 
-from .pull import pull_all
+from .pipeline import pull_all
 
 if version_info.major != 3 or version_info.minor < 13:
     raise SystemExit("Python version must be at least 3.13")
