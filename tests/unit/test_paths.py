@@ -61,20 +61,20 @@ def test_unsupported_platform_raises(
 
 
 def test_derived_paths_sit_under_data_directory() -> None:
-    """The json, bulk, metadata and config paths derive from the data dir."""
+    """The mtgjson, bulk, metadata and config paths derive from the data dir."""
 
     paths = load_paths({"PLANAR_BRIDGE_DIR": "/data/pb"})
-    assert paths.json_directory == Path("/data/pb/.json")
-    assert paths.bulk_path == Path("/data/pb/.json/AllPrintings.json")
-    assert paths.metadata_path == Path("/data/pb/.json/Meta.json")
+    assert paths.mtgjson_directory == Path("/data/pb/.mtgjson")
+    assert paths.bulk_path == Path("/data/pb/.mtgjson/AllPrintings.json")
+    assert paths.metadata_path == Path("/data/pb/.mtgjson/Meta.json")
     assert paths.config_path == Path("/data/pb/config.toml")
 
 
 def test_database_path_sits_under_data_directory() -> None:
-    """The catalog database is catalog.db in the data directory."""
+    """The catalog database is catalog.sqlite in the data directory."""
 
     paths = load_paths({"PLANAR_BRIDGE_DIR": "/data/pb"})
-    assert paths.database_path == Path("/data/pb/catalog.db")
+    assert paths.database_path == Path("/data/pb/catalog.sqlite")
 
 
 def test_load_paths_does_no_filesystem_work(tmp_path: Path) -> None:
@@ -86,10 +86,12 @@ def test_load_paths_does_no_filesystem_work(tmp_path: Path) -> None:
     assert not missing.exists()
 
 
-def test_ensure_directories_exist_creates_data_and_json(tmp_path: Path) -> None:
-    """ensure_directories_exist creates the data and json directories."""
+def test_ensure_directories_exist_creates_data_and_mtgjson(
+    tmp_path: Path,
+) -> None:
+    """ensure_directories_exist creates the data and mtgjson directories."""
 
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path / "pb")})
     ensure_directories_exist(paths)
     assert paths.data_directory.is_dir()
-    assert paths.json_directory.is_dir()
+    assert paths.mtgjson_directory.is_dir()

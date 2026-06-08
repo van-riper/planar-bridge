@@ -303,7 +303,7 @@ def test_pull_meta_exits_when_up_to_date(tmp_path: Path) -> None:
     """pull_meta exits cleanly when local data already matches the source."""
 
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
-    paths.json_directory.mkdir(parents=True)
+    paths.mtgjson_directory.mkdir(parents=True)
     paths.metadata_path.write_text(
         json.dumps({"meta": {"date": "2024-01-01", "version": "5.2.2"}})
     )

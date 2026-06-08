@@ -171,7 +171,7 @@ def test_close_closes_the_connection(
 def test_open_creates_a_usable_catalog(tmp_path: Path) -> None:
     """``open()`` connects to a file database with the schema applied."""
 
-    database_path = tmp_path / "catalog.db"
+    database_path = tmp_path / "catalog.sqlite"
 
     repository = CatalogRepository.open(database_path)
     repository.upsert_card(make_card_row())
@@ -185,7 +185,7 @@ def test_open_creates_a_usable_catalog(tmp_path: Path) -> None:
 def test_repository_closes_on_context_exit(tmp_path: Path) -> None:
     """Used as a context manager, the repository closes on block exit."""
 
-    database_path = tmp_path / "catalog.db"
+    database_path = tmp_path / "catalog.sqlite"
 
     with CatalogRepository.open(database_path) as repository:
         repository.upsert_card(make_card_row())
