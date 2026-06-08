@@ -101,6 +101,23 @@ def test_card_downloaded_and_upgraded_share_a_line(
     assert emitted(capsys, CardUpgraded(**fields)) == [f"ENHANCED: {body}"]
 
 
+def test_progress_label_reads_full_at_completion(
+    capsys: CaptureFixture[str],
+) -> None:
+    """At the last card of the last set, both progress labels read (100%)."""
+
+    event = CardDownloaded(
+        set_code="LEA",
+        run_count=8,
+        run_total=8,
+        set_count=8,
+        set_total=8,
+        display_label="uuid | Black Lotus",
+    )
+    # Both the run-level and set-level labels collapse to the full marker.
+    assert emitted(capsys, event)[0].count("(100%)") == 2
+
+
 def test_run_finished_prints_summary_then_remaining(
     capsys: CaptureFixture[str],
 ) -> None:

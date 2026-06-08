@@ -1,5 +1,6 @@
 """Unit test for the CLI runner's interrupt handling."""
 
+import runpy
 from typing import Any
 
 import pytest
@@ -24,3 +25,14 @@ def test_run_exits_cleanly_on_keyboard_interrupt(
 
     assert exit_info.value.code == main.INTERRUPT_EXIT_CODE
     assert "Interrupted" in capsys.readouterr().out
+
+
+def test_module_entry_invokes_run(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``python -m planar_bridge`` delegates to cli.main.run."""
+
+    calls: list[bool] = []
+    monkeypatch.setattr(main, "run", lambda: calls.append(True))
+
+    runpy.run_module("planar_bridge.__main__", run_name="__main__")
+
+    assert calls == [True]
