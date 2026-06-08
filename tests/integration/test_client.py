@@ -143,6 +143,34 @@ def test_get_returns_the_response_on_success() -> None:
     assert calls["count"] == 1
 
 
+def test_get_follows_a_redirect() -> None:
+    """A 302 to a file origin is followed to the final response.
+
+    Scryfall's ?format=image redirects from api.scryfall.com to a
+    *.scryfall.io file origin, so the client must follow redirects.
+    """
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/image":
+            return httpx.Response(
+                302, headers={"Location": "https://files.test/final"}
+            )
+        return httpx.Response(200, content=b"image-bytes")
+
+    httpx_client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    client = AsyncHttpClient(httpx_client, RecordingLimiter())
+
+    async def scenario() -> httpx.Response | None:
+        response = await client.get("https://example.test/image")
+        await httpx_client.aclose()
+        return response
+
+    response = asyncio.run(scenario())
+
+    assert response is not None
+    assert response.content == b"image-bytes"
+
+
 def test_get_retries_a_retryable_status_then_succeeds() -> None:
     """A 503 is retried until a success arrives, sleeping between tries."""
 
