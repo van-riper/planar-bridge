@@ -99,10 +99,10 @@ def test_set_started_is_a_load_set_line(capsys: CaptureFixture[str]) -> None:
     """SetStarted renders the padded set code and the AllHighRes flag."""
 
     event = SetStarted(
-        set_code="LEA", progress="(12.3%)", is_all_high_resolution=False
+        set_code="LEA", run_count=1, run_total=8, is_all_high_resolution=False
     )
     assert emitted(capsys, event) == [
-        f"LOAD SET: (12.3%) {'LEA'.ljust(6)} AllHighRes: False"
+        f"LOAD SET: (12.5%) {'LEA'.ljust(6)} AllHighRes: False"
     ]
 
 
@@ -113,11 +113,13 @@ def test_card_downloaded_and_upgraded_share_a_line(
 
     fields = {
         "set_code": "LEA",
-        "run_progress": "(50%)",
-        "set_progress": "(50%)>",
+        "run_count": 4,
+        "run_total": 8,
+        "set_count": 4,
+        "set_total": 8,
         "display_label": "uuid | Black Lotus",
     }
-    body = f"(50%) {'LEA'.ljust(6)} (50%)> uuid | Black Lotus"
+    body = f"(50.0%) {'LEA'.ljust(6)} (50.0%)> uuid | Black Lotus"
     assert emitted(capsys, CardDownloaded(**fields)) == [f"NEW CARD: {body}"]
     assert emitted(capsys, CardUpgraded(**fields)) == [f"ENHANCED: {body}"]
 

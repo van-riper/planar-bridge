@@ -9,7 +9,6 @@ The network work lives in ``sources/`` and the download decision in
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import utils
 from .aliases import CardData, SetData
 from .catalog.repository import CardRow, CatalogRepository
 from .config.loader import AppConfig
@@ -80,7 +79,7 @@ class CardObject:  # pylint: disable=too-few-public-methods
         )
 
 
-class SetObject:
+class SetObject:  # pylint: disable=too-few-public-methods
     """One set's derived facts, image directory, and download progress."""
 
     def __init__(
@@ -108,8 +107,3 @@ class SetObject:
         """Advance the count of cards handled in this set by one."""
 
         self.progress = (self.progress[0] + 1, self.progress[1])
-
-    def inner_progress(self) -> str:
-        """Return the set's progress as a formatted percentage string."""
-
-        return utils.progress_str(*self.progress, True)

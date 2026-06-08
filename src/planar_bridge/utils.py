@@ -1,31 +1,10 @@
-"""Small string helpers pending their branch-7/9 move.
+"""Small string helper pending its branch-9 move.
 
-``progress_str`` moves to the reporters and ``boolify_str`` into the CLI; what
-remains here is a temporary home. The colorized ``status`` logger is gone,
+``boolify_str`` moves into the CLI when it absorbs the version-mismatch
+prompt; what remains here is a temporary home. The progress formatting now
+lives in the console reporter, and the colorized ``status`` logger is gone,
 replaced by the event layer and the console reporter.
 """
-
-
-def progress_str(count: int, total: int, arrow: bool) -> str:
-    """Format a count over a total as a padded percentage string.
-
-    Args:
-        count (int): The number done so far.
-        total (int): The total to reach.
-        arrow (bool): When True, append a ``>`` arrow to the string.
-
-    Returns:
-        str: The formatted progress label, such as ``(45%)>``.
-    """
-
-    progress: str = f"({format(count / total, ".1%").zfill(5).rjust(5)})"
-
-    if count == total:
-        progress = " (100%)"
-    if arrow:
-        progress += ">"
-
-    return progress
 
 
 def boolify_str(bool_str: str, default: bool | None = None) -> bool:

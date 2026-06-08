@@ -67,8 +67,10 @@ def test_card_events_share_a_common_base() -> None:
 
     fields = {
         "set_code": "LEA",
-        "run_progress": "(12.3%)",
-        "set_progress": "(50.0%)>",
+        "run_count": 4,
+        "run_total": 8,
+        "set_count": 4,
+        "set_total": 8,
         "display_label": "uuid | Black Lotus",
     }
     downloaded = CardDownloaded(**fields)
@@ -85,7 +87,8 @@ def test_lifecycle_events_carry_their_payloads() -> None:
     assert (
         SetStarted(
             set_code="LEA",
-            progress="(12.3%)",
+            run_count=1,
+            run_total=8,
             is_all_high_resolution=False,
         ).is_all_high_resolution
         is False

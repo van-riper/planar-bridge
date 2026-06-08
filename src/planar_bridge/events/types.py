@@ -75,13 +75,15 @@ class SetStarted(Event):
 
     Attributes:
         set_code (str): The set's MTGJSON code.
-        progress (str): The run-level progress string for this set.
+        run_count (int): This set's position in the run (sets handled so far).
+        run_total (int): The total number of sets in the run.
         is_all_high_resolution (bool): True when every recorded scan in the
             set is already high resolution.
     """
 
     set_code: str
-    progress: str
+    run_count: int
+    run_total: int
     is_all_high_resolution: bool
 
 
@@ -102,14 +104,18 @@ class CardEvent(Event):
 
     Attributes:
         set_code (str): The card's set code.
-        run_progress (str): The run-level progress string.
-        set_progress (str): The within-set progress string.
+        run_count (int): The set's position in the run (sets handled so far).
+        run_total (int): The total number of sets in the run.
+        set_count (int): The card's position in its set (cards handled so far).
+        set_total (int): The total number of cards in the set.
         display_label (str): The card's human-readable label.
     """
 
     set_code: str
-    run_progress: str
-    set_progress: str
+    run_count: int
+    run_total: int
+    set_count: int
+    set_total: int
     display_label: str
 
 
