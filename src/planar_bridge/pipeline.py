@@ -39,6 +39,7 @@ from .events import (
     VersionMismatch,
 )
 from .objects import CardObject, SetObject
+from .options import RunOptions
 from .paths import DataPaths, ensure_directories_exist, load_paths
 from .sources.mtgjson import BULK_TARGETS, MtgjsonSource
 from .sources.scryfall import ScryfallSource
@@ -63,12 +64,14 @@ class PullContext:
         scryfall_source (ScryfallSource): The Scryfall network source.
         config (AppConfig): Resolved filtering configuration.
         bus (EventBus): The event bus for set and card events.
+        options (RunOptions): The per-run command-line switches.
     """
 
     repository: CatalogRepository
     scryfall_source: ScryfallSource
     config: AppConfig
     bus: EventBus
+    options: RunOptions
 
 
 def _read_local_metadata(paths: DataPaths) -> MetadataInfo | None:
@@ -305,12 +308,15 @@ async def _pull_sets(
     )
 
 
-async def pull_all(bus: EventBus) -> None:
+async def pull_all(bus: EventBus, options: RunOptions = RunOptions()) -> None:
     """Run the whole pull: metadata check, then every set's downloads.
 
     Args:
         bus (EventBus): The event bus, already wired to its reporters by the
             caller, that the run emits progress and outcome events on.
+        options (RunOptions): The per-run switches from the command line. The
+            default is a full, prompted run; the flags are wired into the loop
+            in later units.
     """
 
     paths: DataPaths = load_paths(environ)
@@ -338,6 +344,6 @@ async def pull_all(bus: EventBus) -> None:
 
         with CatalogRepository.open(paths.database_path) as repository:
             context = PullContext(
-                repository, ScryfallSource(client), config, bus
+                repository, ScryfallSource(client), config, bus, options
             )
             await _pull_sets(context, paths, set_entries)
