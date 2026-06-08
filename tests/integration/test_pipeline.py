@@ -21,10 +21,10 @@ from planar_bridge.events import (
     SetStarted,
     VersionMismatch,
 )
-from planar_bridge.objects import SetObject
 from planar_bridge.options import RunOptions
 from planar_bridge.paths import load_paths
 from planar_bridge.pipeline import PullContext, download, metadata
+from planar_bridge.pipeline.context import SetObject
 
 
 class StubScryfall:
@@ -86,7 +86,7 @@ def test_pull_set_upserts_a_downloaded_card(
         "cards": [make_card()],
         "tokens": [],
     }
-    set_obj = SetObject(set_dict, config, paths, bus)
+    set_obj = SetObject(set_dict, config, paths)
     context = PullContext(
         repository,
         StubScryfall(),
@@ -123,7 +123,7 @@ def test_dry_run_reports_a_download_without_writing(
         "cards": [make_card()],
         "tokens": [],
     }
-    set_obj = SetObject(set_dict, config, paths, bus)
+    set_obj = SetObject(set_dict, config, paths)
     context = PullContext(
         repository,
         StubScryfall(),
@@ -230,7 +230,7 @@ def test_pull_set_emits_card_failed_and_continues(
         "cards": [make_card()],
         "tokens": [],
     }
-    set_obj = SetObject(set_dict, config, paths, bus)
+    set_obj = SetObject(set_dict, config, paths)
     context = PullContext(
         repository,
         StubScryfall(download_result=None),
@@ -265,7 +265,7 @@ def test_pull_set_emits_card_skipped_for_a_bad_card(
         "cards": [make_card(isReprint=True)],
         "tokens": [],
     }
-    set_obj = SetObject(set_dict, config, paths, bus)
+    set_obj = SetObject(set_dict, config, paths)
     context = PullContext(
         repository,
         StubScryfall(),

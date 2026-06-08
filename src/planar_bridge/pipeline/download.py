@@ -15,10 +15,9 @@ from ..events import (
     SetSkipped,
     SetStarted,
 )
-from ..objects import CardObject, SetObject
 from ..paths import DataPaths
 from ..sources.ports import ImageSource
-from .context import PullContext
+from .context import CardObject, PullContext, SetObject
 
 
 class CardOutcome(Enum):
@@ -197,7 +196,7 @@ async def _pull_sets(
 
     for set_count, set_entry in enumerate(selected, 1):
 
-        set_obj = SetObject(set_entry, context.config, paths, context.bus)
+        set_obj = SetObject(set_entry, context.config, paths)
 
         if set_obj.record.is_omitted:
             context.bus.emit(SetSkipped(set_code=set_obj.record.set_code))
