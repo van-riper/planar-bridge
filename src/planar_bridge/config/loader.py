@@ -36,7 +36,10 @@ class AppConfig:
     exempt_types: frozenset[str]
 
 
-def load_config(config_path: Path | None) -> AppConfig:
+def load_config(
+    config_path: Path | None,
+    language_override: str | None = None,
+) -> AppConfig:
     """Build an AppConfig by layering config.toml over the defaults.
 
     Reads ``config_path`` when provided and present, overlays it on the
@@ -46,12 +49,15 @@ def load_config(config_path: Path | None) -> AppConfig:
     Args:
         config_path (Path | None): Path to a user config.toml, or None.
             A missing or None path falls back to the defaults alone.
+        language_override (str | None): A language code that, when given,
+            takes precedence over the file value and the default (the CLI's
+            ``--language``).
 
     Returns:
         AppConfig: The resolved, immutable configuration.
 
     Raises:
-        ValueError: If ``card_language`` is not a recognized code.
+        ValueError: If the resolved ``card_language`` is not a recognized code.
     """
 
     file_data: dict[str, Any] = {}
@@ -61,7 +67,9 @@ def load_config(config_path: Path | None) -> AppConfig:
 
     pull_reprints = bool(file_data.get("pull_reprints", DEFAULT_PULL_REPRINTS))
 
-    language_code = str(file_data.get("card_language", DEFAULT_LANGUAGE_CODE))
+    language_code = language_override or str(
+        file_data.get("card_language", DEFAULT_LANGUAGE_CODE)
+    )
     language_name = LANGUAGE_MAP.get(language_code)
 
     if language_name is None:

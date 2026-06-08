@@ -16,7 +16,7 @@ from os import environ
 import httpx
 
 from . import constants, utils
-from .aliases import CardData, SetEntries
+from .aliases import CardData, SetData, SetEntries
 from .catalog.repository import CatalogRepository
 from .config.loader import AppConfig, load_config
 from .domain.decisions import decide_download
@@ -283,16 +283,38 @@ async def _handle_card(
     )
 
 
+def _selected_entries(
+    set_entries: SetEntries,
+    only_sets: frozenset[str],
+) -> list[SetData]:
+    """Return the set entries to process, restricted by ``--set`` when given.
+
+    Args:
+        set_entries (SetEntries): Every set keyed by its code.
+        only_sets (frozenset[str]): The requested set codes; an empty set
+            means no restriction.
+
+    Returns:
+        list[SetData]: The entries to walk, in their original order.
+    """
+
+    if not only_sets:
+        return list(set_entries.values())
+
+    return [entry for code, entry in set_entries.items() if code in only_sets]
+
+
 async def _pull_sets(
     context: PullContext,
     paths: DataPaths,
     set_entries: SetEntries,
 ) -> None:
-    """Walk every set in order, downloading the ones not omitted."""
+    """Walk every requested set in order, downloading the ones not omitted."""
 
-    set_total = len(set_entries)
+    selected = _selected_entries(set_entries, context.options.only_sets)
+    set_total = len(selected)
 
-    for set_count, set_entry in enumerate(set_entries.values(), 1):
+    for set_count, set_entry in enumerate(selected, 1):
 
         set_obj = SetObject(set_entry, context.config, paths, context.bus)
 
@@ -323,7 +345,7 @@ async def pull_all(bus: EventBus, options: RunOptions = RunOptions()) -> None:
     paths: DataPaths = load_paths(environ)
     ensure_directories_exist(paths)
 
-    config: AppConfig = load_config(paths.config_path)
+    config: AppConfig = load_config(paths.config_path, options.language)
 
     async with httpx.AsyncClient(
         timeout=REQUEST_TIMEOUT_SECONDS,
