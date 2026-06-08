@@ -1,51 +1,9 @@
-"""Console logging and small string helpers used by the pull pipeline.
+"""Small string helpers pending their branch-7/9 move.
 
-These are the remaining utilities pending their branch-7 move: ``status`` and
-``boolify_str`` go to the CLI and prompt layer, ``progress_str`` to the
-reporters.
+``progress_str`` moves to the reporters and ``boolify_str`` into the CLI; what
+remains here is a temporary home. The colorized ``status`` logger is gone,
+replaced by the event layer and the console reporter.
 """
-
-from time import strftime
-
-from colorama import Fore
-
-
-def status(msg: str, lvl: int) -> None:
-    """Print a timestamped, color-coded status line for each message line.
-
-    Args:
-        msg (str): The message; each line is printed with the same prefix.
-        lvl (int): The severity level 0-6 selecting the colored label.
-
-    Raises:
-        ValueError: When ``lvl`` is outside the 0-6 range.
-    """
-
-    prefix: str
-
-    match lvl:
-        case 0:
-            prefix = Fore.CYAN + "INFO"
-        case 1:
-            prefix = Fore.RED + "WARNING"
-        case 2:
-            prefix = Fore.GREEN + "LOAD SET"
-        case 3:
-            prefix = Fore.YELLOW + "SKIP SET"
-        case 4:
-            prefix = Fore.MAGENTA + "NEW CARD"
-        case 5:
-            prefix = Fore.BLUE + "ENHANCED"
-        case 6:
-            prefix = Fore.RED + "ERROR"
-        case _:
-            raise ValueError(lvl)
-
-    prefix += Fore.RESET + ":"
-    timestamp: str = "[" + Fore.CYAN + strftime("%H:%M:%S") + Fore.RESET + "]"
-
-    for line in msg.splitlines():
-        print(timestamp, prefix, line)
 
 
 def progress_str(count: int, total: int, arrow: bool) -> str:
