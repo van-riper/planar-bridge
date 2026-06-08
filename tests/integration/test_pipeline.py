@@ -317,26 +317,28 @@ def test_resolve_version_drift_aborts_when_disapproved() -> None:
         metadata._resolve_version_drift(EventBus(), "5.3.0", lambda: False)
 
 
-def test_pull_meta_exits_when_up_to_date(tmp_path: Path) -> None:
-    """pull_meta exits cleanly when local data already matches the source."""
+def test_pull_meta_keeps_an_existing_meta_json(tmp_path: Path) -> None:
+    """A newer source build date does not re-download an existing Meta.json."""
 
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     paths.mtgjson_directory.mkdir(parents=True)
     paths.metadata_path.write_text(
-        json.dumps({"meta": {"date": "2024-01-01", "version": "5.2.2"}})
+        json.dumps({"meta": {"date": "2024-01-01", "version": "5.3.0"}})
     )
     paths.bulk_path.write_bytes(b"sqlite-placeholder")
     bus = EventBus()
-    source = StubMtgjson(MetadataInfo(date="2024-01-01", version="5.2.2"))
+    source = StubMtgjson(MetadataInfo(date="2030-06-05", version="5.3.0"))
 
-    with pytest.raises(SystemExit):
-        asyncio.run(metadata.pull_meta(paths, source, bus))
+    asyncio.run(metadata.pull_meta(paths, source, bus))
+
+    meta = json.loads(paths.metadata_path.read_bytes())["meta"]
+    assert meta["date"] == "2024-01-01"
 
 
-def test_pull_meta_downloads_only_meta_json_when_outdated(
+def test_pull_meta_downloads_meta_json_when_missing(
     tmp_path: Path,
 ) -> None:
-    """When outdated, pull_meta writes Meta.json but not the bulk database."""
+    """A missing Meta.json is fetched; the bulk database is left to run.py."""
 
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     paths.mtgjson_directory.mkdir(parents=True)

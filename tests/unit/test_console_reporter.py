@@ -19,7 +19,6 @@ from planar_bridge.events import (
     CardUpgraded,
     Event,
     Interrupted,
-    MetadataChecked,
     MetadataCheckStarted,
     RunFinished,
     RunStarted,
@@ -61,28 +60,6 @@ def test_info_narration_lines(capsys: CaptureFixture[str]) -> None:
     assert emitted(capsys, BulkDataLoaded(date="2026-06-01")) == [
         "INFO: Loading bulk data (2026-06-01)..."
     ]
-
-
-def test_metadata_checked_is_silent_when_outdated(
-    capsys: CaptureFixture[str],
-) -> None:
-    """An outdated verdict prints nothing; the download itself narrates."""
-
-    event = MetadataChecked(
-        is_outdated=True, version_matches_pinned=True, source_version="5.2.2"
-    )
-    assert emitted(capsys, event) == []
-
-
-def test_metadata_checked_reports_up_to_date(
-    capsys: CaptureFixture[str],
-) -> None:
-    """A current verdict announces that there is nothing to download."""
-
-    event = MetadataChecked(
-        is_outdated=False, version_matches_pinned=True, source_version="5.2.2"
-    )
-    assert emitted(capsys, event) == ["INFO: Local data is up to date."]
 
 
 def test_version_mismatch_warns_with_the_changelog_block(

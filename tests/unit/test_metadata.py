@@ -2,8 +2,8 @@
 
 from planar_bridge.domain.metadata import (
     MetadataInfo,
-    compare_metadata,
     normalize_version,
+    version_matches_pin,
 )
 
 
@@ -27,57 +27,19 @@ def test_normalize_version_leaves_plain_version_unchanged() -> None:
     assert normalize_version("5.2.2") == "5.2.2"
 
 
-def test_compare_metadata_no_local_data() -> None:
-    """With no local data the verdict is outdated and version-clean."""
+def test_version_matches_pin_true_without_local_data() -> None:
+    """With no local data the version is vacuously matched."""
 
-    source = make_info()
-
-    result = compare_metadata(None, source, "5.2.2")
-
-    assert result.has_local_data is False
-    assert result.is_outdated is True
-    assert result.version_matches_pinned is True
+    assert version_matches_pin(None, "5.2.2") is True
 
 
-def test_compare_metadata_matching_dates_not_outdated() -> None:
-    """Equal local and source dates are not outdated."""
+def test_version_matches_pin_true_when_local_equals_pin() -> None:
+    """A local version equal to the pinned version matches."""
 
-    local = make_info(date="2024-01-01")
-    source = make_info(date="2024-01-01")
-
-    result = compare_metadata(local, source, "5.2.2")
-
-    assert result.is_outdated is False
+    assert version_matches_pin(make_info(version="5.2.2"), "5.2.2") is True
 
 
-def test_compare_metadata_differing_dates_is_outdated() -> None:
-    """Differing local and source dates are outdated."""
+def test_version_matches_pin_false_when_local_differs() -> None:
+    """A local version unequal to the pinned version does not match."""
 
-    local = make_info(date="2024-01-01")
-    source = make_info(date="2024-02-02")
-
-    result = compare_metadata(local, source, "5.2.2")
-
-    assert result.is_outdated is True
-
-
-def test_compare_metadata_version_mismatch_flagged() -> None:
-    """A local version unequal to the pinned version is flagged."""
-
-    local = make_info(version="5.2.1")
-    source = make_info()
-
-    result = compare_metadata(local, source, "5.2.2")
-
-    assert result.version_matches_pinned is False
-
-
-def test_compare_metadata_version_match_not_flagged() -> None:
-    """A local version equal to the pinned version is not flagged."""
-
-    local = make_info(version="5.2.2")
-    source = make_info()
-
-    result = compare_metadata(local, source, "5.2.2")
-
-    assert result.version_matches_pinned is True
+    assert version_matches_pin(make_info(version="5.2.1"), "5.2.2") is False

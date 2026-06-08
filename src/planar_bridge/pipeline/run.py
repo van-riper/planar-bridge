@@ -30,10 +30,10 @@ async def _download_bulk_database(
     mtgjson_source: MetadataSource,
     bus: EventBus,
 ) -> None:
-    """Download the MTGJSON bulk database and write it to the bulk path.
+    """Download the MTGJSON bulk database when it is missing.
 
-    Reached only once ``pull_meta`` has confirmed the local data is stale, so
-    the large AllPrintings.sqlite is fetched lazily rather than on every run.
+    The large AllPrintings.sqlite is fetched only when no copy is present, so a
+    run reuses the bulk already on disk rather than re-downloading it.
 
     Args:
         paths (DataPaths): The resolved data paths.
@@ -43,6 +43,9 @@ async def _download_bulk_database(
     Raises:
         RuntimeError: When the download fails.
     """
+
+    if paths.bulk_path.exists():
+        return
 
     bus.emit(BulkDownloadStarted())
 
