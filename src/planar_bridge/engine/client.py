@@ -14,7 +14,7 @@ from random import random
 
 import httpx
 
-from .limiter import RateLimiter
+from .ports import Limiter
 
 # HTTP statuses worth retrying: rate limiting and transient server faults.
 RETRYABLE_STATUS_CODES = frozenset({408, 429, 500, 502, 503, 504})
@@ -110,7 +110,7 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
     def __init__(
         self,
         client: httpx.AsyncClient,
-        limiter: RateLimiter,
+        limiter: Limiter,
         *,
         policy: RetryPolicy = RetryPolicy(),
         sleeper: Callable[[float], Awaitable[None]] = asyncio.sleep,
@@ -120,7 +120,7 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
         Args:
             client (httpx.AsyncClient): The underlying httpx session. Its
                 lifecycle is owned by the caller.
-            limiter (RateLimiter): The shared limiter every request waits on.
+            limiter (Limiter): The shared limiter every request waits on.
             policy (RetryPolicy): The retry knobs governing backoff and the
                 attempt budget.
             sleeper (Callable[[float], Awaitable[None]]): Awaitable sleep.
