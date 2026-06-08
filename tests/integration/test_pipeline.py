@@ -9,7 +9,6 @@ from typing import Any
 
 import pytest
 
-from planar_bridge import pipeline
 from planar_bridge.catalog.repository import CatalogRepository
 from planar_bridge.domain.metadata import MetadataInfo
 from planar_bridge.events import (
@@ -25,7 +24,7 @@ from planar_bridge.events import (
 from planar_bridge.objects import SetObject
 from planar_bridge.options import RunOptions
 from planar_bridge.paths import load_paths
-from planar_bridge.pipeline import PullContext
+from planar_bridge.pipeline import PullContext, download, metadata
 
 
 class StubScryfall:
@@ -96,7 +95,7 @@ def test_pull_set_upserts_a_downloaded_card(
         RunOptions(),
     )
 
-    asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
+    asyncio.run(download.pull_set(set_obj, context, (1, 1)))
 
     stored = repository.get_card("uuid-1")
     assert stored is not None
@@ -133,7 +132,7 @@ def test_dry_run_reports_a_download_without_writing(
         RunOptions(dry_run=True),
     )
 
-    asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
+    asyncio.run(download.pull_set(set_obj, context, (1, 1)))
 
     assert any(isinstance(event, CardDownloaded) for event in received)
     assert repository.get_card("uuid-1") is None
@@ -169,7 +168,7 @@ def test_pull_sets_emits_set_skipped_for_an_omitted_set(
         }
     }
 
-    asyncio.run(pipeline._pull_sets(context, paths, set_entries))
+    asyncio.run(download._pull_sets(context, paths, set_entries))
 
     assert SetSkipped(set_code="TST") in received
 
@@ -198,7 +197,7 @@ def test_pull_sets_restricts_to_requested_set_codes(
         "BBB": {"code": "BBB", "type": "expansion", "cards": [], "tokens": []},
     }
 
-    asyncio.run(pipeline._pull_sets(context, paths, set_entries))
+    asyncio.run(download._pull_sets(context, paths, set_entries))
 
     started = [event for event in received if isinstance(event, SetStarted)]
     assert started == [
@@ -240,7 +239,7 @@ def test_pull_set_emits_card_failed_and_continues(
         RunOptions(),
     )
 
-    asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
+    asyncio.run(download.pull_set(set_obj, context, (1, 1)))
 
     assert CardFailed(set_code="TST") in received
     assert repository.get_card("uuid-1") is None
@@ -275,7 +274,7 @@ def test_pull_set_emits_card_skipped_for_a_bad_card(
         RunOptions(),
     )
 
-    asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
+    asyncio.run(download.pull_set(set_obj, context, (1, 1)))
 
     assert CardSkipped(set_code="TST") in received
     assert repository.get_card("uuid-1") is None
@@ -288,7 +287,7 @@ def test_resolve_version_drift_emits_the_event() -> None:
     received: list[Event] = []
     bus.subscribe(received.append)
 
-    pipeline._resolve_version_drift(bus, "5.3.0", lambda: True)
+    metadata._resolve_version_drift(bus, "5.3.0", lambda: True)
 
     assert VersionMismatch(source_version="5.3.0") in received
 
@@ -297,7 +296,7 @@ def test_resolve_version_drift_aborts_when_disapproved() -> None:
     """A disapproving callback raises KeyboardInterrupt to stop the run."""
 
     with pytest.raises(KeyboardInterrupt):
-        pipeline._resolve_version_drift(EventBus(), "5.3.0", lambda: False)
+        metadata._resolve_version_drift(EventBus(), "5.3.0", lambda: False)
 
 
 def test_pull_meta_exits_when_up_to_date(tmp_path: Path) -> None:
@@ -313,4 +312,4 @@ def test_pull_meta_exits_when_up_to_date(tmp_path: Path) -> None:
     source = StubMtgjson(MetadataInfo(date="2024-01-01", version="5.2.2"))
 
     with pytest.raises(SystemExit):
-        asyncio.run(pipeline.pull_meta(paths, source, bus))
+        asyncio.run(metadata.pull_meta(paths, source, bus))
