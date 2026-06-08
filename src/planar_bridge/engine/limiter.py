@@ -10,8 +10,10 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from time import monotonic
 
+from .ports import Limiter
 
-class RateLimiter:  # pylint: disable=too-few-public-methods
+
+class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
     """Caps the global request rate by spacing grants across coroutines.
 
     Each :meth:`acquire` reserves the next free time slot under a lock, then

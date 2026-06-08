@@ -1,5 +1,6 @@
 """Pinned versions and tunables shared across the pull pipeline."""
 
+# TODO: bump to 5.3.0
 MTGJSON_VERS: str = "5.2.2"
 
 # Held under Scryfall's ~10 requests-per-second limit (Terms of Use). The

@@ -42,6 +42,7 @@ from .objects import CardObject, SetObject
 from .options import RunOptions
 from .paths import DataPaths, ensure_directories_exist, load_paths
 from .sources.mtgjson import BULK_TARGETS, MtgjsonSource
+from .sources.ports import ImageSource, MetadataSource
 from .sources.scryfall import ScryfallSource
 
 REQUEST_TIMEOUT_SECONDS = 30.0
@@ -61,14 +62,14 @@ class PullContext:
 
     Attributes:
         repository (CatalogRepository): The catalog of stored card state.
-        scryfall_source (ScryfallSource): The Scryfall network source.
+        scryfall_source (ImageSource): The card-image source.
         config (AppConfig): Resolved filtering configuration.
         bus (EventBus): The event bus for set and card events.
         options (RunOptions): The per-run command-line switches.
     """
 
     repository: CatalogRepository
-    scryfall_source: ScryfallSource
+    scryfall_source: ImageSource
     config: AppConfig
     bus: EventBus
     options: RunOptions
@@ -107,14 +108,14 @@ def _prompt_version_mismatch(bus: EventBus, source_version: str) -> None:
 
 async def pull_meta(
     paths: DataPaths,
-    mtgjson_source: MtgjsonSource,
+    mtgjson_source: MetadataSource,
     bus: EventBus,
 ) -> None:
     """Check MTGJSON's metadata and refresh the bulk files when outdated.
 
     Args:
         paths (DataPaths): The resolved data paths.
-        mtgjson_source (MtgjsonSource): The MTGJSON network source.
+        mtgjson_source (MetadataSource): The MTGJSON metadata source.
         bus (EventBus): The event bus for metadata events.
 
     Raises:
@@ -157,13 +158,13 @@ async def pull_meta(
 
 async def pull_card(
     card_obj: CardObject,
-    scryfall_source: ScryfallSource,
+    scryfall_source: ImageSource,
 ) -> tuple[CardOutcome, bool]:
     """Download one card's image when needed, writing it to disk.
 
     Args:
         card_obj (CardObject): The card's facts, paths, and stored state.
-        scryfall_source (ScryfallSource): The Scryfall network source.
+        scryfall_source (ImageSource): The card-image source.
 
     Returns:
         tuple[CardOutcome, bool]: The outcome, plus whether the stored scan is

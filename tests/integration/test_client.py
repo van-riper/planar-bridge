@@ -48,7 +48,7 @@ def build_client(
     *,
     limiter: RecordingLimiter | None = None,
     sleeper: Callable[[float], Awaitable[None]] | None = None,
-    **overrides: object,
+    policy: RetryPolicy | None = None,
 ) -> tuple[AsyncHttpClient, httpx.AsyncClient, dict[str, int]]:
     """Build an AsyncHttpClient over a scripted MockTransport."""
 
@@ -67,7 +67,7 @@ def build_client(
         httpx_client,
         limiter or RecordingLimiter(),
         sleeper=sleeper or RecordingSleeper(),
-        **overrides,
+        policy=policy or RetryPolicy(),
     )
     return client, httpx_client, calls
 

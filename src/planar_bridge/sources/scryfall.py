@@ -8,11 +8,12 @@ network halves of the old ``CardObject.parse_source_state`` and ``download``.
 
 from ..aliases import Face
 from ..engine.client import AsyncHttpClient
+from .ports import ImageSource
 
 SCRYFALL_API_CARD_URL = "https://api.scryfall.com/cards/"
 
 
-class ScryfallSource:
+class ScryfallSource(ImageSource):
     """Fetches card image status and image bytes from Scryfall."""
 
     def __init__(self, client: AsyncHttpClient) -> None:

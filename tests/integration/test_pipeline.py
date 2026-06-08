@@ -61,6 +61,11 @@ class StubMtgjson:
 
         return self._info
 
+    async def download_bulk(self, target: str) -> bytes | None:
+        """Return canned bulk bytes (unused by the up-to-date path)."""
+
+        return b"{}"
+
 
 def test_pull_set_upserts_a_downloaded_card(
     connection: sqlite3.Connection,

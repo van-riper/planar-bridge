@@ -10,6 +10,7 @@ import gzip
 
 from ..domain.metadata import MetadataInfo, normalize_version
 from ..engine.client import AsyncHttpClient
+from .ports import MetadataSource
 
 MTGJSON_API_URL = "https://mtgjson.com/api/v5/"
 
@@ -17,7 +18,7 @@ MTGJSON_API_URL = "https://mtgjson.com/api/v5/"
 BULK_TARGETS = ("AllPrintings", "Meta")
 
 
-class MtgjsonSource:
+class MtgjsonSource(MetadataSource):
     """Fetches build metadata and bulk files from MTGJSON."""
 
     def __init__(self, client: AsyncHttpClient) -> None:
