@@ -1,13 +1,13 @@
-"""Unit test for the console entry point's interrupt handling."""
+"""Unit test for the CLI runner's interrupt handling."""
 
 from typing import Any
 
 import pytest
 
-from planar_bridge import __main__
+from planar_bridge.cli import main
 
 
-def test_main_exits_cleanly_on_keyboard_interrupt(
+def test_run_exits_cleanly_on_keyboard_interrupt(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -17,10 +17,10 @@ def test_main_exits_cleanly_on_keyboard_interrupt(
         coro.close()  # the pull_all coroutine is never awaited here
         raise KeyboardInterrupt
 
-    monkeypatch.setattr(__main__.asyncio, "run", fake_run)
+    monkeypatch.setattr(main.asyncio, "run", fake_run)
 
     with pytest.raises(SystemExit) as exit_info:
-        __main__.main()
+        main.run([])
 
-    assert exit_info.value.code == __main__.INTERRUPT_EXIT_CODE
+    assert exit_info.value.code == main.INTERRUPT_EXIT_CODE
     assert "Interrupted" in capsys.readouterr().out

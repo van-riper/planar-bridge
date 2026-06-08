@@ -21,6 +21,7 @@ from planar_bridge.events import (
     VersionMismatch,
 )
 from planar_bridge.objects import SetObject
+from planar_bridge.options import RunOptions
 from planar_bridge.paths import load_paths
 from planar_bridge.pipeline import PullContext
 
@@ -80,7 +81,13 @@ def test_pull_set_upserts_a_downloaded_card(
         "tokens": [],
     }
     set_obj = SetObject(set_dict, config, paths, bus)
-    context = PullContext(repository, StubScryfall(), config, bus)
+    context = PullContext(
+        repository,
+        StubScryfall(),
+        config,
+        bus,
+        RunOptions(),
+    )
 
     asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
 
@@ -102,7 +109,13 @@ def test_pull_sets_emits_set_skipped_for_an_omitted_set(
     bus = EventBus()
     received: list[Event] = []
     bus.subscribe(received.append)
-    context = PullContext(repository, StubScryfall(), make_config(), bus)
+    context = PullContext(
+        repository,
+        StubScryfall(),
+        make_config(),
+        bus,
+        RunOptions(),
+    )
     set_entries: dict[str, Any] = {
         "TST": {
             "code": "TST",
@@ -140,7 +153,11 @@ def test_pull_set_emits_card_failed_and_continues(
     }
     set_obj = SetObject(set_dict, config, paths, bus)
     context = PullContext(
-        repository, StubScryfall(download_result=None), config, bus
+        repository,
+        StubScryfall(download_result=None),
+        config,
+        bus,
+        RunOptions(),
     )
 
     asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
@@ -170,7 +187,13 @@ def test_pull_set_emits_card_skipped_for_a_bad_card(
         "tokens": [],
     }
     set_obj = SetObject(set_dict, config, paths, bus)
-    context = PullContext(repository, StubScryfall(), config, bus)
+    context = PullContext(
+        repository,
+        StubScryfall(),
+        config,
+        bus,
+        RunOptions(),
+    )
 
     asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
 

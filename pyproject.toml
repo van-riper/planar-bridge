@@ -11,9 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-# Interim entry point; switches to "planar_bridge.cli.main:run" in the
-# async-engine branch once the cli package exists.
-planar-bridge = "planar_bridge.__main__:main"
+planar-bridge = "planar_bridge.cli.main:run"
 
 [build-system]
 requires = ["hatchling"]
