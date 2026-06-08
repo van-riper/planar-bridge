@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from planar_bridge.catalog.repository import CardRow, CatalogRepository
-from planar_bridge.objects import CardObject
+from planar_bridge.pipeline.context import CardObject
 
 
 def make_row(**overrides: Any) -> CardRow:
