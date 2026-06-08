@@ -11,7 +11,7 @@ class DataPaths:
     Attributes:
         data_directory (Path): Root directory for all stored data.
         mtgjson_directory (Path): Holds the MTGJSON bulk and meta files.
-        bulk_path (Path): AllPrintings.json inside mtgjson_directory.
+        bulk_path (Path): AllPrintings.sqlite inside mtgjson_directory.
         metadata_path (Path): Meta.json inside mtgjson_directory.
         config_path (Path): config.toml inside data_directory.
         database_path (Path): catalog.sqlite (the SQLite catalog) inside
@@ -63,7 +63,7 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
     return DataPaths(
         data_directory=data_directory,
         mtgjson_directory=mtgjson_directory,
-        bulk_path=Path(mtgjson_directory / "AllPrintings.json"),
+        bulk_path=Path(mtgjson_directory / "AllPrintings.sqlite"),
         metadata_path=Path(mtgjson_directory / "Meta.json"),
         config_path=Path(data_directory / "config.toml"),
         database_path=Path(data_directory / "catalog.sqlite"),

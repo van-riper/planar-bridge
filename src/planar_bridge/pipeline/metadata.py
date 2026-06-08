@@ -1,4 +1,4 @@
-"""The metadata phase: compare MTGJSON's build and refresh stale bulk files."""
+"""The metadata phase: compare MTGJSON's build and refresh Meta.json."""
 
 import json
 from collections.abc import Callable
@@ -6,14 +6,12 @@ from collections.abc import Callable
 from .. import constants
 from ..domain.metadata import MetadataInfo, compare_metadata, normalize_version
 from ..events import (
-    BulkDownloadStarted,
     EventBus,
     MetadataCheckStarted,
     MetadataChecked,
     VersionMismatch,
 )
 from ..paths import DataPaths
-from ..sources.mtgjson import BULK_TARGETS
 from ..sources.ports import MetadataSource
 
 
@@ -69,7 +67,10 @@ async def pull_meta(
     *,
     approve_version: Callable[[], bool] = _always_approve,
 ) -> None:
-    """Check MTGJSON's metadata and refresh the bulk files when outdated.
+    """Check MTGJSON's metadata and refresh Meta.json when outdated.
+
+    Only the small Meta.json file is fetched here; the bulk database download
+    is the composition root's concern, run once the data is known to be stale.
 
     Args:
         paths (DataPaths): The resolved data paths.
@@ -107,10 +108,7 @@ async def pull_meta(
     if not comparison.version_matches_pinned:
         _resolve_version_drift(bus, source_info.version, approve_version)
 
-    bus.emit(BulkDownloadStarted())
-
-    for target in BULK_TARGETS:
-        content = await mtgjson_source.download_bulk(target)
-        if content is None:
-            raise RuntimeError
-        (paths.mtgjson_directory / f"{target}.json").write_bytes(content)
+    content = await mtgjson_source.download_bulk("Meta")
+    if content is None:
+        raise RuntimeError
+    paths.metadata_path.write_bytes(content)

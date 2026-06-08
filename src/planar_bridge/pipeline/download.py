@@ -4,7 +4,7 @@ import asyncio
 from enum import Enum, auto
 
 from .. import constants
-from ..aliases import CardData, SetData, SetEntries
+from ..aliases import CardData
 from ..domain.decisions import decide_download
 from ..events import (
     CardDownloaded,
@@ -16,7 +16,7 @@ from ..events import (
     SetStarted,
 )
 from ..paths import DataPaths
-from ..sources.ports import ImageSource
+from ..sources.ports import BulkSource, ImageSource
 from .context import CardObject, PullContext, SetObject
 
 
@@ -163,40 +163,44 @@ async def _handle_card(
     )
 
 
-def _selected_entries(
-    set_entries: SetEntries,
+def _selected_codes(
+    set_codes: tuple[str, ...],
     only_sets: frozenset[str],
-) -> list[SetData]:
-    """Return the set entries to process, restricted by ``--set`` when given.
+) -> list[str]:
+    """Return the set codes to process, restricted by ``--set`` when given.
 
     Args:
-        set_entries (SetEntries): Every set keyed by its code.
+        set_codes (tuple[str, ...]): Every set code, in the bulk reader's order.
         only_sets (frozenset[str]): The requested set codes; an empty set
             means no restriction.
 
     Returns:
-        list[SetData]: The entries to walk, in their original order.
+        list[str]: The codes to walk, keeping the reader's order.
     """
 
     if not only_sets:
-        return list(set_entries.values())
+        return list(set_codes)
 
-    return [entry for code, entry in set_entries.items() if code in only_sets]
+    return [code for code in set_codes if code in only_sets]
 
 
 async def _pull_sets(
     context: PullContext,
     paths: DataPaths,
-    set_entries: SetEntries,
+    bulk: BulkSource,
 ) -> None:
-    """Walk every requested set in order, downloading the ones not omitted."""
+    """Walk every requested set in order, downloading the ones not omitted.
 
-    selected = _selected_entries(set_entries, context.options.only_sets)
+    Each set is loaded from the bulk reader only when its turn comes, so just
+    one set's cards sit in memory at a time.
+    """
+
+    selected = _selected_codes(bulk.set_codes(), context.options.only_sets)
     set_total = len(selected)
 
-    for set_count, set_entry in enumerate(selected, 1):
+    for set_count, set_code in enumerate(selected, 1):
 
-        set_obj = SetObject(set_entry, context.config, paths)
+        set_obj = SetObject(bulk.load_set(set_code), context.config, paths)
 
         if set_obj.record.is_omitted:
             context.bus.emit(SetSkipped(set_code=set_obj.record.set_code))

@@ -65,7 +65,7 @@ def test_derived_paths_sit_under_data_directory() -> None:
 
     paths = load_paths({"PLANAR_BRIDGE_DIR": "/data/pb"})
     assert paths.mtgjson_directory == Path("/data/pb/.mtgjson")
-    assert paths.bulk_path == Path("/data/pb/.mtgjson/AllPrintings.json")
+    assert paths.bulk_path == Path("/data/pb/.mtgjson/AllPrintings.sqlite")
     assert paths.metadata_path == Path("/data/pb/.mtgjson/Meta.json")
     assert paths.config_path == Path("/data/pb/config.toml")
 

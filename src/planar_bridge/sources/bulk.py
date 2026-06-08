@@ -13,6 +13,7 @@ import sqlite3
 from pathlib import Path
 
 from ..aliases import CardData, SetData
+from .ports import BulkSource
 
 # Cards and tokens are projected to the same column shape (tokens have no
 # isOnlineOnly column, so it is synthesized as NULL) so one row mapper serves
@@ -36,7 +37,7 @@ WHERE t.setCode = ?
 """
 
 
-class BulkReader:
+class BulkReader(BulkSource):
     """Reads JSON-shaped set data on demand from ``AllPrintings.sqlite``."""
 
     def __init__(self, connection: sqlite3.Connection) -> None:
