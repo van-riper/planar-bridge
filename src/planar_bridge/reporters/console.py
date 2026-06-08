@@ -18,6 +18,7 @@ from ..events import (
     BulkDownloadStarted,
     CardDownloaded,
     CardEvent,
+    CardFailed,
     CardUpgraded,
     Event,
     Interrupted,
@@ -42,7 +43,7 @@ _ERROR = (str(Fore.RED), "ERROR")
 class ConsoleReporter:  # pylint: disable=too-few-public-methods
     """Subscribes to the event bus and prints the legacy colorized lines."""
 
-    def handle(self, event: Event) -> None:
+    def handle(self, event: Event) -> None:  # pylint: disable=too-many-branches
         """Render one event to stdout, or ignore it if it has no output.
 
         Args:
@@ -68,6 +69,9 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
             self.__render(_NEW_CARD, self.__card_message(event))
         elif isinstance(event, CardUpgraded):
             self.__render(_ENHANCED, self.__card_message(event))
+        elif isinstance(event, CardFailed):
+            message = f"Failed to download a card in {event.set_code}"
+            self.__render(_ERROR, message)
         elif isinstance(event, RunFinished):
             self.__render(_INFO, "Finished successfully.")
             self.__render(_INFO, self.__remaining_message(event))

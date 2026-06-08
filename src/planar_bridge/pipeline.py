@@ -10,6 +10,7 @@ per card to the catalog, so a killed run resumes from confirmed state.
 import asyncio
 import json
 from dataclasses import dataclass
+from enum import Enum, auto
 from os import environ
 
 import httpx
@@ -26,6 +27,8 @@ from .events import (
     BulkDataLoaded,
     BulkDownloadStarted,
     CardDownloaded,
+    CardFailed,
+    CardSkipped,
     CardUpgraded,
     EventBus,
     MetadataCheckStarted,
@@ -40,6 +43,14 @@ from .sources.mtgjson import BULK_TARGETS, MtgjsonSource
 from .sources.scryfall import ScryfallSource
 
 REQUEST_TIMEOUT_SECONDS = 30.0
+
+
+class CardOutcome(Enum):
+    """The result of handling one card in the pull loop."""
+
+    DOWNLOADED = auto()
+    SKIPPED = auto()
+    FAILED = auto()
 
 
 @dataclass(frozen=True)
@@ -143,7 +154,7 @@ async def pull_meta(
 async def pull_card(
     card_obj: CardObject,
     scryfall_source: ScryfallSource,
-) -> tuple[bool, bool]:
+) -> tuple[CardOutcome, bool]:
     """Download one card's image when needed, writing it to disk.
 
     Args:
@@ -151,41 +162,39 @@ async def pull_card(
         scryfall_source (ScryfallSource): The Scryfall network source.
 
     Returns:
-        tuple[bool, bool]: ``(should_record, source_is_high_resolution)``.
-        ``should_record`` is False when the card is skipped (bad, already
-        stored, or no usable source scan).
-
-    Raises:
-        RuntimeError: When a network request fails after its retries.
+        tuple[CardOutcome, bool]: The outcome, plus whether the stored scan is
+        high-resolution (meaningful only when the outcome is DOWNLOADED). A
+        network failure yields FAILED rather than raising, so one bad card does
+        not stop the run.
     """
 
     if card_obj.card.is_bad:
-        return False, False
+        return CardOutcome.SKIPPED, False
 
     if card_obj.local_state and card_obj.path_exists:
-        return False, False
+        return CardOutcome.SKIPPED, False
 
     image_status = await scryfall_source.image_status(card_obj.card.scryfall_id)
     if image_status is None:
-        raise RuntimeError
+        return CardOutcome.FAILED, False
 
     decision = decide_download(
         image_status, card_obj.local_state, card_obj.path_exists
     )
 
     if not decision.should_download:
-        return False, False
+        return CardOutcome.SKIPPED, False
 
     content = await scryfall_source.download_image(
         card_obj.card.scryfall_id, card_obj.card.face
     )
     if content is None:
-        raise RuntimeError
+        return CardOutcome.FAILED, False
 
     card_obj.img_path.parent.mkdir(parents=True, exist_ok=True)
     card_obj.img_path.write_bytes(content)
 
-    return True, decision.source_is_high_resolution
+    return CardOutcome.DOWNLOADED, decision.source_is_high_resolution
 
 
 async def pull_set(
@@ -228,7 +237,7 @@ async def _handle_card(
     progress: str,
     card_entry: CardData,
 ) -> None:
-    """Download one card and record and report it when it lands."""
+    """Download one card and record and report its outcome."""
 
     set_obj.increase_progress()
 
@@ -236,11 +245,15 @@ async def _handle_card(
         card_entry, context.repository, set_obj.set_directory, context.config
     )
 
-    should_record, source_state = await pull_card(
-        card_obj, context.scryfall_source
-    )
+    outcome, source_state = await pull_card(card_obj, context.scryfall_source)
+    set_code = set_obj.record.set_code
 
-    if not should_record:
+    if outcome is CardOutcome.SKIPPED:
+        context.bus.emit(CardSkipped(set_code=set_code))
+        return
+
+    if outcome is CardOutcome.FAILED:
+        context.bus.emit(CardFailed(set_code=set_code))
         return
 
     context.repository.upsert_card(card_obj.to_row(source_state))
@@ -248,7 +261,7 @@ async def _handle_card(
     card_event = CardUpgraded if card_obj.path_exists else CardDownloaded
     context.bus.emit(
         card_event(
-            set_code=set_obj.record.set_code,
+            set_code=set_code,
             run_progress=progress,
             set_progress=set_obj.inner_progress(),
             display_label=card_obj.card.display_label,
