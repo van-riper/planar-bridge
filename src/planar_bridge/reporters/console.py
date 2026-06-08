@@ -90,17 +90,43 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
 
     def __set_message(self, event: SetStarted) -> str:
 
+        run = self.__progress(event.run_count, event.run_total, False)
+
         return (
-            f"{event.progress} {event.set_code.ljust(6)} "
+            f"{run} {event.set_code.ljust(6)} "
             f"AllHighRes: {event.is_all_high_resolution}"
         )
 
     def __card_message(self, event: CardEvent) -> str:
 
+        run = self.__progress(event.run_count, event.run_total, False)
+        within = self.__progress(event.set_count, event.set_total, True)
+
         return (
-            f"{event.run_progress} {event.set_code.ljust(6)} "
-            f"{event.set_progress} {event.display_label}"
+            f"{run} {event.set_code.ljust(6)} "
+            f"{within} {event.display_label}"
         )
+
+    def __progress(self, count: int, total: int, arrow: bool) -> str:
+        """Format a count over a total as a padded percentage label.
+
+        Args:
+            count (int): The number done so far.
+            total (int): The total to reach.
+            arrow (bool): When True, append a ``>`` arrow (set-level lines).
+
+        Returns:
+            str: The formatted label, such as ``(45.0%)`` or ``(45.0%)>``.
+        """
+
+        label = f"({format(count / total, '.1%').zfill(5).rjust(5)})"
+
+        if count == total:
+            label = " (100%)"
+        if arrow:
+            label += ">"
+
+        return label
 
     def __remaining_message(self, event: RunFinished) -> str:
 

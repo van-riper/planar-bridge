@@ -201,20 +201,24 @@ async def pull_card(
 async def pull_set(
     set_obj: SetObject,
     context: PullContext,
-    progress: str,
+    run_position: tuple[int, int],
 ) -> None:
     """Download every card in a set concurrently under a bounded semaphore.
 
     Args:
         set_obj (SetObject): The set's record, directory, and progress.
         context (PullContext): The run-wide dependencies.
-        progress (str): The run-level progress string for this set.
+        run_position (tuple[int, int]): This set's (count, total) position in
+            the run; the reporter formats it into the run-level progress label.
     """
+
+    run_count, run_total = run_position
 
     context.bus.emit(
         SetStarted(
             set_code=set_obj.record.set_code,
-            progress=progress,
+            run_count=run_count,
+            run_total=run_total,
             is_all_high_resolution=context.repository.is_set_high_resolution(
                 set_obj.record.set_code
             ),
@@ -225,7 +229,7 @@ async def pull_set(
 
     async def handle(card_entry: CardData) -> None:
         async with semaphore:
-            await _handle_card(set_obj, context, progress, card_entry)
+            await _handle_card(set_obj, context, run_position, card_entry)
 
     await asyncio.gather(
         *(handle(entry) for entry in set_obj.record.card_entries)
@@ -235,7 +239,7 @@ async def pull_set(
 async def _handle_card(
     set_obj: SetObject,
     context: PullContext,
-    progress: str,
+    run_position: tuple[int, int],
     card_entry: CardData,
 ) -> None:
     """Download one card and record and report its outcome."""
@@ -259,12 +263,17 @@ async def _handle_card(
 
     context.repository.upsert_card(card_obj.to_row(source_state))
 
+    run_count, run_total = run_position
+    set_count, set_total = set_obj.progress
+
     card_event = CardUpgraded if card_obj.path_exists else CardDownloaded
     context.bus.emit(
         card_event(
             set_code=set_code,
-            run_progress=progress,
-            set_progress=set_obj.inner_progress(),
+            run_count=run_count,
+            run_total=run_total,
+            set_count=set_count,
+            set_total=set_total,
             display_label=card_obj.card.display_label,
         )
     )
@@ -287,8 +296,7 @@ async def _pull_sets(
             context.bus.emit(SetSkipped(set_code=set_obj.record.set_code))
             continue
 
-        progress = utils.progress_str(set_count, set_total, False)
-        await pull_set(set_obj, context, progress)
+        await pull_set(set_obj, context, (set_count, set_total))
 
     context.bus.emit(
         RunFinished(

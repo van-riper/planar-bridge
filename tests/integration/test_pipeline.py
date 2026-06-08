@@ -82,7 +82,7 @@ def test_pull_set_upserts_a_downloaded_card(
     set_obj = SetObject(set_dict, config, paths, bus)
     context = PullContext(repository, StubScryfall(), config, bus)
 
-    asyncio.run(pipeline.pull_set(set_obj, context, "1/1"))
+    asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
 
     stored = repository.get_card("uuid-1")
     assert stored is not None
@@ -143,7 +143,7 @@ def test_pull_set_emits_card_failed_and_continues(
         repository, StubScryfall(download_result=None), config, bus
     )
 
-    asyncio.run(pipeline.pull_set(set_obj, context, "1/1"))
+    asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
 
     assert CardFailed(set_code="TST") in received
     assert repository.get_card("uuid-1") is None
@@ -172,7 +172,7 @@ def test_pull_set_emits_card_skipped_for_a_bad_card(
     set_obj = SetObject(set_dict, config, paths, bus)
     context = PullContext(repository, StubScryfall(), config, bus)
 
-    asyncio.run(pipeline.pull_set(set_obj, context, "1/1"))
+    asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
 
     assert CardSkipped(set_code="TST") in received
     assert repository.get_card("uuid-1") is None
