@@ -152,7 +152,7 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
             await self._limiter.acquire()
 
             try:
-                response = await self._client.get(url)
+                response = await self._client.get(url, follow_redirects=True)
                 response.raise_for_status()
                 return response
 
