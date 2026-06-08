@@ -28,7 +28,7 @@ def build_parser() -> ArgumentParser:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="run the full decision logic but write nothing to disk",
+        help="report what would download without writing images or the catalog",
     )
     parser.add_argument(
         "--set",

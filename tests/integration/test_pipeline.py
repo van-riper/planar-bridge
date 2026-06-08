@@ -13,6 +13,7 @@ from planar_bridge import pipeline
 from planar_bridge.catalog.repository import CatalogRepository
 from planar_bridge.domain.metadata import MetadataInfo
 from planar_bridge.events import (
+    CardDownloaded,
     CardFailed,
     CardSkipped,
     Event,
@@ -101,6 +102,42 @@ def test_pull_set_upserts_a_downloaded_card(
     assert stored is not None
     assert stored.is_high_resolution is True
     assert not repository.low_resolution_sets()
+
+
+def test_dry_run_reports_a_download_without_writing(
+    connection: sqlite3.Connection,
+    tmp_path: Path,
+    make_card: Callable[..., dict[str, Any]],
+    make_config: Callable[..., Any],
+) -> None:
+    """A dry run emits the would-download event but persists nothing."""
+
+    repository = CatalogRepository(connection)
+    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
+    bus = EventBus()
+    received: list[Event] = []
+    bus.subscribe(received.append)
+    config = make_config()
+    set_dict: dict[str, Any] = {
+        "code": "TST",
+        "type": "expansion",
+        "cards": [make_card()],
+        "tokens": [],
+    }
+    set_obj = SetObject(set_dict, config, paths, bus)
+    context = PullContext(
+        repository,
+        StubScryfall(),
+        config,
+        bus,
+        RunOptions(dry_run=True),
+    )
+
+    asyncio.run(pipeline.pull_set(set_obj, context, (1, 1)))
+
+    assert any(isinstance(event, CardDownloaded) for event in received)
+    assert repository.get_card("uuid-1") is None
+    assert not (paths.data_directory / "TST").exists()
 
 
 def test_pull_sets_emits_set_skipped_for_an_omitted_set(

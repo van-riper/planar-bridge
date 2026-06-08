@@ -159,12 +159,16 @@ async def pull_meta(
 async def pull_card(
     card_obj: CardObject,
     scryfall_source: ImageSource,
+    *,
+    dry_run: bool = False,
 ) -> tuple[CardOutcome, bool]:
     """Download one card's image when needed, writing it to disk.
 
     Args:
         card_obj (CardObject): The card's facts, paths, and stored state.
         scryfall_source (ImageSource): The card-image source.
+        dry_run (bool): When True, stop once a download is decided on; report
+            DOWNLOADED without fetching the bytes or writing the file.
 
     Returns:
         tuple[CardOutcome, bool]: The outcome, plus whether the stored scan is
@@ -190,14 +194,15 @@ async def pull_card(
     if not decision.should_download:
         return CardOutcome.SKIPPED, False
 
-    content = await scryfall_source.download_image(
-        card_obj.card.scryfall_id, card_obj.card.face
-    )
-    if content is None:
-        return CardOutcome.FAILED, False
+    if not dry_run:
+        content = await scryfall_source.download_image(
+            card_obj.card.scryfall_id, card_obj.card.face
+        )
+        if content is None:
+            return CardOutcome.FAILED, False
 
-    card_obj.img_path.parent.mkdir(parents=True, exist_ok=True)
-    card_obj.img_path.write_bytes(content)
+        card_obj.img_path.parent.mkdir(parents=True, exist_ok=True)
+        card_obj.img_path.write_bytes(content)
 
     return CardOutcome.DOWNLOADED, decision.source_is_high_resolution
 
@@ -254,7 +259,9 @@ async def _handle_card(
         card_entry, context.repository, set_obj.set_directory, context.config
     )
 
-    outcome, source_state = await pull_card(card_obj, context.scryfall_source)
+    outcome, source_state = await pull_card(
+        card_obj, context.scryfall_source, dry_run=context.options.dry_run
+    )
     set_code = set_obj.record.set_code
 
     if outcome is CardOutcome.SKIPPED:
@@ -265,7 +272,8 @@ async def _handle_card(
         context.bus.emit(CardFailed(set_code=set_code))
         return
 
-    context.repository.upsert_card(card_obj.to_row(source_state))
+    if not context.options.dry_run:
+        context.repository.upsert_card(card_obj.to_row(source_state))
 
     run_count, run_total = run_position
     set_count, set_total = set_obj.progress
