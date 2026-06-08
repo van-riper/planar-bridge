@@ -113,4 +113,4 @@ async def pull_meta(
         content = await mtgjson_source.download_bulk(target)
         if content is None:
             raise RuntimeError
-        (paths.json_directory / f"{target}.json").write_bytes(content)
+        (paths.mtgjson_directory / f"{target}.json").write_bytes(content)
