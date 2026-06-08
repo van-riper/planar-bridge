@@ -12,6 +12,7 @@ import pytest
 from planar_bridge.catalog.repository import CatalogRepository
 from planar_bridge.domain.metadata import MetadataInfo
 from planar_bridge.events import (
+    BulkDownloadStarted,
     CardDownloaded,
     CardFailed,
     CardSkipped,
@@ -23,7 +24,7 @@ from planar_bridge.events import (
 )
 from planar_bridge.options import RunOptions
 from planar_bridge.paths import load_paths
-from planar_bridge.pipeline import PullContext, download, metadata
+from planar_bridge.pipeline import PullContext, download, metadata, run
 from planar_bridge.pipeline.context import SetObject
 
 
@@ -66,6 +67,23 @@ class StubMtgjson:
         """Return canned bulk bytes (unused by the up-to-date path)."""
 
         return b"{}"
+
+
+class StubBulk:
+    """A bulk source double backed by an in-memory dict of set entries."""
+
+    def __init__(self, sets: dict[str, dict[str, Any]]) -> None:
+        self._sets = sets
+
+    def set_codes(self) -> tuple[str, ...]:
+        """Return the configured set codes in insertion order."""
+
+        return tuple(self._sets)
+
+    def load_set(self, set_code: str) -> dict[str, Any]:
+        """Return the configured set entry for a code."""
+
+        return self._sets[set_code]
 
 
 def test_pull_set_upserts_a_downloaded_card(
@@ -168,7 +186,7 @@ def test_pull_sets_emits_set_skipped_for_an_omitted_set(
         }
     }
 
-    asyncio.run(download._pull_sets(context, paths, set_entries))
+    asyncio.run(download._pull_sets(context, paths, StubBulk(set_entries)))
 
     assert SetSkipped(set_code="TST") in received
 
@@ -197,7 +215,7 @@ def test_pull_sets_restricts_to_requested_set_codes(
         "BBB": {"code": "BBB", "type": "expansion", "cards": [], "tokens": []},
     }
 
-    asyncio.run(download._pull_sets(context, paths, set_entries))
+    asyncio.run(download._pull_sets(context, paths, StubBulk(set_entries)))
 
     started = [event for event in received if isinstance(event, SetStarted)]
     assert started == [
@@ -307,9 +325,43 @@ def test_pull_meta_exits_when_up_to_date(tmp_path: Path) -> None:
     paths.metadata_path.write_text(
         json.dumps({"meta": {"date": "2024-01-01", "version": "5.2.2"}})
     )
-    paths.bulk_path.write_text(json.dumps({"data": {}}))
+    paths.bulk_path.write_bytes(b"sqlite-placeholder")
     bus = EventBus()
     source = StubMtgjson(MetadataInfo(date="2024-01-01", version="5.2.2"))
 
     with pytest.raises(SystemExit):
         asyncio.run(metadata.pull_meta(paths, source, bus))
+
+
+def test_pull_meta_downloads_only_meta_json_when_outdated(
+    tmp_path: Path,
+) -> None:
+    """When outdated, pull_meta writes Meta.json but not the bulk database."""
+
+    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
+    paths.mtgjson_directory.mkdir(parents=True)
+    bus = EventBus()
+    source = StubMtgjson(MetadataInfo(date="2030-01-01", version="5.3.0"))
+
+    asyncio.run(metadata.pull_meta(paths, source, bus))
+
+    assert paths.metadata_path.read_bytes() == b"{}"
+    assert not paths.bulk_path.exists()
+
+
+def test_download_bulk_database_writes_the_bulk_path(
+    tmp_path: Path,
+) -> None:
+    """The bulk download writes the fetched bytes to the sqlite bulk path."""
+
+    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
+    paths.mtgjson_directory.mkdir(parents=True)
+    bus = EventBus()
+    received: list[Event] = []
+    bus.subscribe(received.append)
+    source = StubMtgjson(MetadataInfo(date="x", version="5.3.0"))
+
+    asyncio.run(run._download_bulk_database(paths, source, bus))
+
+    assert paths.bulk_path.read_bytes() == b"{}"
+    assert any(isinstance(event, BulkDownloadStarted) for event in received)

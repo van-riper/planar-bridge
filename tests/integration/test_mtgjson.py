@@ -95,11 +95,11 @@ def test_download_bulk_decompresses_the_payload() -> None:
     assert asyncio.run(scenario()) == payload
 
 
-def test_download_bulk_requests_the_gzipped_target() -> None:
-    """The bulk download targets the named gzipped file."""
+def test_download_bulk_requests_all_printings_as_sqlite() -> None:
+    """AllPrintings is fetched as the gzipped SQLite distribution."""
 
     source, httpx_client, captured_urls = build_source(
-        [httpx.Response(200, content=gzip.compress(b"{}"))]
+        [httpx.Response(200, content=gzip.compress(b"sqlite"))]
     )
 
     async def scenario() -> None:
@@ -108,7 +108,25 @@ def test_download_bulk_requests_the_gzipped_target() -> None:
 
     asyncio.run(scenario())
 
-    assert captured_urls == ["https://mtgjson.com/api/v5/AllPrintings.json.gz"]
+    assert captured_urls == [
+        "https://mtgjson.com/api/v5/AllPrintings.sqlite.gz"
+    ]
+
+
+def test_download_bulk_requests_meta_as_json() -> None:
+    """Meta still comes from the gzipped JSON file, not SQLite."""
+
+    source, httpx_client, captured_urls = build_source(
+        [httpx.Response(200, content=gzip.compress(b"{}"))]
+    )
+
+    async def scenario() -> None:
+        await source.download_bulk("Meta")
+        await httpx_client.aclose()
+
+    asyncio.run(scenario())
+
+    assert captured_urls == ["https://mtgjson.com/api/v5/Meta.json.gz"]
 
 
 def test_download_bulk_is_none_on_failure() -> None:

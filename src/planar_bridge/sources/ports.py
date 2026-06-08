@@ -9,7 +9,7 @@ its port.
 
 from typing import Protocol
 
-from ..aliases import Face
+from ..aliases import Face, SetData
 from ..domain.metadata import MetadataInfo
 
 
@@ -33,3 +33,13 @@ class MetadataSource(Protocol):
 
     async def download_bulk(self, target: str) -> bytes | None:
         """Download and decompress one bulk file, or None on failure."""
+
+
+class BulkSource(Protocol):
+    """Lists set codes and loads one set at a time as JSON-shaped data."""
+
+    def set_codes(self) -> tuple[str, ...]:
+        """Return every set code, for the run total and the walk order."""
+
+    def load_set(self, set_code: str) -> SetData:
+        """Load one set as the JSON-shaped dict the domain consumes."""
