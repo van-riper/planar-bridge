@@ -278,7 +278,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "colorama", specifier = "~=0.4" },
-    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "httpx", specifier = "~=0.28" },
 ]
 
 [package.metadata.requires-dev]
