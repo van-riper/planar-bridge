@@ -31,6 +31,7 @@ from .events import (
     MetadataCheckStarted,
     MetadataChecked,
     RunFinished,
+    SetSkipped,
     SetStarted,
 )
 from .objects import CardObject, SetObject
@@ -269,6 +270,7 @@ async def _pull_sets(
         set_obj = SetObject(set_entry, context.config, paths, context.bus)
 
         if set_obj.record.is_omitted:
+            context.bus.emit(SetSkipped(set_code=set_obj.record.set_code))
             continue
 
         progress = utils.progress_str(set_count, set_total, False)
