@@ -35,7 +35,6 @@ from .events import (
 )
 from .objects import CardObject, SetObject
 from .paths import DataPaths, ensure_directories_exist, load_paths
-from .reporters.console import ConsoleReporter
 from .sources.mtgjson import BULK_TARGETS, MtgjsonSource
 from .sources.scryfall import ScryfallSource
 
@@ -282,11 +281,13 @@ async def _pull_sets(
     )
 
 
-async def pull_all() -> None:
-    """Run the whole pull: metadata check, then every set's downloads."""
+async def pull_all(bus: EventBus) -> None:
+    """Run the whole pull: metadata check, then every set's downloads.
 
-    bus: EventBus = EventBus()
-    bus.subscribe(ConsoleReporter().handle)
+    Args:
+        bus (EventBus): The event bus, already wired to its reporters by the
+            caller, that the run emits progress and outcome events on.
+    """
 
     paths: DataPaths = load_paths(environ)
     ensure_directories_exist(paths)

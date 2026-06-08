@@ -68,7 +68,7 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
             self.__render(_INFO, "Finished successfully.")
             self.__render(_INFO, self.__remaining_message(event))
         elif isinstance(event, Interrupted):
-            message = "SIGINT recieved (Ctrl-C), saving & exiting..."
+            message = "Interrupted (Ctrl-C), exiting. Progress is saved."
             self.__render(_ERROR, message)
 
     def __version_message(self, event: VersionMismatch) -> str:
