@@ -9,13 +9,13 @@ from typing import Any
 
 import pytest
 
-from planar_bridge import pull
+from planar_bridge import pipeline
 from planar_bridge.catalog.repository import CatalogRepository
 from planar_bridge.domain.metadata import MetadataInfo
 from planar_bridge.events import EventBus
 from planar_bridge.objects import SetObject
 from planar_bridge.paths import load_paths
-from planar_bridge.pull import PullContext
+from planar_bridge.pipeline import PullContext
 
 
 class StubScryfall:
@@ -70,7 +70,7 @@ def test_pull_set_upserts_a_downloaded_card(
     set_obj = SetObject(set_dict, config, paths, bus)
     context = PullContext(repository, StubScryfall(), config, bus)
 
-    asyncio.run(pull.pull_set(set_obj, context, "1/1"))
+    asyncio.run(pipeline.pull_set(set_obj, context, "1/1"))
 
     stored = repository.get_card("uuid-1")
     assert stored is not None
@@ -91,4 +91,4 @@ def test_pull_meta_exits_when_up_to_date(tmp_path: Path) -> None:
     source = StubMtgjson(MetadataInfo(date="2024-01-01", version="5.2.2"))
 
     with pytest.raises(SystemExit):
-        asyncio.run(pull.pull_meta(paths, source, bus))
+        asyncio.run(pipeline.pull_meta(paths, source, bus))
