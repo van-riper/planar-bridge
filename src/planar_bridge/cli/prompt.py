@@ -7,18 +7,37 @@ that callback is built, so the only ``input()`` in the program lives here.
 
 from collections.abc import Callable
 
-from .. import utils
+
+def _ask_yes_no(question: str) -> bool:
+    """Prompt for a yes/no answer, re-prompting until it is y or n.
+
+    Args:
+        question (str): The question to show; a ``[y/n]`` hint is appended.
+
+    Returns:
+        bool: True for y, False for n. A closed input stream (EOF) declines.
+    """
+
+    while True:
+        try:
+            answer = input(f"{question} [y/n]: ").strip().lower()
+        except EOFError:
+            return False
+
+        if answer == "y":
+            return True
+        if answer == "n":
+            return False
 
 
 def confirm_version_drift() -> bool:
     """Ask the user whether to proceed past an MTGJSON version drift.
 
     Returns:
-        bool: True to proceed, False to abort. An empty answer defaults to
-        False (do not proceed).
+        bool: True to proceed, False to abort.
     """
 
-    return utils.boolify_str(input("Do you want to proceed? [y/N]: "), False)
+    return _ask_yes_no("Do you want to proceed?")
 
 
 def approval_for(*, assume_yes: bool) -> Callable[[], bool]:
