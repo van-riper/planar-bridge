@@ -6,7 +6,7 @@ contract for `AppConfig` and `load_config`.
 
 from pathlib import Path
 
-from pytest import raises
+import pytest
 
 from planar_bridge.config import AppConfig, load_config
 
@@ -55,5 +55,5 @@ def test_unknown_language_code_raises(tmp_path: Path) -> None:
 
     config_path = tmp_path / "config.toml"
     config_path.write_text('card_language = "xx"\n', encoding="UTF-8")
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         load_config(config_path)
