@@ -135,10 +135,10 @@ def test_run_finished_prints_summary_then_remaining(
 
 
 def test_interrupted_is_an_error_line(capsys: CaptureFixture[str]) -> None:
-    """Interrupted renders the SIGINT message as an ERROR line."""
+    """Interrupted renders the interrupt message as an ERROR line."""
 
     assert emitted(capsys, Interrupted()) == [
-        "ERROR: SIGINT recieved (Ctrl-C), saving & exiting..."
+        "ERROR: Interrupted (Ctrl-C), exiting. Progress is saved."
     ]
 
 
