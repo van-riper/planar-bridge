@@ -4,8 +4,8 @@ This reproduces the historical ``utils.status`` output (the old integer
 levels 0 to 6) exactly, now driven by typed events instead of
 ``(message, level)`` calls. It is the only place that knows about color and
 the timestamp: the engine emits plain facts and this reporter decides how
-they look. Events with no legacy output (RunStarted, SetSkipped, CardSkipped,
-CardFailed) are received and ignored, so the console output is unchanged.
+they look. Events with no console output (RunStarted, CardSkipped) are
+received and ignored.
 """
 
 from time import strftime
@@ -24,17 +24,19 @@ from ..events import (
     MetadataChecked,
     MetadataCheckStarted,
     RunFinished,
+    SetSkipped,
     SetStarted,
     VersionMismatch,
 )
 
 # Each category is the (color, label) pair from the old status() levels.
-_INFO = (Fore.CYAN, "INFO")
-_WARNING = (Fore.RED, "WARNING")
-_LOAD_SET = (Fore.GREEN, "LOAD SET")
-_NEW_CARD = (Fore.MAGENTA, "NEW CARD")
-_ENHANCED = (Fore.BLUE, "ENHANCED")
-_ERROR = (Fore.RED, "ERROR")
+_INFO = (str(Fore.CYAN), "INFO")
+_WARNING = (str(Fore.RED), "WARNING")
+_LOAD_SET = (str(Fore.GREEN), "LOAD SET")
+_SKIP_SET = (str(Fore.YELLOW), "SKIP SET")
+_NEW_CARD = (str(Fore.MAGENTA), "NEW CARD")
+_ENHANCED = (str(Fore.BLUE), "ENHANCED")
+_ERROR = (str(Fore.RED), "ERROR")
 
 
 class ConsoleReporter:  # pylint: disable=too-few-public-methods
@@ -60,6 +62,8 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
             self.__render(_INFO, f"Loading bulk data ({event.date})...")
         elif isinstance(event, SetStarted):
             self.__render(_LOAD_SET, self.__set_message(event))
+        elif isinstance(event, SetSkipped):
+            self.__render(_SKIP_SET, event.set_code)
         elif isinstance(event, CardDownloaded):
             self.__render(_NEW_CARD, self.__card_message(event))
         elif isinstance(event, CardUpgraded):
@@ -103,8 +107,8 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
     def __render(self, category: tuple[str, str], message: str) -> None:
 
         color, label = category
-        prefix = color + label + Fore.RESET + ":"
-        timestamp = "[" + Fore.CYAN + strftime("%H:%M:%S") + Fore.RESET + "]"
+        prefix = f"{color}{label}{Fore.RESET}:"
+        timestamp = f"[{Fore.CYAN}{strftime('%H:%M:%S')}{Fore.RESET}]"
 
         for line in message.splitlines():
             print(timestamp, prefix, line)

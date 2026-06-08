@@ -12,7 +12,7 @@ import pytest
 from planar_bridge import pipeline
 from planar_bridge.catalog.repository import CatalogRepository
 from planar_bridge.domain.metadata import MetadataInfo
-from planar_bridge.events import EventBus
+from planar_bridge.events import Event, EventBus, SetSkipped
 from planar_bridge.objects import SetObject
 from planar_bridge.paths import load_paths
 from planar_bridge.pipeline import PullContext
@@ -76,6 +76,34 @@ def test_pull_set_upserts_a_downloaded_card(
     assert stored is not None
     assert stored.is_high_resolution is True
     assert not repository.low_resolution_sets()
+
+
+def test_pull_sets_emits_set_skipped_for_an_omitted_set(
+    connection: sqlite3.Connection,
+    tmp_path: Path,
+    make_config: Callable[..., Any],
+) -> None:
+    """An omitted set emits SetSkipped instead of being silently skipped."""
+
+    repository = CatalogRepository(connection)
+    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
+    bus = EventBus()
+    received: list[Event] = []
+    bus.subscribe(received.append)
+    context = PullContext(repository, StubScryfall(), make_config(), bus)
+    set_entries: dict[str, Any] = {
+        "TST": {
+            "code": "TST",
+            "type": "expansion",
+            "isOnlineOnly": True,
+            "cards": [],
+            "tokens": [],
+        }
+    }
+
+    asyncio.run(pipeline._pull_sets(context, paths, set_entries))
+
+    assert SetSkipped(set_code="TST") in received
 
 
 def test_pull_meta_exits_when_up_to_date(tmp_path: Path) -> None:
