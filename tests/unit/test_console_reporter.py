@@ -148,7 +148,6 @@ def test_silent_events_print_nothing(capsys: CaptureFixture[str]) -> None:
     silent: tuple[Event, ...] = (
         RunStarted(),
         CardSkipped(set_code="LEA"),
-        CardFailed(set_code="LEA"),
     )
     for event in silent:
         assert emitted(capsys, event) == []
@@ -158,3 +157,11 @@ def test_set_skipped_is_a_skip_set_line(capsys: CaptureFixture[str]) -> None:
     """An omitted set renders a SKIP SET line naming the set."""
 
     assert emitted(capsys, SetSkipped(set_code="LEA")) == ["SKIP SET: LEA"]
+
+
+def test_card_failed_is_an_error_line(capsys: CaptureFixture[str]) -> None:
+    """A failed card download renders an ERROR line naming its set."""
+
+    assert emitted(capsys, CardFailed(set_code="LEA")) == [
+        "ERROR: Failed to download a card in LEA"
+    ]

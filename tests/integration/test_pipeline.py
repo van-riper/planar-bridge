@@ -12,7 +12,13 @@ import pytest
 from planar_bridge import pipeline
 from planar_bridge.catalog.repository import CatalogRepository
 from planar_bridge.domain.metadata import MetadataInfo
-from planar_bridge.events import Event, EventBus, SetSkipped
+from planar_bridge.events import (
+    CardFailed,
+    CardSkipped,
+    Event,
+    EventBus,
+    SetSkipped,
+)
 from planar_bridge.objects import SetObject
 from planar_bridge.paths import load_paths
 from planar_bridge.pipeline import PullContext
@@ -21,8 +27,13 @@ from planar_bridge.pipeline import PullContext
 class StubScryfall:
     """A Scryfall source double that reports a fixed status and bytes."""
 
-    def __init__(self, image_status: str = "highres_scan") -> None:
+    def __init__(
+        self,
+        image_status: str = "highres_scan",
+        download_result: bytes | None = b"image-bytes",
+    ) -> None:
         self._image_status = image_status
+        self._download_result = download_result
 
     async def image_status(self, scryfall_id: str) -> str:
         """Return the canned image status."""
@@ -31,10 +42,10 @@ class StubScryfall:
 
     async def download_image(
         self, scryfall_id: str, face: str | None = None
-    ) -> bytes:
-        """Return canned image bytes."""
+    ) -> bytes | None:
+        """Return the canned download result (bytes, or None for failure)."""
 
-        return b"image-bytes"
+        return self._download_result
 
 
 class StubMtgjson:
@@ -104,6 +115,66 @@ def test_pull_sets_emits_set_skipped_for_an_omitted_set(
     asyncio.run(pipeline._pull_sets(context, paths, set_entries))
 
     assert SetSkipped(set_code="TST") in received
+
+
+def test_pull_set_emits_card_failed_and_continues(
+    connection: sqlite3.Connection,
+    tmp_path: Path,
+    make_card: Callable[..., dict[str, Any]],
+    make_config: Callable[..., Any],
+) -> None:
+    """A failed download emits CardFailed, records nothing, and does not raise."""
+
+    repository = CatalogRepository(connection)
+    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
+    bus = EventBus()
+    received: list[Event] = []
+    bus.subscribe(received.append)
+    config = make_config()
+    set_dict: dict[str, Any] = {
+        "code": "TST",
+        "type": "expansion",
+        "cards": [make_card()],
+        "tokens": [],
+    }
+    set_obj = SetObject(set_dict, config, paths, bus)
+    context = PullContext(
+        repository, StubScryfall(download_result=None), config, bus
+    )
+
+    asyncio.run(pipeline.pull_set(set_obj, context, "1/1"))
+
+    assert CardFailed(set_code="TST") in received
+    assert repository.get_card("uuid-1") is None
+
+
+def test_pull_set_emits_card_skipped_for_a_bad_card(
+    connection: sqlite3.Connection,
+    tmp_path: Path,
+    make_card: Callable[..., dict[str, Any]],
+    make_config: Callable[..., Any],
+) -> None:
+    """A bad card emits CardSkipped and records nothing, without a download."""
+
+    repository = CatalogRepository(connection)
+    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
+    bus = EventBus()
+    received: list[Event] = []
+    bus.subscribe(received.append)
+    config = make_config()
+    set_dict: dict[str, Any] = {
+        "code": "TST",
+        "type": "expansion",
+        "cards": [make_card(isReprint=True)],
+        "tokens": [],
+    }
+    set_obj = SetObject(set_dict, config, paths, bus)
+    context = PullContext(repository, StubScryfall(), config, bus)
+
+    asyncio.run(pipeline.pull_set(set_obj, context, "1/1"))
+
+    assert CardSkipped(set_code="TST") in received
+    assert repository.get_card("uuid-1") is None
 
 
 def test_pull_meta_exits_when_up_to_date(tmp_path: Path) -> None:
