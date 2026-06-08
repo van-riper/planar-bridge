@@ -19,7 +19,6 @@ from planar_bridge.events import (
     CardUpgraded,
     Event,
     Interrupted,
-    MetadataChecked,
     MetadataCheckStarted,
     RunFinished,
     RunStarted,
@@ -47,19 +46,6 @@ def test_events_are_immutable() -> None:
     event = VersionMismatch(source_version="5.2.1")
     with raises(FrozenInstanceError):
         event.source_version = "9.9.9"  # type: ignore
-
-
-def test_metadata_checked_carries_the_comparison_verdict() -> None:
-    """MetadataChecked records the outdated and version-match flags."""
-
-    checked = MetadataChecked(
-        is_outdated=True,
-        version_matches_pinned=False,
-        source_version="5.2.1",
-    )
-    assert checked.is_outdated is True
-    assert checked.version_matches_pinned is False
-    assert checked.source_version == "5.2.1"
 
 
 def test_card_events_share_a_common_base() -> None:

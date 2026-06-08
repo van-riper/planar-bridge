@@ -22,7 +22,6 @@ from ..events import (
     CardUpgraded,
     Event,
     Interrupted,
-    MetadataChecked,
     MetadataCheckStarted,
     RunFinished,
     SetSkipped,
@@ -52,9 +51,6 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
 
         if isinstance(event, MetadataCheckStarted):
             self.__render(_INFO, "Comparing local & source files...")
-        elif isinstance(event, MetadataChecked):
-            if not event.is_outdated:
-                self.__render(_INFO, "Local data is up to date.")
         elif isinstance(event, VersionMismatch):
             self.__render(_WARNING, self.__version_message(event))
         elif isinstance(event, BulkDownloadStarted):

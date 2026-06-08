@@ -1,16 +1,15 @@
-"""The metadata phase: compare MTGJSON's build and refresh Meta.json."""
+"""The metadata phase: check the MTGJSON version and refresh Meta.json."""
 
 import json
 from collections.abc import Callable
 
 from .. import constants
-from ..domain.metadata import MetadataInfo, compare_metadata, normalize_version
-from ..events import (
-    EventBus,
-    MetadataCheckStarted,
-    MetadataChecked,
-    VersionMismatch,
+from ..domain.metadata import (
+    MetadataInfo,
+    normalize_version,
+    version_matches_pin,
 )
+from ..events import EventBus, MetadataCheckStarted, VersionMismatch
 from ..paths import DataPaths
 from ..sources.ports import MetadataSource
 
@@ -67,10 +66,12 @@ async def pull_meta(
     *,
     approve_version: Callable[[], bool] = _always_approve,
 ) -> None:
-    """Check MTGJSON's metadata and refresh Meta.json when outdated.
+    """Warn on a pinned-version drift and refresh Meta.json when missing.
 
-    Only the small Meta.json file is fetched here; the bulk database download
-    is the composition root's concern, run once the data is known to be stale.
+    The bulk files are not re-fetched on MTGJSON's daily rebuild; both Meta.json
+    and the bulk database (downloaded by the composition root) are pulled only
+    when absent. Detecting genuinely new data, such as a set release, is left to
+    a future phase. Only the small Meta.json is fetched here.
 
     Args:
         paths (DataPaths): The resolved data paths.
@@ -80,7 +81,6 @@ async def pull_meta(
             decide whether to proceed; the CLI supplies the prompt.
 
     Raises:
-        SystemExit: When local data is already up to date.
         RuntimeError: When a network fetch fails.
     """
 
@@ -90,23 +90,13 @@ async def pull_meta(
     if source_info is None:
         raise RuntimeError
 
-    comparison = compare_metadata(
-        _read_local_metadata(paths), source_info, constants.MTGJSON_VERS
-    )
-
-    bus.emit(
-        MetadataChecked(
-            is_outdated=comparison.is_outdated,
-            version_matches_pinned=comparison.version_matches_pinned,
-            source_version=source_info.version,
-        )
-    )
-
-    if not comparison.is_outdated:
-        raise SystemExit
-
-    if not comparison.version_matches_pinned:
+    local_info = _read_local_metadata(paths)
+    if not version_matches_pin(local_info, constants.MTGJSON_VERS):
         _resolve_version_drift(bus, source_info.version, approve_version)
+
+    # Fetch Meta.json only when it is missing; an existing copy is kept.
+    if paths.metadata_path.exists():
+        return
 
     content = await mtgjson_source.download_bulk("Meta")
     if content is None:

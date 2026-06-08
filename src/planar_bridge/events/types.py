@@ -26,23 +26,6 @@ class MetadataCheckStarted(Event):
 
 
 @dataclass(frozen=True, kw_only=True)
-class MetadataChecked(Event):
-    """The metadata comparison has finished.
-
-    Attributes:
-        is_outdated (bool): True when local data is missing or older than
-            the source, i.e. a bulk download is needed.
-        version_matches_pinned (bool): True when the source version equals
-            the pinned MTGJSON version the code was validated against.
-        source_version (str): The MTGJSON version reported by the source.
-    """
-
-    is_outdated: bool
-    version_matches_pinned: bool
-    source_version: str
-
-
-@dataclass(frozen=True, kw_only=True)
 class VersionMismatch(Event):
     """The source MTGJSON version differs from the pinned version.
 
