@@ -78,7 +78,6 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
             self._render(_ERROR, message)
 
     def _version_message(self, event: VersionMismatch) -> str:
-
         return (
             "MTGJSON has been updated to v"
             + event.source_version
@@ -87,7 +86,6 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         )
 
     def _set_message(self, event: SetStarted) -> str:
-
         run = self._progress(event.run_count, event.run_total, arrow=False)
 
         return (
@@ -96,7 +94,6 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         )
 
     def _card_message(self, event: CardEvent) -> str:
-
         run = self._progress(event.run_count, event.run_total, arrow=False)
         within = self._progress(event.set_count, event.set_total, arrow=True)
 
@@ -128,13 +125,11 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         return label
 
     def _remaining_message(self, event: RunFinished) -> str:
-
         return "Remaining sets with low res scans: " + (", ").join(
             event.low_resolution_set_codes
         )
 
     def _render(self, category: tuple[str, str], message: str) -> None:
-
         color, label = category
         prefix = f"{color}{label}{Fore.RESET}:"
         timestamp = f"[{Fore.CYAN}{strftime('%H:%M:%S')}{Fore.RESET}]"

@@ -68,7 +68,6 @@ class CardObject:  # pylint: disable=too-few-public-methods
 
         self.set_code: str = set_directory.name
         data_directory: Path = set_directory.parent
-
         image_directory: Path = set_directory
         if self.card.layout in layouts.LAYOUT_TOKEN:
             image_directory = set_directory / "tokens"

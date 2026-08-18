@@ -55,7 +55,6 @@ def parse_args(argv: Sequence[str] | None = None) -> RunOptions:
         does not matter on the command line.
     """
     parsed = build_parser().parse_args(argv)
-
     only_sets = frozenset(code.upper() for code in (parsed.set or ()))
 
     return RunOptions(

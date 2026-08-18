@@ -60,12 +60,10 @@ def load_config(
         ValueError: If the resolved card_language is not a recognized code.
     """
     file_data: dict[str, Any] = {}
-
     if config_path and config_path.exists():
         file_data = loads(config_path.read_text(encoding="UTF-8"))
 
     pull_reprints = bool(file_data.get("pull_reprints", DEFAULT_PULL_REPRINTS))
-
     language_code = language_override or str(
         file_data.get("card_language", DEFAULT_LANGUAGE_CODE)
     )

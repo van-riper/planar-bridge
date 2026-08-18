@@ -167,11 +167,9 @@ class CatalogRepository:
             "relative_path, updated_at FROM cards WHERE is_high_resolution = 0"
         )
         parameters: tuple[str, ...] = ()
-
         if set_code is not None:
             query += " AND set_code = ?"
             parameters = (set_code,)
-
         query += " ORDER BY filename"
 
         rows = self._connection.execute(query, parameters).fetchall()

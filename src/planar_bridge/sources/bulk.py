@@ -64,6 +64,7 @@ class BulkReader(BulkSource):
             BulkReader: A reader wrapping a read-only connection to that file.
         """
         connection = sqlite3.connect(f"file:{database_path}?mode=ro", uri=True)
+
         return cls(connection)
 
     def __enter__(self) -> "BulkReader":

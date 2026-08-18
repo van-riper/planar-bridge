@@ -57,7 +57,6 @@ def decide_download(
         )
 
     source_is_high_resolution = image_status == HIGH_RESOLUTION_STATUS
-
     already_stored = (
         source_is_high_resolution == local_is_high_resolution and image_exists
     )

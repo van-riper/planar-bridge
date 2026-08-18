@@ -9,11 +9,11 @@ import asyncio
 from collections.abc import Sequence
 from sys import version_info
 
+from planar_bridge.cli.args import parse_args
+from planar_bridge.cli.prompt import approval_for
 from planar_bridge.events import EventBus, Interrupted
 from planar_bridge.pipeline import pull_all
 from planar_bridge.reporters.console import ConsoleReporter
-from planar_bridge.cli.args import parse_args
-from planar_bridge.cli.prompt import approval_for
 
 if version_info.major != 3 or version_info.minor < 13:
     raise SystemExit("Python version must be at least 3.13")
@@ -37,8 +37,8 @@ def run(argv: Sequence[str] | None = None) -> None:
     """
     options = parse_args(argv)
     approve_version = approval_for(assume_yes=options.assume_yes)
-
     bus = EventBus()
+
     bus.subscribe(ConsoleReporter().handle)
 
     try:

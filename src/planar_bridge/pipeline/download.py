@@ -50,7 +50,6 @@ async def pull_card(
     """
     if card_obj.card.is_bad:
         return CardOutcome.SKIPPED, False
-
     if card_obj.local_state and card_obj.path_exists:
         return CardOutcome.SKIPPED, False
 
@@ -127,7 +126,6 @@ async def _handle_card(
 ) -> None:
     """Download one card and record and report its outcome."""
     set_obj.increase_progress()
-
     card_obj = CardObject(
         card_entry, context.repository, set_obj.set_directory, context.config
     )
@@ -140,7 +138,6 @@ async def _handle_card(
     if outcome is CardOutcome.SKIPPED:
         context.bus.emit(CardSkipped(set_code=set_code))
         return
-
     if outcome is CardOutcome.FAILED:
         context.bus.emit(CardFailed(set_code=set_code))
         return
@@ -150,7 +147,6 @@ async def _handle_card(
 
     run_count, run_total = run_position
     set_count, set_total = set_obj.progress
-
     card_event = CardUpgraded if card_obj.path_exists else CardDownloaded
     context.bus.emit(
         card_event(

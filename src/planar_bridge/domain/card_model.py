@@ -52,7 +52,6 @@ def card_face(layout: str, side: str | None) -> Face | None:
     """
     if layout not in layouts.LAYOUT_TWOSIDED:
         return None
-
     if side not in {"a", "b"}:
         message = f"unexpected side {side!r} for two-sided layout {layout!r}"
         raise ValueError(message)
@@ -83,7 +82,6 @@ def card_filename(uuid: str, layout: str, related_uuids: list[str]) -> str:
     """
     if layout not in layouts.LAYOUT_COMBINED:
         return uuid
-
     if not related_uuids:
         message = f"combined layout {layout!r} has no related UUIDs"
         raise ValueError(message)
@@ -113,7 +111,6 @@ def card_is_bad(card_data: CardData, config: AppConfig, layout: str) -> bool:
         True if the card should be skipped.
     """
     # TODO: all of these conditions should be configurable in the future
-
     is_reprint = card_data.get("isReprint") and not config.pull_reprints
     # TODO: needs a better implementation of supporting oracle languages
     is_language_bad = card_data["language"] not in [
@@ -155,18 +152,13 @@ def build_card_fields(card_data: CardData, config: AppConfig) -> CardFields:
     """
     uuid: str = card_data["uuid"]
     scryfall_id: str = card_data["identifiers"]["scryfallId"]
-
     layout: str = card_data["layout"]
-
     side: str | None = card_data.get("side")
     face = card_face(layout, side)
-
     name: str = card_data["name"]
     display_label = f"{uuid} | {name}"
-
     related_uuids: list[str] = card_data.get("otherFaceIds", [])
     filename = card_filename(uuid, layout, related_uuids)
-
     is_bad = card_is_bad(card_data, config, layout)
 
     return CardFields(

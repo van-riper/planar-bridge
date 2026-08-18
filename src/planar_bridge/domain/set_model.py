@@ -47,7 +47,6 @@ def set_is_omitted(set_data: SetData, config: AppConfig) -> bool:
         return False
 
     # TODO: all of these conditions should be configurable in the future
-
     is_type_exempt = str(set_data["type"]) in config.exempt_types
     is_set_exempt = set_code in config.exempt_sets
     is_foreign_only = bool(set_data.get("isForeignOnly"))

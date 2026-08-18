@@ -58,7 +58,6 @@ class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
         """Wait until the next request is allowed to proceed."""
         async with self._lock:
             now: float = self._clock()
-
             if (
                 self._next_available_time is None
                 or now >= self._next_available_time

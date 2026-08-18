@@ -57,10 +57,8 @@ class ScryfallSource(ImageSource):
             The image bytes, or None when the request fails.
         """
         url = f"{SCRYFALL_API_CARD_URL}{scryfall_id}?format=image"
-
         if face is not None:
             url += f"&face={face}"
-
         response = await self._client.get(url)
 
         if response is None:
