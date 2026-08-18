@@ -83,7 +83,7 @@ class RetryPolicy:
     jitter_fraction: float = 0.25
     random_source: Callable[[], float] = random
 
-    def backoff_for(self, attempt: int) -> float:
+    def backoff_seconds_for(self, attempt: int) -> float:
         """Return the backoff delay for the attempt that just failed.
 
         Args:
@@ -157,6 +157,6 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
                 pass
 
             if attempt + 1 < self._policy.max_attempts:
-                await self._sleeper(self._policy.backoff_for(attempt))
+                await self._sleeper(self._policy.backoff_seconds_for(attempt))
 
         return None
