@@ -71,8 +71,8 @@ async def pull_card(
         if content is None:
             return CardOutcome.FAILED, False
 
-        card_obj.img_path.parent.mkdir(parents=True, exist_ok=True)
-        card_obj.img_path.write_bytes(content)
+        card_obj.image_path.parent.mkdir(parents=True, exist_ok=True)
+        card_obj.image_path.write_bytes(content)
 
     return CardOutcome.DOWNLOADED, decision.source_is_high_resolution
 

@@ -73,9 +73,9 @@ class CardObject:  # pylint: disable=too-few-public-methods
         if self.card.layout in layouts.LAYOUT_TOKEN:
             image_directory = set_directory / "tokens"
 
-        self.img_path: Path = image_directory / (self.card.filename + ".jpg")
-        self.path_exists: bool = self.img_path.exists()
-        self.relative_path: str = self.img_path.relative_to(
+        self.image_path: Path = image_directory / (self.card.filename + ".jpg")
+        self.path_exists: bool = self.image_path.exists()
+        self.relative_path: str = self.image_path.relative_to(
             data_directory
         ).as_posix()
 
