@@ -6,9 +6,9 @@ domain.decisions and the file write to the pipeline. It replaces the
 network halves of the old CardObject.parse_source_state and download.
 """
 
-from ..aliases import Face
-from ..engine.client import AsyncHttpClient
-from .ports import ImageSource
+from planar_bridge.aliases import Face
+from planar_bridge.engine.client import AsyncHttpClient
+from planar_bridge.sources.ports import ImageSource
 
 SCRYFALL_API_CARD_URL = "https://api.scryfall.com/cards/"
 

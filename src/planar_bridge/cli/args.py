@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from collections.abc import Sequence
 
-from ..options import RunOptions
+from planar_bridge.options import RunOptions
 
 
 def build_parser() -> ArgumentParser:

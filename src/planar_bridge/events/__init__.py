@@ -1,7 +1,7 @@
 """Event taxonomy and bus for decoupling the engine from its reporters."""
 
-from .bus import EventBus, EventHandler
-from .types import (
+from planar_bridge.events.bus import EventBus, EventHandler
+from planar_bridge.events.types import (
     BulkDataLoaded,
     BulkDownloadStarted,
     CardDownloaded,

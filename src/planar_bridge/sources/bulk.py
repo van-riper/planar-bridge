@@ -12,8 +12,8 @@ AllPrintings.json path.
 import sqlite3
 from pathlib import Path
 
-from ..aliases import CardData, SetData
-from .ports import BulkSource
+from planar_bridge.aliases import CardData, SetData
+from planar_bridge.sources.ports import BulkSource
 
 # Cards and tokens are projected to the same column shape (tokens have no
 # isOnlineOnly column, so it is synthesized as NULL) so one row mapper serves

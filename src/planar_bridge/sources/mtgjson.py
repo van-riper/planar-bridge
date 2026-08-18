@@ -8,9 +8,9 @@ the network halves of the old MetaObject.__fetch_source and pull_bulk.
 
 import gzip
 
-from ..domain.metadata import MetadataInfo, normalize_version
-from ..engine.client import AsyncHttpClient
-from .ports import MetadataSource
+from planar_bridge.domain.metadata import MetadataInfo, normalize_version
+from planar_bridge.engine.client import AsyncHttpClient
+from planar_bridge.sources.ports import MetadataSource
 
 MTGJSON_API_URL = "https://mtgjson.com/api/v5/"
 

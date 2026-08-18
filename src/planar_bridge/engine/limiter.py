@@ -10,7 +10,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from time import monotonic
 
-from .ports import Limiter
+from planar_bridge.engine.ports import Limiter
 
 
 class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods

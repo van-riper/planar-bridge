@@ -7,9 +7,9 @@ this module performs I/O.
 
 from dataclasses import dataclass
 
-from ..aliases import CardData, Face
-from ..config.loader import AppConfig
-from . import layouts
+from planar_bridge.aliases import CardData, Face
+from planar_bridge.config.loader import AppConfig
+from planar_bridge.domain import layouts
 
 
 @dataclass(frozen=True, kw_only=True)

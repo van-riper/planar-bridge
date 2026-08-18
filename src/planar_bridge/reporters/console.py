@@ -12,8 +12,8 @@ from time import strftime
 
 from colorama import Fore
 
-from .. import constants
-from ..events import (
+from planar_bridge import constants
+from planar_bridge.events import (
     BulkDataLoaded,
     BulkDownloadStarted,
     CardDownloaded,

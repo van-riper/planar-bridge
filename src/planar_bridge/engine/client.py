@@ -14,7 +14,7 @@ from random import random
 
 import httpx
 
-from .ports import Limiter
+from planar_bridge.engine.ports import Limiter
 
 # HTTP statuses worth retrying: rate limiting and transient server faults.
 RETRYABLE_STATUS_CODES = frozenset({408, 429, 500, 502, 503, 504})

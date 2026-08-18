@@ -1,5 +1,5 @@
 """The command-line interface: argument parsing and the run entry point."""
 
-from .main import run
+from planar_bridge.cli.main import run
 
 __all__ = ["run"]

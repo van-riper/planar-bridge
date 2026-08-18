@@ -5,7 +5,7 @@ from pathlib import Path
 from tomllib import loads
 from typing import Any
 
-from .defaults import (
+from planar_bridge.config.defaults import (
     DEFAULT_FILTER_LISTS,
     DEFAULT_LANGUAGE_CODE,
     DEFAULT_PULL_REPRINTS,

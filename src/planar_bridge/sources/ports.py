@@ -9,8 +9,8 @@ its port.
 
 from typing import Protocol
 
-from ..aliases import Face, SetData
-from ..domain.metadata import MetadataInfo
+from planar_bridge.aliases import Face, SetData
+from planar_bridge.domain.metadata import MetadataInfo
 
 
 class ImageSource(Protocol):

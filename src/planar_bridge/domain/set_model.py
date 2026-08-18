@@ -7,8 +7,8 @@ Nothing in this module performs I/O.
 
 from dataclasses import dataclass
 
-from ..aliases import CardData, SetData
-from ..config.loader import AppConfig
+from planar_bridge.aliases import CardData, SetData
+from planar_bridge.config.loader import AppConfig
 
 
 @dataclass(frozen=True, kw_only=True)

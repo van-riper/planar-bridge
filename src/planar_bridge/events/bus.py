@@ -11,7 +11,7 @@ asyncio queue from inside a handler, without touching any publisher.
 
 from collections.abc import Callable
 
-from .types import Event
+from planar_bridge.events.types import Event
 
 type EventHandler = Callable[[Event], None]
 

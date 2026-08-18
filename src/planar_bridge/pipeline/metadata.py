@@ -3,15 +3,15 @@
 import json
 from collections.abc import Callable
 
-from .. import constants
-from ..domain.metadata import (
+from planar_bridge import constants
+from planar_bridge.domain.metadata import (
     MetadataInfo,
     normalize_version,
     version_matches_pin,
 )
-from ..events import EventBus, MetadataCheckStarted, VersionMismatch
-from ..paths import DataPaths
-from ..sources.ports import MetadataSource
+from planar_bridge.events import EventBus, MetadataCheckStarted, VersionMismatch
+from planar_bridge.paths import DataPaths
+from planar_bridge.sources.ports import MetadataSource
 
 
 def _read_local_metadata(paths: DataPaths) -> MetadataInfo | None:
