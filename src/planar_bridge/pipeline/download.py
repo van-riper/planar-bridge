@@ -16,8 +16,8 @@ from planar_bridge.events import (
     SetStarted,
 )
 from planar_bridge.paths import DataPaths
-from planar_bridge.sources.ports import BulkSource, ImageSource
 from planar_bridge.pipeline.context import CardObject, PullContext, SetObject
+from planar_bridge.sources.ports import BulkSource, ImageSource
 
 
 class CardOutcome(Enum):
@@ -61,7 +61,6 @@ async def pull_card(
     decision = decide_download(
         image_status, card_obj.local_state, card_obj.path_exists
     )
-
     if not decision.should_download:
         return CardOutcome.SKIPPED, False
 
