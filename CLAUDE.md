@@ -23,10 +23,11 @@ uv sync
 uv run planar-bridge
 uv run python -m planar_bridge
 
-# Test, lint, format
+# Test, lint, format, type-check
 uv run pytest
-uv run pylint src/planar_bridge
-uv run black src tests
+uv run ruff check src tests
+uv run ruff format src tests
+uv run ty check
 ```
 
 The test suite currently holds only an import smoke test; real coverage arrives with the

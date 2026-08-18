@@ -141,8 +141,9 @@ Planar Bridge is developed with [uv](https://docs.astral.sh/uv/). After
 
 ```sh
 $ uv run pytest                    # run the test suite
-$ uv run pylint src/planar_bridge  # lint
-$ uv run black src tests           # format
+$ uv run ruff check src tests      # lint
+$ uv run ruff format src tests     # format
+$ uv run ty check                  # type-check
 ```
 
 ## Configuration

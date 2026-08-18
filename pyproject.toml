@@ -22,20 +22,14 @@ packages = ["src/planar_bridge"]
 
 [dependency-groups]
 dev = [
-    "black>=24",
-    "pylint>=3",
     "pytest>=8",
     "pytest-cov>=7",
+    "ruff>=0.16",
+    "ty>=0.0.72",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
-[tool.black]
-line-length = 80
-
-[tool.pylint.format]
-max-line-length = 80
 
 [tool.ruff]
 extend = "ruff.pythonicator.toml"
