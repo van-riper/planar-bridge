@@ -7,10 +7,10 @@ serial downloader and is load-bearing for honoring Scryfall's rate limit.
 """
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from time import monotonic
 
-from planar_bridge.engine.ports import Limiter
+from planar_bridge.engine.ports import Limiter, Sleeper
 
 
 class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
@@ -27,7 +27,7 @@ class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
         max_requests_per_second: float,
         *,
         clock: Callable[[], float] = monotonic,
-        sleeper: Callable[[float], Awaitable[None]] = asyncio.sleep,
+        sleeper: Sleeper = asyncio.sleep,
     ) -> None:
         """Build a limiter for a maximum request rate.
 
@@ -50,7 +50,7 @@ class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
 
         self._minimum_interval_seconds: float = 1.0 / max_requests_per_second
         self._clock: Callable[[], float] = clock
-        self._sleeper: Callable[[float], Awaitable[None]] = sleeper
+        self._sleeper: Sleeper = sleeper
         self._lock: asyncio.Lock = asyncio.Lock()
         self._next_available_time: float | None = None
 

@@ -1,7 +1,6 @@
 """Integration tests for the async HTTP client and its retry policy."""
 
 import asyncio
-from collections.abc import Awaitable, Callable
 
 import httpx
 import pytest
@@ -12,6 +11,7 @@ from planar_bridge.engine.client import (
     backoff_seconds,
     is_retryable_status,
 )
+from planar_bridge.engine.ports import Sleeper
 
 URL = "https://example.test/resource"
 
@@ -45,7 +45,7 @@ def build_client(
     items: list[QueueItem],
     *,
     limiter: RecordingLimiter | None = None,
-    sleeper: Callable[[float], Awaitable[None]] | None = None,
+    sleeper: Sleeper | None = None,
     policy: RetryPolicy | None = None,
 ) -> tuple[AsyncHttpClient, httpx.AsyncClient, dict[str, int]]:
     """Build an AsyncHttpClient over a scripted MockTransport."""
@@ -119,9 +119,9 @@ def test_backoff_adds_jitter_above_the_capped_delay() -> None:
 
 def test_get_returns_the_response_on_success() -> None:
     """A 200 response is returned to the caller."""
-    client, httpx_client, calls = build_client(
-        [httpx.Response(200, content=b"ok")]
-    )
+    client, httpx_client, calls = build_client([
+        httpx.Response(200, content=b"ok")
+    ])
 
     async def scenario() -> httpx.Response | None:
         response = await client.get(URL)
@@ -193,9 +193,10 @@ def test_get_retries_a_retryable_status_then_succeeds() -> None:
 
 def test_get_retries_a_transport_error_then_succeeds() -> None:
     """A dropped connection is treated as retryable."""
-    client, httpx_client, calls = build_client(
-        [httpx.ConnectError("boom"), httpx.Response(200, content=b"ok")]
-    )
+    client, httpx_client, calls = build_client([
+        httpx.ConnectError("boom"),
+        httpx.Response(200, content=b"ok"),
+    ])
 
     async def scenario() -> httpx.Response | None:
         response = await client.get(URL)

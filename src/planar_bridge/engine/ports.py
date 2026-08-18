@@ -6,7 +6,10 @@ satisfies it, including the recording double used in tests. RateLimiter
 implements it by explicit subclassing so the type checker confirms the match.
 """
 
+from collections.abc import Awaitable, Callable
 from typing import Protocol
+
+type Sleeper = Callable[[float], Awaitable[None]]
 
 
 class Limiter(Protocol):  # pylint: disable=too-few-public-methods

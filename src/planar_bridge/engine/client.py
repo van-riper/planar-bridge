@@ -8,13 +8,13 @@ every error with a fixed escalating sleep.
 """
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from dataclasses import dataclass
 from random import random
 
 import httpx
 
-from planar_bridge.engine.ports import Limiter
+from planar_bridge.engine.ports import Limiter, Sleeper
 
 # HTTP statuses worth retrying: rate limiting and transient server faults.
 RETRYABLE_STATUS_CODES = frozenset({408, 429, 500, 502, 503, 504})
@@ -110,7 +110,7 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
         limiter: Limiter,
         *,
         policy: RetryPolicy = RetryPolicy(),
-        sleeper: Callable[[float], Awaitable[None]] = asyncio.sleep,
+        sleeper: Sleeper = asyncio.sleep,
     ) -> None:
         """Build a client over an httpx session and a shared limiter.
 
