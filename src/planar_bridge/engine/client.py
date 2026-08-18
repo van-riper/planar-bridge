@@ -69,12 +69,12 @@ class RetryPolicy:
     """Immutable retry knobs for the async client.
 
     Attributes:
-        max_attempts (int): Total tries before giving up.
-        base_seconds (float): First-retry backoff, before doubling.
-        maximum_seconds (float): Ceiling for the pre-jitter backoff.
-        jitter_fraction (float): Fraction of the backoff added as jitter.
-        random_source (Callable[[], float]): Returns a value in ``[0, 1)``,
-            injected for deterministic testing of the jitter.
+        max_attempts: Total tries before giving up.
+        base_seconds: First-retry backoff, before doubling.
+        maximum_seconds: Ceiling for the pre-jitter backoff.
+        jitter_fraction: Fraction of the backoff added as jitter.
+        random_source: Returns a value in ``[0, 1)``, injected for
+            deterministic testing of the jitter.
     """
 
     max_attempts: int = 4
@@ -143,7 +143,6 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
             request fails fatally or exhausts its retries.
         """
         for attempt in range(self._policy.max_attempts):
-
             await self._limiter.acquire()
 
             try:
