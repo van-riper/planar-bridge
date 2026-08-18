@@ -47,14 +47,14 @@ def load_config(
     language name, and freezes the exempt/pardon collections.
 
     Args:
-        config_path (Path | None): Path to a user config.toml, or None.
-            A missing or None path falls back to the defaults alone.
-        language_override (str | None): A language code that, when given,
-            takes precedence over the file value and the default (the CLI's
+        config_path: Path to a user config.toml, or None. A missing or None
+            path falls back to the defaults alone.
+        language_override: A language code that, when given, takes
+            precedence over the file value and the default (the CLI's
             ``--language``).
 
     Returns:
-        AppConfig: The resolved, immutable configuration.
+        The resolved, immutable configuration.
 
     Raises:
         ValueError: If the resolved ``card_language`` is not a recognized code.

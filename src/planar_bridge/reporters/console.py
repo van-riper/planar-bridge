@@ -46,7 +46,7 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         """Render one event to stdout, or ignore it if it has no output.
 
         Args:
-            event (Event): The event to render.
+            event: The event to render.
         """
         if isinstance(event, MetadataCheckStarted):
             self.__render(_INFO, "Comparing local & source files...")
@@ -97,10 +97,7 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         run = self.__progress(event.run_count, event.run_total, False)
         within = self.__progress(event.set_count, event.set_total, True)
 
-        return (
-            f"{run} {event.set_code.ljust(6)} "
-            f"{within} {event.display_label}"
-        )
+        return f"{run} {event.set_code.ljust(6)} {within} {event.display_label}"
 
     def __progress(self, count: int, total: int, arrow: bool) -> str:
         """Format a count over a total as a padded percentage label.

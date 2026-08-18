@@ -42,8 +42,8 @@ class CatalogRepository:
         """Wrap an open connection, applying the schema so the tables exist.
 
         Args:
-            connection (sqlite3.Connection): An open connection to the catalog
-                database (a file path in production, ``:memory:`` in tests).
+            connection: An open connection to the catalog database (a file
+                path in production, ``:memory:`` in tests).
         """
         self._connection = connection
         self._connection.row_factory = sqlite3.Row
@@ -57,7 +57,7 @@ class CatalogRepository:
         get back a ready repository without touching the database driver.
 
         Args:
-            database_path (Path): Where the SQLite catalog file lives.
+            database_path: Where the SQLite catalog file lives.
 
         Returns:
             CatalogRepository: A repository wrapping a connection to that file.
@@ -76,10 +76,10 @@ class CatalogRepository:
         """Return the stored row for a filename, or None when absent.
 
         Args:
-            filename (str): The image filename stem to look up.
+            filename: The image filename stem to look up.
 
         Returns:
-            CardRow | None: The stored row, or None when no such card exists.
+            The stored row, or None when no such card exists.
         """
         row = self._connection.execute(
             "SELECT filename, set_code, uuid, is_high_resolution, "
@@ -93,7 +93,7 @@ class CatalogRepository:
         """Insert or replace a card row, committing immediately.
 
         Args:
-            row (CardRow): The card state to persist.
+            row: The card state to persist.
         """
         self._connection.execute(
             "INSERT INTO cards (filename, set_code, uuid, is_high_resolution, "
@@ -121,10 +121,10 @@ class CatalogRepository:
         ``StatesObject.is_all_highres`` on an empty map.
 
         Args:
-            set_code (str): The set code to check.
+            set_code: The set code to check.
 
         Returns:
-            bool: True when the set has no low-resolution card.
+            True when the set has no low-resolution card.
         """
         row = self._connection.execute(
             "SELECT NOT EXISTS(SELECT 1 FROM cards "
@@ -138,7 +138,7 @@ class CatalogRepository:
         """Return the set codes that still hold at least one low-res card.
 
         Returns:
-            tuple[str, ...]: The distinct set codes needing more work.
+            The distinct set codes needing more work.
         """
         rows = self._connection.execute(
             "SELECT DISTINCT set_code FROM cards "
@@ -153,10 +153,10 @@ class CatalogRepository:
         """Return the low-resolution cards, optionally limited to one set.
 
         Args:
-            set_code (str | None): When given, restrict the result to this set.
+            set_code: When given, restrict the result to this set.
 
         Returns:
-            list[CardRow]: The matching low-resolution card rows.
+            The matching low-resolution card rows.
         """
         query = (
             "SELECT filename, set_code, uuid, is_high_resolution, "

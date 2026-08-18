@@ -71,11 +71,11 @@ async def pull_meta(
     a future phase. Only the small Meta.json is fetched here.
 
     Args:
-        paths (DataPaths): The resolved data paths.
-        mtgjson_source (MetadataSource): The MTGJSON metadata source.
-        bus (EventBus): The event bus for metadata events.
-        approve_version (Callable[[], bool]): Consulted on a version drift to
-            decide whether to proceed; the CLI supplies the prompt.
+        paths: The resolved data paths.
+        mtgjson_source: The MTGJSON metadata source.
+        bus: The event bus for metadata events.
+        approve_version: Consulted on a version drift to decide whether
+            to proceed; the CLI supplies the prompt.
 
     Raises:
         RuntimeError: When a network fetch fails.

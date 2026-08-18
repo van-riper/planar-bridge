@@ -39,13 +39,13 @@ def card_face(layout: str, side: str | None) -> Face | None:
     """Resolve which face of a two-sided card this entry represents.
 
     Args:
-        layout (str): MTGJSON layout string.
-        side (str | None): MTGJSON "side" value. For a two-sided layout it
-            must be "a" or "b"; None is expected only for other layouts.
+        layout: MTGJSON layout string.
+        side: MTGJSON "side" value. For a two-sided layout it must be "a"
+            or "b"; None is expected only for other layouts.
 
     Returns:
-        Face | None: "front" for side "a" and "back" for side "b" on two-sided
-        layouts, or None for any other layout.
+        "front" for side "a" and "back" for side "b" on two-sided layouts,
+        or None for any other layout.
 
     Raises:
         ValueError: If a two-sided layout's side is neither "a" nor "b".
@@ -69,14 +69,14 @@ def card_filename(uuid: str, layout: str, related_uuids: list[str]) -> str:
     sorted order. All other cards use their own UUID.
 
     Args:
-        uuid (str): The card's own MTGJSON UUID.
-        layout (str): MTGJSON layout string.
-        related_uuids (list[str]): UUIDs of the card's other faces. Must be
-            non-empty for a combined layout; ignored for any other layout.
-            The list is not mutated.
+        uuid: The card's own MTGJSON UUID.
+        layout: MTGJSON layout string.
+        related_uuids: UUIDs of the card's other faces. Must be non-empty
+            for a combined layout; ignored for any other layout. The list
+            is not mutated.
 
     Returns:
-        str: The filename stem (no extension).
+        The filename stem (no extension).
 
     Raises:
         ValueError: If a combined layout has no related UUIDs.
@@ -104,13 +104,13 @@ def card_is_bad(card_data: CardData, config: AppConfig, layout: str) -> bool:
     unsupported; it is a funny card; or it carries an exempt promo type.
 
     Args:
-        card_data (CardData): One MTGJSON card entry.
-        config (AppConfig): Resolved filtering configuration.
-        layout (str): MTGJSON layout string, checked against the unsupported
+        card_data: One MTGJSON card entry.
+        config: Resolved filtering configuration.
+        layout: MTGJSON layout string, checked against the unsupported
             layout set.
 
     Returns:
-        bool: True if the card should be skipped.
+        True if the card should be skipped.
     """
     # TODO: all of these conditions should be configurable in the future
 
@@ -152,11 +152,11 @@ def build_card_fields(card_data: CardData, config: AppConfig) -> CardFields:
     """Assemble the derived CardFields for one MTGJSON card entry.
 
     Args:
-        card_data (CardData): One MTGJSON card entry.
-        config (AppConfig): Resolved filtering configuration.
+        card_data: One MTGJSON card entry.
+        config: Resolved filtering configuration.
 
     Returns:
-        CardFields: The immutable derived facts for the card.
+        The immutable derived facts for the card.
     """
     uuid: str = card_data["uuid"]
     scryfall_id: str = card_data["identifiers"]["scryfallId"]

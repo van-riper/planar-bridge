@@ -55,11 +55,11 @@ class CardObject:  # pylint: disable=too-few-public-methods
         """Derive a card's facts, paths, and catalog state.
 
         Args:
-            card_dict (CardData): One MTGJSON card entry.
-            repository (CatalogRepository): The catalog, queried for the card's
-                recorded resolution.
-            set_directory (Path): The set's image directory.
-            config (AppConfig): Resolved filtering configuration.
+            card_dict: One MTGJSON card entry.
+            repository: The catalog, queried for the card's recorded
+                resolution.
+            set_directory: The set's image directory.
+            config: Resolved filtering configuration.
         """
         self.card: CardFields = build_card_fields(card_dict, config)
 
@@ -85,10 +85,10 @@ class CardObject:  # pylint: disable=too-few-public-methods
         """Build the catalog row recording this card's stored resolution.
 
         Args:
-            is_high_resolution (bool): Whether the stored scan is high-res.
+            is_high_resolution: Whether the stored scan is high-res.
 
         Returns:
-            CardRow: The row to persist for this card.
+            The row to persist for this card.
         """
         return CardRow(
             filename=self.card.filename,
@@ -112,9 +112,9 @@ class SetObject:  # pylint: disable=too-few-public-methods
         """Derive a set's record, image directory, and progress counter.
 
         Args:
-            set_dict (SetData): One MTGJSON set entry.
-            config (AppConfig): Resolved filtering configuration.
-            paths (DataPaths): The resolved data paths.
+            set_dict: One MTGJSON set entry.
+            config: Resolved filtering configuration.
+            paths: The resolved data paths.
         """
         self.record: SetRecord = build_set_record(set_dict, config)
         self.set_directory: Path = paths.data_directory / self.record.set_code

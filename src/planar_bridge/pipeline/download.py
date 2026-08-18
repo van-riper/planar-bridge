@@ -37,15 +37,15 @@ async def pull_card(
     """Download one card's image when needed, writing it to disk.
 
     Args:
-        card_obj (CardObject): The card's facts, paths, and stored state.
-        scryfall_source (ImageSource): The card-image source.
-        dry_run (bool): When True, stop once a download is decided on; report
+        card_obj: The card's facts, paths, and stored state.
+        scryfall_source: The card-image source.
+        dry_run: When True, stop once a download is decided on; report
             DOWNLOADED without fetching the bytes or writing the file.
 
     Returns:
-        tuple[CardOutcome, bool]: The outcome, plus whether the stored scan is
-        high-resolution (meaningful only when the outcome is DOWNLOADED). A
-        network failure yields FAILED rather than raising, so one bad card does
+        The outcome, plus whether the stored scan is high-resolution
+        (meaningful only when the outcome is DOWNLOADED). A network
+        failure yields FAILED rather than raising, so one bad card does
         not stop the run.
     """
     if card_obj.card.is_bad:
@@ -86,10 +86,10 @@ async def pull_set(
     """Download every card in a set concurrently under a bounded semaphore.
 
     Args:
-        set_obj (SetObject): The set's record, directory, and progress.
-        context (PullContext): The run-wide dependencies.
-        run_position (tuple[int, int]): This set's (count, total) position in
-            the run; the reporter formats it into the run-level progress label.
+        set_obj: The set's record, directory, and progress.
+        context: The run-wide dependencies.
+        run_position: This set's (count, total) position in the run; the
+            reporter formats it into the run-level progress label.
     """
     run_count, run_total = run_position
 
@@ -194,7 +194,6 @@ async def _pull_sets(
     set_total = len(selected)
 
     for set_count, set_code in enumerate(selected, 1):
-
         set_obj = SetObject(bulk.load_set(set_code), context.config, paths)
 
         if set_obj.record.is_omitted:

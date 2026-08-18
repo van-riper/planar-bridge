@@ -24,11 +24,11 @@ def normalize_version(version: str) -> str:
     """Strip any build suffix from a version string.
 
     Args:
-        version (str): A raw MTGJSON version string, possibly carrying a
+        version: A raw MTGJSON version string, possibly carrying a
             ``+<build>`` suffix.
 
     Returns:
-        str: The version with any build suffix removed.
+        The version with any build suffix removed.
     """
     return version.split("+", maxsplit=1)[0]
 
@@ -45,13 +45,12 @@ def version_matches_pin(
     the code is validated against. Vacuously true when no local data is present.
 
     Args:
-        local (MetadataInfo | None): The local metadata, or None when no local
-            data is present.
-        pinned_version (str): The version the code is pinned to. Assumed
+        local: The local metadata, or None when no local data is present.
+        pinned_version: The version the code is pinned to. Assumed
             already normalized.
 
     Returns:
-        bool: True when there is no local data, or the local version equals the
+        True when there is no local data, or the local version equals the
         pinned version.
     """
     return local is None or local.version == pinned_version

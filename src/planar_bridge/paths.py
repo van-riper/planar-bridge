@@ -34,10 +34,10 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
     sub-paths under it. Does no filesystem work.
 
     Args:
-        environment (Mapping[str, str]): Environment variables to read.
+        environment: Environment variables to read.
 
     Returns:
-        DataPaths: The immutable set of absolute locations.
+        The immutable set of absolute locations.
     """
     # TODO: rename PLANAR_BRIDGE_DIR to PLANAR_BRIDGE_PATH
     # Assign if PLANAR_BRIDGE_DIR is set
@@ -45,7 +45,6 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
 
     # Fallback to system data folders otherwise
     if data_directory is None:
-
         match platform:
             case "linux" | "darwin":
                 base_path = environment["HOME"] + "/.local/share"
@@ -74,7 +73,7 @@ def ensure_directories_exist(paths: DataPaths) -> None:
     """Create the data and mtgjson directories if they do not exist.
 
     Args:
-        paths (DataPaths): The absolute locations to create.
+        paths: The absolute locations to create.
     """
     paths.data_directory.mkdir(parents=True, exist_ok=True)
     paths.mtgjson_directory.mkdir(exist_ok=True)

@@ -29,8 +29,8 @@ class MtgjsonSource(MetadataSource):
         """Build the source over an async HTTP client.
 
         Args:
-            client (AsyncHttpClient): The rate-limited client used for every
-                MTGJSON request.
+            client: The rate-limited client used for every MTGJSON
+                request.
         """
         self._client = client
 
@@ -38,8 +38,8 @@ class MtgjsonSource(MetadataSource):
         """Fetch MTGJSON's current build metadata.
 
         Returns:
-            MetadataInfo | None: The remote build date and normalized version,
-            or None when the request fails.
+            The remote build date and normalized version, or None when
+            the request fails.
         """
         url = f"{MTGJSON_API_URL}Meta.json"
         response = await self._client.get(url)
@@ -58,12 +58,12 @@ class MtgjsonSource(MetadataSource):
         """Download and decompress one MTGJSON bulk file.
 
         Args:
-            target (str): The bulk file key, such as ``"AllPrintings"`` or
+            target: The bulk file key, such as ``"AllPrintings"`` or
                 ``"Meta"``; its remote filename is resolved via BULK_TARGETS.
 
         Returns:
-            bytes | None: The decompressed bytes (SQLite for AllPrintings, JSON
-            for Meta), or None when the request fails.
+            The decompressed bytes (SQLite for AllPrintings, JSON for
+            Meta), or None when the request fails.
         """
         url = f"{MTGJSON_API_URL}{BULK_TARGETS[target]}.gz"
         response = await self._client.get(url)

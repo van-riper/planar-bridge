@@ -27,7 +27,7 @@ class EventBus:
         """Register a handler to receive every subsequently emitted event.
 
         Args:
-            handler (EventHandler): A callable invoked with each emitted event.
+            handler: A callable invoked with each emitted event.
         """
         self._handlers.append(handler)
 
@@ -35,7 +35,7 @@ class EventBus:
         """Deliver one event to every registered handler, in order.
 
         Args:
-            event (Event): The event to deliver to all handlers.
+            event: The event to deliver to all handlers.
         """
         for handler in self._handlers:
             handler(event)

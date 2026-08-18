@@ -32,12 +32,12 @@ class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
         """Build a limiter for a maximum request rate.
 
         Args:
-            max_requests_per_second (float): The throughput ceiling. Must be
+            max_requests_per_second: The throughput ceiling. Must be
                 positive.
-            clock (Callable[[], float]): Returns the current time in seconds.
-                Injected for deterministic testing.
-            sleeper (Callable[[float], Awaitable[None]]): Awaitable sleep for a
-                number of seconds. Injected for deterministic testing.
+            clock: Returns the current time in seconds. Injected for
+                deterministic testing.
+            sleeper: Awaitable sleep for a number of seconds. Injected for
+                deterministic testing.
 
         Raises:
             ValueError: If ``max_requests_per_second`` is not positive.

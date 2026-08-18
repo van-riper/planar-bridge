@@ -30,8 +30,7 @@ def run(argv: Sequence[str] | None = None) -> None:
     the event bus. Progress is already persisted per card, so nothing is lost.
 
     Args:
-        argv (Sequence[str] | None): The argument vector, or None to read
-            ``sys.argv``.
+        argv: The argument vector, or None to read ``sys.argv``.
 
     Raises:
         SystemExit: With the conventional interrupt code when Ctrl-C is caught.

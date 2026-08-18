@@ -44,8 +44,8 @@ class BulkReader(BulkSource):
         """Wrap an open connection to the bulk database.
 
         Args:
-            connection (sqlite3.Connection): An open connection to the bulk
-                database (a file in production, ``:memory:`` in tests).
+            connection: An open connection to the bulk database (a file in
+                production, ``:memory:`` in tests).
         """
         self._connection = connection
         self._connection.row_factory = sqlite3.Row
@@ -58,7 +58,7 @@ class BulkReader(BulkSource):
         accidental mutation; the reader only ever queries it.
 
         Args:
-            database_path (Path): Where the ``AllPrintings.sqlite`` file lives.
+            database_path: Where the ``AllPrintings.sqlite`` file lives.
 
         Returns:
             BulkReader: A reader wrapping a read-only connection to that file.
@@ -81,7 +81,7 @@ class BulkReader(BulkSource):
         load each set on demand, holding only one set's cards in memory.
 
         Returns:
-            tuple[str, ...]: All set codes, ascending.
+            All set codes, ascending.
         """
         rows = self._connection.execute(
             "SELECT code FROM sets ORDER BY code"
@@ -93,11 +93,12 @@ class BulkReader(BulkSource):
         """Load one set as a JSON-shaped dictionary the domain can consume.
 
         Args:
-            set_code (str): The set code to load.
+            set_code: The set code to load.
 
         Returns:
-            SetData: The set's omit-decision fields plus its ``cards`` and
-            ``tokens`` lists, each card carrying a nested ``identifiers`` dict.
+            The set's omit-decision fields plus its ``cards`` and
+            ``tokens`` lists, each card carrying a nested ``identifiers``
+            dict.
         """
         set_row = self._connection.execute(
             "SELECT code, type, isOnlineOnly, isForeignOnly "

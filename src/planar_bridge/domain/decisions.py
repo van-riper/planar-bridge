@@ -43,13 +43,13 @@ def decide_download(
     resolution-upgrade case and downloads.
 
     Args:
-        image_status (str): Scryfall's ``image_status`` for the card.
-        local_is_high_resolution (bool | None): The recorded resolution of the
-            stored scan, or None when no scan has been recorded.
-        image_exists (bool): True when the image file is present on disk.
+        image_status: Scryfall's ``image_status`` for the card.
+        local_is_high_resolution: The recorded resolution of the stored
+            scan, or None when no scan has been recorded.
+        image_exists: True when the image file is present on disk.
 
     Returns:
-        DownloadDecision: The immutable verdict for the card.
+        The immutable verdict for the card.
     """
     if image_status in PLACEHOLDER_STATUSES:
         return DownloadDecision(

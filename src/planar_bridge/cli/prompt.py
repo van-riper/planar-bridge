@@ -33,7 +33,7 @@ def confirm_version_drift() -> bool:
     """Ask the user whether to proceed past an MTGJSON version drift.
 
     Returns:
-        bool: True to proceed, False to abort.
+        True to proceed, False to abort.
     """
     return _ask_yes_no("Do you want to proceed?")
 
@@ -42,11 +42,11 @@ def approval_for(*, assume_yes: bool) -> Callable[[], bool]:
     """Choose the version-drift approval for a run.
 
     Args:
-        assume_yes (bool): True when ``--assume-yes`` was given.
+        assume_yes: True when ``--assume-yes`` was given.
 
     Returns:
-        Callable[[], bool]: An auto-approval that proceeds without prompting
-        under ``--assume-yes``, otherwise the interactive prompt.
+        An auto-approval that proceeds without prompting under
+        ``--assume-yes``, otherwise the interactive prompt.
     """
     if assume_yes:
         return lambda: True

@@ -35,11 +35,11 @@ def set_is_omitted(set_data: SetData, config: AppConfig) -> bool:
     and is never omitted.
 
     Args:
-        set_data (SetData): One MTGJSON set entry.
-        config (AppConfig): Resolved filtering configuration.
+        set_data: One MTGJSON set entry.
+        config: Resolved filtering configuration.
 
     Returns:
-        bool: True if the set should be skipped.
+        True if the set should be skipped.
     """
     set_code: str = set_data["code"]
 
@@ -68,10 +68,10 @@ def merge_card_entries(set_data: SetData) -> list[CardData]:
     """Combine a set's cards and tokens into one ordered list.
 
     Args:
-        set_data (SetData): One MTGJSON set entry.
+        set_data: One MTGJSON set entry.
 
     Returns:
-        list[CardData]: The set's cards followed by its tokens.
+        The set's cards followed by its tokens.
     """
     set_cards: list[CardData] = set_data["cards"]
     set_tokens: list[CardData] = set_data["tokens"]
@@ -83,11 +83,11 @@ def build_set_record(set_data: SetData, config: AppConfig) -> SetRecord:
     """Assemble the derived SetRecord for one MTGJSON set entry.
 
     Args:
-        set_data (SetData): One MTGJSON set entry.
-        config (AppConfig): Resolved filtering configuration.
+        set_data: One MTGJSON set entry.
+        config: Resolved filtering configuration.
 
     Returns:
-        SetRecord: The immutable derived facts for the set.
+        The immutable derived facts for the set.
     """
     return SetRecord(
         set_code=set_data["code"],

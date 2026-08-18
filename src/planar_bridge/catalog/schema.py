@@ -31,8 +31,7 @@ def apply_schema(connection: sqlite3.Connection) -> None:
     change can detect and upgrade an older database.
 
     Args:
-        connection (sqlite3.Connection): An open connection to the catalog
-            database.
+        connection: An open connection to the catalog database.
     """
     connection.executescript(_SCHEMA)
     connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")

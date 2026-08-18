@@ -63,11 +63,11 @@ async def pull_all(
     """Run the whole pull: metadata check, then every set's downloads.
 
     Args:
-        bus (EventBus): The event bus, already wired to its reporters by the
+        bus: The event bus, already wired to its reporters by the
             caller, that the run emits progress and outcome events on.
-        options (RunOptions): The per-run switches from the command line.
-        approve_version (Callable[[], bool]): Consulted on a version drift; the
-            CLI builds it from ``--assume-yes`` and the interactive prompt.
+        options: The per-run switches from the command line.
+        approve_version: Consulted on a version drift; the CLI builds it
+            from ``--assume-yes`` and the interactive prompt.
     """
     paths: DataPaths = load_paths(environ)
     ensure_directories_exist(paths)
@@ -78,7 +78,6 @@ async def pull_all(
         timeout=REQUEST_TIMEOUT_SECONDS,
         headers=constants.HTTP_HEADERS,
     ) as http_client:
-
         client = AsyncHttpClient(
             http_client, RateLimiter(constants.MAX_REQUESTS_PER_SECOND)
         )
