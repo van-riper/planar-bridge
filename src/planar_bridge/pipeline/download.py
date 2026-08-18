@@ -164,7 +164,7 @@ def _selected_codes(
     set_codes: tuple[str, ...],
     only_sets: frozenset[str],
 ) -> list[str]:
-    """Return the set codes to process, restricted by ``--set`` when given.
+    """Return the set codes to process, restricted by --set when given.
 
     Args:
         set_codes (tuple[str, ...]): Every set code, in the bulk reader's order.

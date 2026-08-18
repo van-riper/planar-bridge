@@ -43,7 +43,7 @@ def decide_download(
     resolution-upgrade case and downloads.
 
     Args:
-        image_status: Scryfall's ``image_status`` for the card.
+        image_status: Scryfall's image_status for the card.
         local_is_high_resolution: The recorded resolution of the stored
             scan, or None when no scan has been recorded.
         image_exists: True when the image file is present on disk.

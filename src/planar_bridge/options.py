@@ -1,9 +1,9 @@
 """Run-level options that toggle one pull, independent of file config.
 
 These are the runtime switches a caller sets per invocation (today the CLI),
-kept separate from the file-backed ``AppConfig``. The type lives at the
+kept separate from the file-backed AppConfig. The type lives at the
 package root so both the CLI and the pipeline can depend on it without the
-pipeline reaching outward into ``cli/``.
+pipeline reaching outward into cli/.
 """
 
 from dataclasses import dataclass, field

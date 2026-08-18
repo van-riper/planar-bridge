@@ -3,7 +3,7 @@
 The client funnels every request through the shared rate limiter, then retries
 transient failures with capped, jittered exponential backoff. Permanent client
 errors (such as 404) are treated as fatal and fail fast rather than burning the
-whole retry budget. This replaces the old ``utils.handle_response`` that retried
+whole retry budget. This replaces the old utils.handle_response that retried
 every error with a fixed escalating sleep.
 """
 
@@ -51,7 +51,7 @@ def backoff_seconds(
         base_seconds: Delay after the first failure, before doubling.
         maximum_seconds: Ceiling for the pre-jitter delay.
         jitter_fraction: Fraction of the capped delay added as jitter.
-        random_source: Returns a value in ``[0, 1)``. Injected for
+        random_source: Returns a value in [0, 1). Injected for
             deterministic testing.
 
     Returns:
@@ -73,7 +73,7 @@ class RetryPolicy:
         base_seconds: First-retry backoff, before doubling.
         maximum_seconds: Ceiling for the pre-jitter backoff.
         jitter_fraction: Fraction of the backoff added as jitter.
-        random_source: Returns a value in ``[0, 1)``, injected for
+        random_source: Returns a value in [0, 1), injected for
             deterministic testing of the jitter.
     """
 

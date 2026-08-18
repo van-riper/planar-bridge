@@ -2,8 +2,8 @@
 
 The source knows Scryfall's URL shapes and response format. It reports a card's
 image status and downloads its image bytes, leaving the download decision to
-``domain.decisions`` and the file write to the pipeline. It replaces the
-network halves of the old ``CardObject.parse_source_state`` and ``download``.
+domain.decisions and the file write to the pipeline. It replaces the
+network halves of the old CardObject.parse_source_state and download.
 """
 
 from ..aliases import Face
@@ -32,7 +32,7 @@ class ScryfallSource(ImageSource):
             scryfall_id: The card's Scryfall identifier.
 
         Returns:
-            The card's ``image_status``, or None when the request fails.
+            The card's image_status, or None when the request fails.
         """
         url = f"{SCRYFALL_API_CARD_URL}{scryfall_id}?format=json"
         response = await self._client.get(url)

@@ -10,7 +10,7 @@ def build_parser() -> ArgumentParser:
     """Construct the Planar Bridge argument parser.
 
     Returns:
-        A parser for the run-level flags. The ``set`` option uses an append
+        A parser for the run-level flags. The set option uses an append
         action so it may be repeated.
     """
     parser = ArgumentParser(
@@ -48,7 +48,7 @@ def parse_args(argv: Sequence[str] | None = None) -> RunOptions:
     """Parse argv into a RunOptions value.
 
     Args:
-        argv: The argument vector, or None to read ``sys.argv``.
+        argv: The argument vector, or None to read sys.argv.
 
     Returns:
         The resolved per-run switches. Set codes are upper-cased so case

@@ -42,8 +42,8 @@ def load_config(
 ) -> AppConfig:
     """Build an AppConfig by layering config.toml over the defaults.
 
-    Reads ``config_path`` when provided and present, overlays it on the
-    built-in defaults, maps the ``card_language`` code to MTGJSON's full
+    Reads config_path when provided and present, overlays it on the
+    built-in defaults, maps the card_language code to MTGJSON's full
     language name, and freezes the exempt/pardon collections.
 
     Args:
@@ -51,13 +51,13 @@ def load_config(
             path falls back to the defaults alone.
         language_override: A language code that, when given, takes
             precedence over the file value and the default (the CLI's
-            ``--language``).
+            --language).
 
     Returns:
         The resolved, immutable configuration.
 
     Raises:
-        ValueError: If the resolved ``card_language`` is not a recognized code.
+        ValueError: If the resolved card_language is not a recognized code.
     """
     file_data: dict[str, Any] = {}
 

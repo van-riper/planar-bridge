@@ -1,7 +1,7 @@
 """Unit tests for path resolution.
 
 Written before the implementation (TDD): these assertions define the
-contract for ``DataPaths``, ``load_paths`` and ``ensure_directories_exist``.
+contract for DataPaths, load_paths and ensure_directories_exist.
 """
 
 from pathlib import Path

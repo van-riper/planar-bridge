@@ -2,7 +2,7 @@
 
 The limiter spaces grants by a fixed minimum interval so that, however many
 coroutines share one instance, the combined request rate stays at or below the
-configured ceiling. This replaces the per-call ``sleep`` that paced the old
+configured ceiling. This replaces the per-call sleep that paced the old
 serial downloader and is load-bearing for honoring Scryfall's rate limit.
 """
 
@@ -16,7 +16,7 @@ from .ports import Limiter
 class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
     """Caps the global request rate by spacing grants across coroutines.
 
-    Each :meth:`acquire` reserves the next free time slot under a lock, then
+    Each acquire reserves the next free time slot under a lock, then
     waits until that slot arrives. The lock guards only the scheduling, so the
     waits themselves overlap and concurrency is preserved while the grant rate
     stays bounded.
@@ -40,7 +40,7 @@ class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
                 deterministic testing.
 
         Raises:
-            ValueError: If ``max_requests_per_second`` is not positive.
+            ValueError: If max_requests_per_second is not positive.
         """
         if max_requests_per_second <= 0:
             raise ValueError(

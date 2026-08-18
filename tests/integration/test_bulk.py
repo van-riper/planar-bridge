@@ -1,12 +1,12 @@
 """Integration tests for the SQLite-backed bulk reader.
 
 Written before the implementation (TDD): these assertions pin the contract
-for ``BulkReader``, which reconstructs the JSON-shaped set/card dictionaries
-the domain consumes from MTGJSON's relational ``AllPrintings.sqlite``.
+for BulkReader, which reconstructs the JSON-shaped set/card dictionaries
+the domain consumes from MTGJSON's relational AllPrintings.sqlite.
 
 The fixtures build a tiny database mirroring the real schema's quirks (the
-``cardIdentifiers`` join for ``scryfallId``, comma-space list fields, ``1``/
-``NULL`` booleans, and tokens lacking an ``isOnlineOnly`` column) rather than
+cardIdentifiers join for scryfallId, comma-space list fields, 1/
+NULL booleans, and tokens lacking an isOnlineOnly column) rather than
 shipping the 600MB production file.
 """
 

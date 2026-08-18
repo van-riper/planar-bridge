@@ -28,7 +28,7 @@ def test_run_exits_cleanly_on_keyboard_interrupt(
 
 
 def test_module_entry_invokes_run(monkeypatch: pytest.MonkeyPatch) -> None:
-    """``python -m planar_bridge`` delegates to cli.main.run."""
+    """Running python -m planar_bridge delegates to cli.main.run."""
     calls: list[bool] = []
     monkeypatch.setattr(main, "run", lambda: calls.append(True))
 

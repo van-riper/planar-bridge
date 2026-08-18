@@ -1,7 +1,7 @@
 """A minimal synchronous event bus.
 
-Publishers call :meth:`EventBus.emit`; every handler registered through
-:meth:`EventBus.subscribe` receives each event in subscription order. The bus
+Publishers call EventBus.emit; every handler registered through
+EventBus.subscribe receives each event in subscription order. The bus
 is deliberately synchronous: the download pipeline is synchronous today and a
 single in-process reporter needs nothing more. The publisher-facing contract
 (emit returns nothing and promises only "handlers see events in emit order")

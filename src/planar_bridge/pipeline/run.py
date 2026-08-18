@@ -67,7 +67,7 @@ async def pull_all(
             caller, that the run emits progress and outcome events on.
         options: The per-run switches from the command line.
         approve_version: Consulted on a version drift; the CLI builds it
-            from ``--assume-yes`` and the interactive prompt.
+            from --assume-yes and the interactive prompt.
     """
     paths: DataPaths = load_paths(environ)
     ensure_directories_exist(paths)

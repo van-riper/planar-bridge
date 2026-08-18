@@ -27,7 +27,7 @@ class DataPaths:
 
 
 def load_paths(environment: Mapping[str, str]) -> DataPaths:
-    """Load all absolute data paths from an ``environment`` mapping.
+    """Load all absolute data paths from an environment mapping.
 
     Pure: uses PLANAR_BRIDGE_DIR when set, otherwise falls back to
     $HOME/.local/share (or %APPDATA% on Windows), then builds the

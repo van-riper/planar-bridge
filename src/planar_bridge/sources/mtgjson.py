@@ -1,9 +1,9 @@
 """MTGJSON metadata and bulk access built on the async HTTP client.
 
 The source knows MTGJSON's URL shapes and that its bulk files arrive gzipped.
-It reports the remote build metadata as a domain ``MetadataInfo`` and returns
+It reports the remote build metadata as a domain MetadataInfo and returns
 decompressed bulk payloads, leaving the file write to the pipeline. It replaces
-the network halves of the old ``MetaObject.__fetch_source`` and ``pull_bulk``.
+the network halves of the old MetaObject.__fetch_source and pull_bulk.
 """
 
 import gzip
@@ -58,8 +58,8 @@ class MtgjsonSource(MetadataSource):
         """Download and decompress one MTGJSON bulk file.
 
         Args:
-            target: The bulk file key, such as ``"AllPrintings"`` or
-                ``"Meta"``; its remote filename is resolved via BULK_TARGETS.
+            target: The bulk file key, such as "AllPrintings" or
+                "Meta"; its remote filename is resolved via BULK_TARGETS.
 
         Returns:
             The decompressed bytes (SQLite for AllPrintings, JSON for

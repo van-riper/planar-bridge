@@ -1,9 +1,9 @@
 """The CatalogRepository: a SQLite-backed store of per-card resolution state.
 
 This is the only layer that knows SQLite. It replaces the per-set
-``.states.json`` files with one catalog database, persisting each card write
+.states.json files with one catalog database, persisting each card write
 immediately so a killed run resumes from confirmed state, matching the old
-``StatesObject`` "confirmed only" contract.
+StatesObject "confirmed only" contract.
 """
 
 import sqlite3
@@ -23,7 +23,7 @@ class CardRow:
         uuid: The card's MTGJSON UUID.
         is_high_resolution: True when the stored scan is high-resolution.
         relative_path: The card's image path relative to the data
-            directory (the set directory, with ``tokens/`` for token layouts).
+            directory (the set directory, with tokens/ for token layouts).
         updated_at: ISO-8601 timestamp of the row's last write.
     """
 
@@ -43,7 +43,7 @@ class CatalogRepository:
 
         Args:
             connection: An open connection to the catalog database (a file
-                path in production, ``:memory:`` in tests).
+                path in production, :memory: in tests).
         """
         self._connection = connection
         self._connection.row_factory = sqlite3.Row
@@ -118,7 +118,7 @@ class CatalogRepository:
         """Report whether a set holds no low-resolution cards.
 
         Vacuously True for a set with no stored cards, mirroring the old
-        ``StatesObject.is_all_highres`` on an empty map.
+        StatesObject.is_all_highres on an empty map.
 
         Args:
             set_code: The set code to check.

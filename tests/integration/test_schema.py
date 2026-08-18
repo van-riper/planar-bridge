@@ -22,7 +22,7 @@ def _index_names(connection: sqlite3.Connection) -> set[str]:
 
 
 def _column_names(connection: sqlite3.Connection, table: str) -> set[str]:
-    """Return the column names of ``table``."""
+    """Return the column names of table."""
     rows = connection.execute(f"PRAGMA table_info({table})").fetchall()
     return {row[1] for row in rows}
 

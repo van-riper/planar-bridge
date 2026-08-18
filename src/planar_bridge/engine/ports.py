@@ -1,8 +1,8 @@
 """Structural ports the engine depends on, implemented within the engine.
 
-The HTTP client is typed against the ``Limiter`` protocol rather than the
-concrete ``RateLimiter``, so any object that can be awaited for a turn
-satisfies it, including the recording double used in tests. ``RateLimiter``
+The HTTP client is typed against the Limiter protocol rather than the
+concrete RateLimiter, so any object that can be awaited for a turn
+satisfies it, including the recording double used in tests. RateLimiter
 implements it by explicit subclassing so the type checker confirms the match.
 """
 

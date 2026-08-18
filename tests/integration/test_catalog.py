@@ -158,7 +158,7 @@ def test_close_closes_the_connection(
 
 
 def test_open_creates_a_usable_catalog(tmp_path: Path) -> None:
-    """``open()`` connects to a file database with the schema applied."""
+    """open() connects to a file database with the schema applied."""
     database_path = tmp_path / "catalog.sqlite"
 
     repository = CatalogRepository.open(database_path)

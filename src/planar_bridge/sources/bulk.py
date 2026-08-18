@@ -1,12 +1,12 @@
-"""The SQLite-backed bulk reader for MTGJSON's ``AllPrintings.sqlite``.
+"""The SQLite-backed bulk reader for MTGJSON's AllPrintings.sqlite.
 
 This is an anti-corruption layer: it absorbs the relational shape of MTGJSON's
-SQLite distribution (the ``cardIdentifiers``/``tokenIdentifiers`` join for
-``scryfallId``, comma-space list fields, ``1``/``NULL`` booleans, tokens
-lacking an ``isOnlineOnly`` column) and hands the pipeline back the same
+SQLite distribution (the cardIdentifiers/tokenIdentifiers join for
+scryfallId, comma-space list fields, 1/NULL booleans, tokens
+lacking an isOnlineOnly column) and hands the pipeline back the same
 JSON-shaped set/card dictionaries the domain already consumes. Loading one set
-at a time keeps memory flat, replacing the whole-file ``json.loads`` of the old
-``AllPrintings.json`` path.
+at a time keeps memory flat, replacing the whole-file json.loads of the old
+AllPrintings.json path.
 """
 
 import sqlite3
@@ -38,14 +38,14 @@ WHERE t.setCode = ?
 
 
 class BulkReader(BulkSource):
-    """Reads JSON-shaped set data on demand from ``AllPrintings.sqlite``."""
+    """Reads JSON-shaped set data on demand from AllPrintings.sqlite."""
 
     def __init__(self, connection: sqlite3.Connection) -> None:
         """Wrap an open connection to the bulk database.
 
         Args:
             connection: An open connection to the bulk database (a file in
-                production, ``:memory:`` in tests).
+                production, :memory: in tests).
         """
         self._connection = connection
         self._connection.row_factory = sqlite3.Row
@@ -58,7 +58,7 @@ class BulkReader(BulkSource):
         accidental mutation; the reader only ever queries it.
 
         Args:
-            database_path: Where the ``AllPrintings.sqlite`` file lives.
+            database_path: Where the AllPrintings.sqlite file lives.
 
         Returns:
             BulkReader: A reader wrapping a read-only connection to that file.
@@ -96,8 +96,8 @@ class BulkReader(BulkSource):
             set_code: The set code to load.
 
         Returns:
-            The set's omit-decision fields plus its ``cards`` and
-            ``tokens`` lists, each card carrying a nested ``identifiers``
+            The set's omit-decision fields plus its cards and
+            tokens lists, each card carrying a nested identifiers
             dict.
         """
         set_row = self._connection.execute(
@@ -131,11 +131,11 @@ def _row_to_card(row: sqlite3.Row) -> CardData:
 
     Args:
         row (sqlite3.Row): A row from the card or token query, carrying the
-            common columns plus the joined ``scryfallId``.
+            common columns plus the joined scryfallId.
 
     Returns:
         CardData: The card with split list fields, pass-through boolean flags,
-        and the ``scryfallId`` nested under ``identifiers``.
+        and the scryfallId nested under identifiers.
     """
     return {
         "uuid": row["uuid"],
@@ -155,7 +155,7 @@ def _row_to_card(row: sqlite3.Row) -> CardData:
 def _split_list(value: str | None) -> list[str]:
     """Split a comma-space MTGJSON list field into its members.
 
-    MTGJSON stores list columns such as ``otherFaceIds`` as ``"a, b"``; a NULL
+    MTGJSON stores list columns such as otherFaceIds as "a, b"; a NULL
     or empty value means there are no members.
 
     Args:

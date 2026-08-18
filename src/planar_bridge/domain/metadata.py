@@ -25,7 +25,7 @@ def normalize_version(version: str) -> str:
 
     Args:
         version: A raw MTGJSON version string, possibly carrying a
-            ``+<build>`` suffix.
+            +<build> suffix.
 
     Returns:
         The version with any build suffix removed.

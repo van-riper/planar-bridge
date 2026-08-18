@@ -27,7 +27,7 @@ def apply_schema(connection: sqlite3.Connection) -> None:
     """Create the catalog table and indexes and set the schema version.
 
     Idempotent: safe to call on an already-initialized database. Sets
-    ``PRAGMA user_version`` to :data:`SCHEMA_VERSION` so a future schema
+    PRAGMA user_version to SCHEMA_VERSION so a future schema
     change can detect and upgrade an older database.
 
     Args:

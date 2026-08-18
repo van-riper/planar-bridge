@@ -1,8 +1,8 @@
 """Console reporter: renders engine events as colorized status lines.
 
-This reproduces the output of the old ``status()`` logger (the integer
+This reproduces the output of the old status() logger (the integer
 levels 0 to 6) exactly, now driven by typed events instead of
-``(message, level)`` calls. It is the only place that knows about color and
+(message, level) calls. It is the only place that knows about color and
 the timestamp: the engine emits plain facts and this reporter decides how
 they look. Events with no console output (RunStarted, CardSkipped) are
 received and ignored.
@@ -105,10 +105,10 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         Args:
             count (int): The number done so far.
             total (int): The total to reach.
-            arrow (bool): When True, append a ``>`` arrow (set-level lines).
+            arrow (bool): When True, append a > arrow (set-level lines).
 
         Returns:
-            str: The formatted label, such as ``(45.0%)`` or ``(45.0%)>``.
+            str: The formatted label, such as (45.0%) or (45.0%)>.
         """
         label = f"({format(count / total, '.1%').zfill(5).rjust(5)})"
 
