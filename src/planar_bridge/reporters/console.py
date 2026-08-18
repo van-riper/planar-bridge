@@ -29,6 +29,9 @@ from ..events import (
     VersionMismatch,
 )
 
+_SET_CODE_WIDTH = 6
+_PERCENT_LABEL_WIDTH = 5
+
 # Each category is the (color, label) pair from the old status() levels.
 _INFO = (str(Fore.CYAN), "INFO")
 _WARNING = (str(Fore.RED), "WARNING")
@@ -88,7 +91,7 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         run = self._progress(event.run_count, event.run_total, arrow=False)
 
         return (
-            f"{run} {event.set_code.ljust(6)} "
+            f"{run} {event.set_code.ljust(_SET_CODE_WIDTH)} "
             f"AllHighRes: {event.is_all_high_resolution}"
         )
 
@@ -97,7 +100,10 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         run = self._progress(event.run_count, event.run_total, arrow=False)
         within = self._progress(event.set_count, event.set_total, arrow=True)
 
-        return f"{run} {event.set_code.ljust(6)} {within} {event.display_label}"
+        return (
+            f"{run} {event.set_code.ljust(_SET_CODE_WIDTH)} "
+            f"{within} {event.display_label}"
+        )
 
     def _progress(self, count: int, total: int, *, arrow: bool) -> str:
         """Format a count over a total as a padded percentage label.
@@ -110,7 +116,9 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         Returns:
             str: The formatted label, such as (45.0%) or (45.0%)>.
         """
-        label = f"({format(count / total, '.1%').zfill(5).rjust(5)})"
+        percent = format(count / total, ".1%")
+        percent = percent.zfill(_PERCENT_LABEL_WIDTH)
+        label = f"({percent.rjust(_PERCENT_LABEL_WIDTH)})"
 
         if count == total:
             label = " (100%)"
