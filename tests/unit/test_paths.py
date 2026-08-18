@@ -13,37 +13,43 @@ from planar_bridge.paths import ensure_directories_exist, load_paths
 
 def test_planar_bridge_dir_takes_precedence() -> None:
     """PLANAR_BRIDGE_DIR wins over XDG_DATA_HOME."""
-    paths = load_paths(
-        {"PLANAR_BRIDGE_DIR": "/data/pb", "XDG_DATA_HOME": "/xdg"}
-    )
+    paths = load_paths({
+        "PLANAR_BRIDGE_DIR": "/data/pb",
+        "XDG_DATA_HOME": "/xdg",
+    })
     assert paths.data_directory == Path("/data/pb")
 
 
-def test_linux_falls_back_to_local_share(
+@pytest.mark.parametrize(
+    ("platform_name", "environment", "expected"),
+    [
+        (
+            "linux",
+            {"HOME": "/home/u"},
+            Path("/home/u/.local/share/planar-bridge"),
+        ),
+        (
+            "darwin",
+            {"HOME": "/Users/u"},
+            Path("/Users/u/.local/share/planar-bridge"),
+        ),
+        (
+            "win32",
+            {"APPDATA": "/appdata"},
+            Path("/appdata/planar-bridge"),
+        ),
+    ],
+)
+def test_platform_fallback_paths(
     monkeypatch: pytest.MonkeyPatch,
+    platform_name: str,
+    environment: dict[str, str],
+    expected: Path,
 ) -> None:
-    """On linux the base is $HOME/.local/share."""
-    monkeypatch.setattr("planar_bridge.paths.platform", "linux")
-    paths = load_paths({"HOME": "/home/u"})
-    assert paths.data_directory == Path("/home/u/.local/share/planar-bridge")
-
-
-def test_macos_falls_back_to_local_share(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """On macOS the base is also $HOME/.local/share."""
-    monkeypatch.setattr("planar_bridge.paths.platform", "darwin")
-    paths = load_paths({"HOME": "/Users/u"})
-    assert paths.data_directory == Path("/Users/u/.local/share/planar-bridge")
-
-
-def test_windows_falls_back_to_appdata(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """On Windows the base is %APPDATA%."""
-    monkeypatch.setattr("planar_bridge.paths.platform", "win32")
-    paths = load_paths({"APPDATA": "/appdata"})
-    assert paths.data_directory == Path("/appdata/planar-bridge")
+    """On linux/macOS the base is $HOME/.local/share; on Windows %APPDATA%."""
+    monkeypatch.setattr("planar_bridge.paths.platform", platform_name)
+    paths = load_paths(environment)
+    assert paths.data_directory == expected
 
 
 def test_unsupported_platform_raises(
