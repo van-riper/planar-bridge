@@ -6,7 +6,7 @@ import json
 import sqlite3
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 import httpx
 import pytest
@@ -225,13 +225,58 @@ def test_pull_sets_restricts_to_requested_set_codes(
     ]
 
 
-def test_pull_set_emits_card_failed_and_continues(
+class CardOutcomeCase(NamedTuple):
+    """One non-happy-path pull_set outcome: inputs, event, and assertions."""
+
+    card_kwargs: dict[str, Any]
+    scryfall_kwargs: dict[str, Any]
+    expected_event: Event
+    check_card_absent: bool
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        CardOutcomeCase(
+            card_kwargs={},
+            scryfall_kwargs={"download_result": None},
+            expected_event=CardFailed(set_code="TST"),
+            check_card_absent=True,
+        ),
+        CardOutcomeCase(
+            card_kwargs={"isReprint": True},
+            scryfall_kwargs={},
+            expected_event=CardSkipped(set_code="TST"),
+            check_card_absent=True,
+        ),
+        CardOutcomeCase(
+            card_kwargs={},
+            scryfall_kwargs={"image_status": None},
+            expected_event=CardFailed(set_code="TST"),
+            check_card_absent=False,
+        ),
+        CardOutcomeCase(
+            card_kwargs={},
+            scryfall_kwargs={"image_status": "placeholder"},
+            expected_event=CardSkipped(set_code="TST"),
+            check_card_absent=True,
+        ),
+    ],
+    ids=[
+        "download-fails",
+        "bad-card",
+        "status-unavailable",
+        "placeholder-image",
+    ],
+)
+def test_pull_set_emits_event_for_card_outcome(
     connection: sqlite3.Connection,
     tmp_path: Path,
     make_card: Callable[..., dict[str, Any]],
     make_config: Callable[..., Any],
+    case: CardOutcomeCase,
 ) -> None:
-    """A failed download emits CardFailed and does not crash the run."""
+    """pull_set emits the matching event for each non-happy-path outcome."""
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     bus = EventBus()
@@ -241,13 +286,13 @@ def test_pull_set_emits_card_failed_and_continues(
     set_dict: dict[str, Any] = {
         "code": "TST",
         "type": "expansion",
-        "cards": [make_card()],
+        "cards": [make_card(**case.card_kwargs)],
         "tokens": [],
     }
     set_obj = SetObject(set_dict, config, paths)
     context = PullContext(
         repository,
-        StubScryfall(download_result=None),
+        StubScryfall(**case.scryfall_kwargs),
         config,
         bus,
         RunOptions(),
@@ -255,42 +300,9 @@ def test_pull_set_emits_card_failed_and_continues(
 
     asyncio.run(download.pull_set(set_obj, context, (1, 1)))
 
-    assert CardFailed(set_code="TST") in received
-    assert repository.get_card("uuid-1") is None
-
-
-def test_pull_set_emits_card_skipped_for_a_bad_card(
-    connection: sqlite3.Connection,
-    tmp_path: Path,
-    make_card: Callable[..., dict[str, Any]],
-    make_config: Callable[..., Any],
-) -> None:
-    """A bad card emits CardSkipped and records nothing, without a download."""
-    repository = CatalogRepository(connection)
-    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
-    bus = EventBus()
-    received: list[Event] = []
-    bus.subscribe(received.append)
-    config = make_config()
-    set_dict: dict[str, Any] = {
-        "code": "TST",
-        "type": "expansion",
-        "cards": [make_card(isReprint=True)],
-        "tokens": [],
-    }
-    set_obj = SetObject(set_dict, config, paths)
-    context = PullContext(
-        repository,
-        StubScryfall(),
-        config,
-        bus,
-        RunOptions(),
-    )
-
-    asyncio.run(download.pull_set(set_obj, context, (1, 1)))
-
-    assert CardSkipped(set_code="TST") in received
-    assert repository.get_card("uuid-1") is None
+    assert case.expected_event in received
+    if case.check_card_absent:
+        assert repository.get_card("uuid-1") is None
 
 
 def test_resolve_version_drift_emits_the_event() -> None:
@@ -426,73 +438,6 @@ def test_pull_meta_raises_when_meta_download_fails(tmp_path: Path) -> None:
 
     with pytest.raises(RuntimeError):
         asyncio.run(metadata.pull_meta(paths, source, EventBus()))
-
-
-def test_pull_set_emits_card_failed_when_status_unavailable(
-    connection: sqlite3.Connection,
-    tmp_path: Path,
-    make_card: Callable[..., dict[str, Any]],
-    make_config: Callable[..., Any],
-) -> None:
-    """An unavailable image status fails the card without raising."""
-    repository = CatalogRepository(connection)
-    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
-    bus = EventBus()
-    received: list[Event] = []
-    bus.subscribe(received.append)
-    config = make_config()
-    set_dict: dict[str, Any] = {
-        "code": "TST",
-        "type": "expansion",
-        "cards": [make_card()],
-        "tokens": [],
-    }
-    set_obj = SetObject(set_dict, config, paths)
-    context = PullContext(
-        repository,
-        StubScryfall(image_status=None),
-        config,
-        bus,
-        RunOptions(),
-    )
-
-    asyncio.run(download.pull_set(set_obj, context, (1, 1)))
-
-    assert CardFailed(set_code="TST") in received
-
-
-def test_pull_set_skips_a_placeholder_card(
-    connection: sqlite3.Connection,
-    tmp_path: Path,
-    make_card: Callable[..., dict[str, Any]],
-    make_config: Callable[..., Any],
-) -> None:
-    """A placeholder image carries no usable scan, so the card is skipped."""
-    repository = CatalogRepository(connection)
-    paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
-    bus = EventBus()
-    received: list[Event] = []
-    bus.subscribe(received.append)
-    config = make_config()
-    set_dict: dict[str, Any] = {
-        "code": "TST",
-        "type": "expansion",
-        "cards": [make_card()],
-        "tokens": [],
-    }
-    set_obj = SetObject(set_dict, config, paths)
-    context = PullContext(
-        repository,
-        StubScryfall(image_status="placeholder"),
-        config,
-        bus,
-        RunOptions(),
-    )
-
-    asyncio.run(download.pull_set(set_obj, context, (1, 1)))
-
-    assert CardSkipped(set_code="TST") in received
-    assert repository.get_card("uuid-1") is None
 
 
 def test_pull_set_skips_an_already_downloaded_card(
