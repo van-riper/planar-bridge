@@ -18,13 +18,13 @@ class CardRow:
     """One card's persisted catalog state.
 
     Attributes:
-        filename (str): The image filename stem, the catalog primary key.
-        set_code (str): The MTGJSON set code the card belongs to.
-        uuid (str): The card's MTGJSON UUID.
-        is_high_resolution (bool): True when the stored scan is high-resolution.
-        relative_path (str): The card's image path relative to the data
+        filename: The image filename stem, the catalog primary key.
+        set_code: The MTGJSON set code the card belongs to.
+        uuid: The card's MTGJSON UUID.
+        is_high_resolution: True when the stored scan is high-resolution.
+        relative_path: The card's image path relative to the data
             directory (the set directory, with ``tokens/`` for token layouts).
-        updated_at (str): ISO-8601 timestamp of the row's last write.
+        updated_at: ISO-8601 timestamp of the row's last write.
     """
 
     filename: str
