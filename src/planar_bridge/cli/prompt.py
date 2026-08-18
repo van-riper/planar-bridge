@@ -17,7 +17,6 @@ def _ask_yes_no(question: str) -> bool:
     Returns:
         bool: True for y, False for n. A closed input stream (EOF) declines.
     """
-
     while True:
         try:
             answer = input(f"{question} [y/n]: ").strip().lower()
@@ -36,7 +35,6 @@ def confirm_version_drift() -> bool:
     Returns:
         bool: True to proceed, False to abort.
     """
-
     return _ask_yes_no("Do you want to proceed?")
 
 
@@ -50,7 +48,6 @@ def approval_for(*, assume_yes: bool) -> Callable[[], bool]:
         Callable[[], bool]: An auto-approval that proceeds without prompting
         under ``--assume-yes``, otherwise the interactive prompt.
     """
-
     if assume_yes:
         return lambda: True
 

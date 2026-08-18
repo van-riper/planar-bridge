@@ -42,7 +42,6 @@ class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
         Raises:
             ValueError: If ``max_requests_per_second`` is not positive.
         """
-
         if max_requests_per_second <= 0:
             raise ValueError(
                 "max_requests_per_second must be positive, got "
@@ -57,7 +56,6 @@ class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
 
     async def acquire(self) -> None:
         """Wait until the next request is allowed to proceed."""
-
         async with self._lock:
             now: float = self._clock()
 

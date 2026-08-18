@@ -51,7 +51,6 @@ def decide_download(
     Returns:
         DownloadDecision: The immutable verdict for the card.
     """
-
     if image_status in PLACEHOLDER_STATUSES:
         return DownloadDecision(
             should_download=False, source_is_high_resolution=False

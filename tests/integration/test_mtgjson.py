@@ -15,7 +15,6 @@ def build_source(
     items: list[httpx.Response],
 ) -> tuple[MtgjsonSource, httpx.AsyncClient, list[str]]:
     """Build an MtgjsonSource over a MockTransport that records its URLs."""
-
     queue = list(items)
     captured_urls: list[str] = []
 
@@ -30,7 +29,6 @@ def build_source(
 
 def test_fetch_metadata_returns_the_parsed_info() -> None:
     """The metadata is parsed into a MetadataInfo with a clean version."""
-
     source, httpx_client, _ = build_source(
         [
             httpx.Response(
@@ -52,7 +50,6 @@ def test_fetch_metadata_returns_the_parsed_info() -> None:
 
 def test_fetch_metadata_requests_the_meta_endpoint() -> None:
     """The metadata query targets MTGJSON's Meta.json."""
-
     source, httpx_client, captured_urls = build_source(
         [httpx.Response(200, json={"meta": {"date": "x", "version": "5.2.2"}})]
     )
@@ -68,7 +65,6 @@ def test_fetch_metadata_requests_the_meta_endpoint() -> None:
 
 def test_fetch_metadata_is_none_on_failure() -> None:
     """A failed metadata query yields None."""
-
     source, httpx_client, _ = build_source([httpx.Response(404)])
 
     async def scenario() -> MetadataInfo | None:
@@ -81,7 +77,6 @@ def test_fetch_metadata_is_none_on_failure() -> None:
 
 def test_download_bulk_decompresses_the_payload() -> None:
     """A gzipped bulk file is returned decompressed."""
-
     payload = b'{"data": {}}'
     source, httpx_client, _ = build_source(
         [httpx.Response(200, content=gzip.compress(payload))]
@@ -97,7 +92,6 @@ def test_download_bulk_decompresses_the_payload() -> None:
 
 def test_download_bulk_requests_all_printings_as_sqlite() -> None:
     """AllPrintings is fetched as the gzipped SQLite distribution."""
-
     source, httpx_client, captured_urls = build_source(
         [httpx.Response(200, content=gzip.compress(b"sqlite"))]
     )
@@ -115,7 +109,6 @@ def test_download_bulk_requests_all_printings_as_sqlite() -> None:
 
 def test_download_bulk_requests_meta_as_json() -> None:
     """Meta still comes from the gzipped JSON file, not SQLite."""
-
     source, httpx_client, captured_urls = build_source(
         [httpx.Response(200, content=gzip.compress(b"{}"))]
     )
@@ -131,7 +124,6 @@ def test_download_bulk_requests_meta_as_json() -> None:
 
 def test_download_bulk_is_none_on_failure() -> None:
     """A failed bulk download yields None."""
-
     source, httpx_client, _ = build_source([httpx.Response(404)])
 
     async def scenario() -> bytes | None:

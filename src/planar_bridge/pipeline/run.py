@@ -43,7 +43,6 @@ async def _download_bulk_database(
     Raises:
         RuntimeError: When the download fails.
     """
-
     if paths.bulk_path.exists():
         return
 
@@ -70,7 +69,6 @@ async def pull_all(
         approve_version (Callable[[], bool]): Consulted on a version drift; the
             CLI builds it from ``--assume-yes`` and the interactive prompt.
     """
-
     paths: DataPaths = load_paths(environ)
     ensure_directories_exist(paths)
 

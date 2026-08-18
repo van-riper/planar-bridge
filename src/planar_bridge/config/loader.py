@@ -59,7 +59,6 @@ def load_config(
     Raises:
         ValueError: If the resolved ``card_language`` is not a recognized code.
     """
-
     file_data: dict[str, Any] = {}
 
     if config_path and config_path.exists():

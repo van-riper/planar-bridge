@@ -11,7 +11,6 @@ from planar_bridge.catalog.repository import CardRow, CatalogRepository
 
 def make_card_row(**overrides: Any) -> CardRow:
     """A CardRow with sensible defaults, overridable per test."""
-
     base: dict[str, Any] = {
         "filename": "abcd",
         "set_code": "TST",
@@ -28,7 +27,6 @@ def test_get_card_returns_none_when_absent(
     connection: sqlite3.Connection,
 ) -> None:
     """Looking up a filename that was never stored yields None."""
-
     repository = CatalogRepository(connection)
 
     assert repository.get_card("missing") is None
@@ -38,7 +36,6 @@ def test_upsert_then_get_round_trips_a_card(
     connection: sqlite3.Connection,
 ) -> None:
     """A stored card is read back field-for-field, with a real bool flag."""
-
     repository = CatalogRepository(connection)
     row = make_card_row()
 
@@ -54,7 +51,6 @@ def test_upsert_updates_an_existing_card(
     connection: sqlite3.Connection,
 ) -> None:
     """Upserting the same filename overwrites the prior row in place."""
-
     repository = CatalogRepository(connection)
     repository.upsert_card(make_card_row(is_high_resolution=False))
 
@@ -72,7 +68,6 @@ def test_is_set_high_resolution_false_when_a_card_is_low_res(
     connection: sqlite3.Connection,
 ) -> None:
     """A set with any low-res card is not fully high-resolution."""
-
     repository = CatalogRepository(connection)
     repository.upsert_card(make_card_row(filename="a", is_high_resolution=True))
     repository.upsert_card(
@@ -86,7 +81,6 @@ def test_is_set_high_resolution_true_when_all_cards_high_res(
     connection: sqlite3.Connection,
 ) -> None:
     """A set whose every card is high-res reports fully high-resolution."""
-
     repository = CatalogRepository(connection)
     repository.upsert_card(make_card_row(filename="a", is_high_resolution=True))
     repository.upsert_card(make_card_row(filename="b", is_high_resolution=True))
@@ -98,7 +92,6 @@ def test_is_set_high_resolution_true_for_unknown_set(
     connection: sqlite3.Connection,
 ) -> None:
     """An unseen set is vacuously high-res, mirroring the old is_all_highres."""
-
     repository = CatalogRepository(connection)
 
     assert repository.is_set_high_resolution("NONE") is True
@@ -108,7 +101,6 @@ def test_low_resolution_sets_lists_only_sets_with_low_res_cards(
     connection: sqlite3.Connection,
 ) -> None:
     """Only set codes that still hold a low-res card are returned."""
-
     repository = CatalogRepository(connection)
     repository.upsert_card(
         make_card_row(filename="a", set_code="LOW", is_high_resolution=False)
@@ -124,7 +116,6 @@ def test_low_resolution_cards_returns_all_low_res(
     connection: sqlite3.Connection,
 ) -> None:
     """Without a set filter, every low-res card across all sets is returned."""
-
     repository = CatalogRepository(connection)
     repository.upsert_card(
         make_card_row(filename="a", set_code="ONE", is_high_resolution=False)
@@ -142,7 +133,6 @@ def test_low_resolution_cards_filters_by_set_code(
     connection: sqlite3.Connection,
 ) -> None:
     """With a set filter, only that set's low-res cards are returned."""
-
     repository = CatalogRepository(connection)
     repository.upsert_card(
         make_card_row(filename="a", set_code="ONE", is_high_resolution=False)
@@ -159,7 +149,6 @@ def test_close_closes_the_connection(
     connection: sqlite3.Connection,
 ) -> None:
     """After close, the underlying connection can no longer be used."""
-
     repository = CatalogRepository(connection)
 
     repository.close()
@@ -170,7 +159,6 @@ def test_close_closes_the_connection(
 
 def test_open_creates_a_usable_catalog(tmp_path: Path) -> None:
     """``open()`` connects to a file database with the schema applied."""
-
     database_path = tmp_path / "catalog.sqlite"
 
     repository = CatalogRepository.open(database_path)
@@ -184,7 +172,6 @@ def test_open_creates_a_usable_catalog(tmp_path: Path) -> None:
 
 def test_repository_closes_on_context_exit(tmp_path: Path) -> None:
     """Used as a context manager, the repository closes on block exit."""
-
     database_path = tmp_path / "catalog.sqlite"
 
     with CatalogRepository.open(database_path) as repository:

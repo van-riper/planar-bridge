@@ -45,7 +45,6 @@ class CatalogRepository:
             connection (sqlite3.Connection): An open connection to the catalog
                 database (a file path in production, ``:memory:`` in tests).
         """
-
         self._connection = connection
         self._connection.row_factory = sqlite3.Row
         apply_schema(self._connection)
@@ -63,17 +62,14 @@ class CatalogRepository:
         Returns:
             CatalogRepository: A repository wrapping a connection to that file.
         """
-
         return cls(sqlite3.connect(database_path))
 
     def __enter__(self) -> "CatalogRepository":
         """Enter a context that closes the repository on exit."""
-
         return self
 
     def __exit__(self, *exc_info: object) -> None:
         """Close the repository when the context block exits."""
-
         self.close()
 
     def get_card(self, filename: str) -> CardRow | None:
@@ -85,7 +81,6 @@ class CatalogRepository:
         Returns:
             CardRow | None: The stored row, or None when no such card exists.
         """
-
         row = self._connection.execute(
             "SELECT filename, set_code, uuid, is_high_resolution, "
             "relative_path, updated_at FROM cards WHERE filename = ?",
@@ -100,7 +95,6 @@ class CatalogRepository:
         Args:
             row (CardRow): The card state to persist.
         """
-
         self._connection.execute(
             "INSERT INTO cards (filename, set_code, uuid, is_high_resolution, "
             "relative_path, updated_at) VALUES (?, ?, ?, ?, ?, ?) "
@@ -132,7 +126,6 @@ class CatalogRepository:
         Returns:
             bool: True when the set has no low-resolution card.
         """
-
         row = self._connection.execute(
             "SELECT NOT EXISTS(SELECT 1 FROM cards "
             "WHERE set_code = ? AND is_high_resolution = 0)",
@@ -147,7 +140,6 @@ class CatalogRepository:
         Returns:
             tuple[str, ...]: The distinct set codes needing more work.
         """
-
         rows = self._connection.execute(
             "SELECT DISTINCT set_code FROM cards "
             "WHERE is_high_resolution = 0 ORDER BY set_code"
@@ -166,7 +158,6 @@ class CatalogRepository:
         Returns:
             list[CardRow]: The matching low-resolution card rows.
         """
-
         query = (
             "SELECT filename, set_code, uuid, is_high_resolution, "
             "relative_path, updated_at FROM cards WHERE is_high_resolution = 0"
@@ -185,7 +176,6 @@ class CatalogRepository:
 
     def close(self) -> None:
         """Close the underlying database connection."""
-
         self._connection.close()
 
 
@@ -198,7 +188,6 @@ def _row_to_card(row: sqlite3.Row) -> CardRow:
     Returns:
         CardRow: The reconstructed card state.
     """
-
     return CardRow(
         filename=row["filename"],
         set_code=row["set_code"],

@@ -43,14 +43,12 @@ class StubScryfall:
 
     async def image_status(self, scryfall_id: str) -> str | None:
         """Return the canned image status (None models a failed query)."""
-
         return self._image_status
 
     async def download_image(
         self, scryfall_id: str, face: str | None = None
     ) -> bytes | None:
         """Return the canned download result (bytes, or None for failure)."""
-
         return self._download_result
 
 
@@ -67,12 +65,10 @@ class StubMtgjson:
 
     async def fetch_metadata(self) -> MetadataInfo | None:
         """Return the canned metadata info (None models a failed fetch)."""
-
         return self._info
 
     async def download_bulk(self, target: str) -> bytes | None:
         """Return the canned bulk bytes (None models a failed download)."""
-
         return self._download_result
 
 
@@ -84,12 +80,10 @@ class StubBulk:
 
     def set_codes(self) -> tuple[str, ...]:
         """Return the configured set codes in insertion order."""
-
         return tuple(self._sets)
 
     def load_set(self, set_code: str) -> dict[str, Any]:
         """Return the configured set entry for a code."""
-
         return self._sets[set_code]
 
 
@@ -100,7 +94,6 @@ def test_pull_set_upserts_a_downloaded_card(
     make_config: Callable[..., Any],
 ) -> None:
     """pull_set persists each successfully downloaded card to the catalog."""
-
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     bus = EventBus()
@@ -135,7 +128,6 @@ def test_dry_run_reports_a_download_without_writing(
     make_config: Callable[..., Any],
 ) -> None:
     """A dry run emits the would-download event but persists nothing."""
-
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     bus = EventBus()
@@ -170,7 +162,6 @@ def test_pull_sets_emits_set_skipped_for_an_omitted_set(
     make_config: Callable[..., Any],
 ) -> None:
     """An omitted set emits SetSkipped instead of being silently skipped."""
-
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     bus = EventBus()
@@ -204,7 +195,6 @@ def test_pull_sets_restricts_to_requested_set_codes(
     make_config: Callable[..., Any],
 ) -> None:
     """--set limits the run to the named codes; the run total reflects it."""
-
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     bus = EventBus()
@@ -242,7 +232,6 @@ def test_pull_set_emits_card_failed_and_continues(
     make_config: Callable[..., Any],
 ) -> None:
     """A failed download emits CardFailed and does not crash the run."""
-
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     bus = EventBus()
@@ -277,7 +266,6 @@ def test_pull_set_emits_card_skipped_for_a_bad_card(
     make_config: Callable[..., Any],
 ) -> None:
     """A bad card emits CardSkipped and records nothing, without a download."""
-
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     bus = EventBus()
@@ -307,7 +295,6 @@ def test_pull_set_emits_card_skipped_for_a_bad_card(
 
 def test_resolve_version_drift_emits_the_event() -> None:
     """The version-drift handler emits a VersionMismatch event."""
-
     bus = EventBus()
     received: list[Event] = []
     bus.subscribe(received.append)
@@ -319,14 +306,12 @@ def test_resolve_version_drift_emits_the_event() -> None:
 
 def test_resolve_version_drift_aborts_when_disapproved() -> None:
     """A disapproving callback raises KeyboardInterrupt to stop the run."""
-
     with pytest.raises(KeyboardInterrupt):
         metadata._resolve_version_drift(EventBus(), "5.3.0", lambda: False)
 
 
 def test_pull_meta_keeps_an_existing_meta_json(tmp_path: Path) -> None:
     """A newer source build date does not re-download an existing Meta.json."""
-
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     paths.mtgjson_directory.mkdir(parents=True)
     paths.metadata_path.write_text(
@@ -346,7 +331,6 @@ def test_pull_meta_downloads_meta_json_when_missing(
     tmp_path: Path,
 ) -> None:
     """A missing Meta.json is fetched; the bulk database is left to run.py."""
-
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     paths.mtgjson_directory.mkdir(parents=True)
     bus = EventBus()
@@ -362,7 +346,6 @@ def test_download_bulk_database_writes_the_bulk_path(
     tmp_path: Path,
 ) -> None:
     """The bulk download writes the fetched bytes to the sqlite bulk path."""
-
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     paths.mtgjson_directory.mkdir(parents=True)
     bus = EventBus()
@@ -378,7 +361,6 @@ def test_download_bulk_database_writes_the_bulk_path(
 
 def test_download_bulk_database_skips_when_present(tmp_path: Path) -> None:
     """An existing bulk file is reused: no download, no banner emitted."""
-
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     paths.mtgjson_directory.mkdir(parents=True)
     paths.bulk_path.write_bytes(b"existing-sqlite")
@@ -397,7 +379,6 @@ def test_download_bulk_database_raises_when_download_fails(
     tmp_path: Path,
 ) -> None:
     """A failed bulk download raises RuntimeError instead of writing."""
-
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     paths.mtgjson_directory.mkdir(parents=True)
     source = StubMtgjson(
@@ -410,7 +391,6 @@ def test_download_bulk_database_raises_when_download_fails(
 
 def test_pull_meta_raises_when_metadata_fetch_fails(tmp_path: Path) -> None:
     """A failed metadata fetch raises RuntimeError rather than continuing."""
-
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     source = StubMtgjson(None)
 
@@ -420,7 +400,6 @@ def test_pull_meta_raises_when_metadata_fetch_fails(tmp_path: Path) -> None:
 
 def test_pull_meta_warns_on_pinned_version_drift(tmp_path: Path) -> None:
     """Local data built on a non-pinned version emits a VersionMismatch."""
-
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     paths.mtgjson_directory.mkdir(parents=True)
     paths.metadata_path.write_text(
@@ -439,7 +418,6 @@ def test_pull_meta_warns_on_pinned_version_drift(tmp_path: Path) -> None:
 
 def test_pull_meta_raises_when_meta_download_fails(tmp_path: Path) -> None:
     """A failed Meta.json download raises RuntimeError."""
-
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     paths.mtgjson_directory.mkdir(parents=True)
     source = StubMtgjson(
@@ -457,7 +435,6 @@ def test_pull_set_emits_card_failed_when_status_unavailable(
     make_config: Callable[..., Any],
 ) -> None:
     """An unavailable image status fails the card without raising."""
-
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     bus = EventBus()
@@ -491,7 +468,6 @@ def test_pull_set_skips_a_placeholder_card(
     make_config: Callable[..., Any],
 ) -> None:
     """A placeholder image carries no usable scan, so the card is skipped."""
-
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     bus = EventBus()
@@ -526,7 +502,6 @@ def test_pull_set_skips_an_already_downloaded_card(
     make_config: Callable[..., Any],
 ) -> None:
     """A card recorded high-res with its file present skips before Scryfall."""
-
     repository = CatalogRepository(connection)
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     set_directory = paths.data_directory / "TST"
@@ -568,7 +543,6 @@ def test_pull_set_skips_an_already_downloaded_card(
 
 def _write_bulk_sqlite(database_path: Path) -> None:
     """Build a one-set, one-card AllPrintings.sqlite the reader can load."""
-
     connection = sqlite3.connect(database_path)
     connection.executescript("""
         CREATE TABLE sets (
@@ -600,7 +574,6 @@ def test_pull_all_runs_end_to_end(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """pull_all wires the whole run: fetch, bulk, stream, download, persist."""
-
     monkeypatch.setenv("PLANAR_BRIDGE_DIR", str(tmp_path))
     monkeypatch.delenv("XDG_DATA_HOME", raising=False)
     # Make the rate limiter effectively instant for the test.
@@ -649,5 +622,4 @@ def test_pull_all_runs_end_to_end(
 
 def paths_has_image(data_directory: Path) -> bool:
     """True when at least one downloaded scan exists under the data dir."""
-
     return any(data_directory.rglob("*.jpg"))

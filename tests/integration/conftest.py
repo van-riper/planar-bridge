@@ -12,7 +12,6 @@ from planar_bridge.config.loader import AppConfig
 @pytest.fixture
 def connection():
     """Yield an in-memory SQLite connection, closed after the test."""
-
     conn = sqlite3.connect(":memory:")
     yield conn
     conn.close()

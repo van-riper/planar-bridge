@@ -36,7 +36,6 @@ def run(argv: Sequence[str] | None = None) -> None:
     Raises:
         SystemExit: With the conventional interrupt code when Ctrl-C is caught.
     """
-
     options = parse_args(argv)
     approve_version = approval_for(assume_yes=options.assume_yes)
 

@@ -11,7 +11,6 @@ from planar_bridge.pipeline.context import CardObject
 
 def make_row(**overrides: Any) -> CardRow:
     """A CardRow matching the make_card defaults, overridable per test."""
-
     base: dict[str, Any] = {
         "filename": "uuid-1",
         "set_code": "TST",
@@ -31,7 +30,6 @@ def test_local_state_is_none_for_an_unknown_card(
     make_config: Callable[..., Any],
 ) -> None:
     """A card absent from the catalog has no local state."""
-
     repository = CatalogRepository(connection)
 
     card = CardObject(make_card(), repository, tmp_path / "TST", make_config())
@@ -46,7 +44,6 @@ def test_local_state_reflects_a_stored_row(
     make_config: Callable[..., Any],
 ) -> None:
     """A card present in the catalog reports its stored resolution."""
-
     repository = CatalogRepository(connection)
     repository.upsert_card(make_row(is_high_resolution=True))
 
@@ -62,7 +59,6 @@ def test_set_code_and_relative_path_for_a_normal_layout(
     make_config: Callable[..., Any],
 ) -> None:
     """A normal card's image sits at <set>/<filename>.jpg."""
-
     repository = CatalogRepository(connection)
 
     card = CardObject(make_card(), repository, tmp_path / "TST", make_config())
@@ -78,7 +74,6 @@ def test_relative_path_for_a_token_layout(
     make_config: Callable[..., Any],
 ) -> None:
     """A token card's image sits under the tokens/ subdirectory."""
-
     repository = CatalogRepository(connection)
 
     card = CardObject(
@@ -98,7 +93,6 @@ def test_to_row_builds_a_card_row(
     make_config: Callable[..., Any],
 ) -> None:
     """to_row assembles a CardRow from the card's derived fields."""
-
     repository = CatalogRepository(connection)
     card = CardObject(make_card(), repository, tmp_path / "TST", make_config())
 

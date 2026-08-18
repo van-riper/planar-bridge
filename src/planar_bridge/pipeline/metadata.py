@@ -16,7 +16,6 @@ from ..sources.ports import MetadataSource
 
 def _read_local_metadata(paths: DataPaths) -> MetadataInfo | None:
     """Read the on-disk MTGJSON metadata, or None when bulk data is absent."""
-
     if not (paths.bulk_path.exists() and paths.metadata_path.exists()):
         return None
 
@@ -30,7 +29,6 @@ def _read_local_metadata(paths: DataPaths) -> MetadataInfo | None:
 
 def _always_approve() -> bool:
     """Approve a version drift without asking (the non-interactive default)."""
-
     return True
 
 
@@ -52,7 +50,6 @@ def _resolve_version_drift(
     Raises:
         KeyboardInterrupt: When the approval declines to proceed.
     """
-
     bus.emit(VersionMismatch(source_version=source_version))
 
     if not approve_version():
@@ -83,7 +80,6 @@ async def pull_meta(
     Raises:
         RuntimeError: When a network fetch fails.
     """
-
     bus.emit(MetadataCheckStarted())
 
     source_info = await mtgjson_source.fetch_metadata()

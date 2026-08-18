@@ -30,7 +30,6 @@ def normalize_version(version: str) -> str:
     Returns:
         str: The version with any build suffix removed.
     """
-
     return version.split("+")[0]
 
 
@@ -55,5 +54,4 @@ def version_matches_pin(
         bool: True when there is no local data, or the local version equals the
         pinned version.
     """
-
     return local is None or local.version == pinned_version

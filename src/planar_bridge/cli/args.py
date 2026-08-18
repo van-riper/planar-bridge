@@ -13,7 +13,6 @@ def build_parser() -> ArgumentParser:
         ArgumentParser: A parser for the run-level flags. The ``set`` option
         uses an append action so it may be repeated.
     """
-
     parser = ArgumentParser(
         prog="planar-bridge",
         description="Download and upgrade a local library of MTG card scans.",
@@ -56,7 +55,6 @@ def parse_args(argv: Sequence[str] | None = None) -> RunOptions:
         RunOptions: The resolved per-run switches. Set codes are upper-cased
         so case does not matter on the command line.
     """
-
     parsed = build_parser().parse_args(argv)
 
     only_sets = frozenset(code.upper() for code in (parsed.set or ()))

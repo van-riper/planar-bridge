@@ -29,7 +29,6 @@ class EventBus:
         Args:
             handler (EventHandler): A callable invoked with each emitted event.
         """
-
         self._handlers.append(handler)
 
     def emit(self, event: Event) -> None:
@@ -38,6 +37,5 @@ class EventBus:
         Args:
             event (Event): The event to deliver to all handlers.
         """
-
         for handler in self._handlers:
             handler(event)

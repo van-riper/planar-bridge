@@ -17,7 +17,6 @@ def test_ask_yes_no_accepts_y_or_n(
     monkeypatch: pytest.MonkeyPatch, text: str, expected: bool
 ) -> None:
     """A y or n answer (any case, surrounding space) returns its bool."""
-
     monkeypatch.setattr("builtins.input", lambda _: text)
     assert _ask_yes_no("Proceed?") is expected
 
@@ -26,7 +25,6 @@ def test_ask_yes_no_reprompts_until_valid(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Anything other than y or n re-prompts until a valid answer arrives."""
-
     answers = iter(["", "maybe", "y"])
     monkeypatch.setattr("builtins.input", lambda _: next(answers))
     assert _ask_yes_no("Proceed?") is True
@@ -48,7 +46,6 @@ def test_confirm_version_drift_reads_yes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """A yes answer at the prompt approves proceeding."""
-
     monkeypatch.setattr("builtins.input", lambda _: "y")
     assert confirm_version_drift() is True
 
@@ -57,7 +54,6 @@ def test_confirm_version_drift_reads_no(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """A no answer declines."""
-
     monkeypatch.setattr("builtins.input", lambda _: "n")
     assert confirm_version_drift() is False
 
@@ -76,5 +72,4 @@ def test_approval_for_assume_yes_skips_the_prompt(
 
 def test_approval_for_interactive_uses_the_prompt() -> None:
     """Without --assume-yes the approval is the interactive prompt."""
-
     assert approval_for(assume_yes=False) is confirm_version_drift

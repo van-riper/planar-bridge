@@ -41,7 +41,6 @@ def set_is_omitted(set_data: SetData, config: AppConfig) -> bool:
     Returns:
         bool: True if the set should be skipped.
     """
-
     set_code: str = set_data["code"]
 
     if set_code in config.pardoned_sets:
@@ -74,7 +73,6 @@ def merge_card_entries(set_data: SetData) -> list[CardData]:
     Returns:
         list[CardData]: The set's cards followed by its tokens.
     """
-
     set_cards: list[CardData] = set_data["cards"]
     set_tokens: list[CardData] = set_data["tokens"]
 
@@ -91,7 +89,6 @@ def build_set_record(set_data: SetData, config: AppConfig) -> SetRecord:
     Returns:
         SetRecord: The immutable derived facts for the set.
     """
-
     return SetRecord(
         set_code=set_data["code"],
         is_omitted=set_is_omitted(set_data, config),

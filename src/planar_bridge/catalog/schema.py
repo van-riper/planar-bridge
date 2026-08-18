@@ -34,7 +34,6 @@ def apply_schema(connection: sqlite3.Connection) -> None:
         connection (sqlite3.Connection): An open connection to the catalog
             database.
     """
-
     connection.executescript(_SCHEMA)
     connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
     connection.commit()

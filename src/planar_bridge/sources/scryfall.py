@@ -23,7 +23,6 @@ class ScryfallSource(ImageSource):
             client (AsyncHttpClient): The rate-limited client used for every
                 Scryfall request.
         """
-
         self._client = client
 
     async def image_status(self, scryfall_id: str) -> str | None:
@@ -36,7 +35,6 @@ class ScryfallSource(ImageSource):
             str | None: The card's ``image_status``, or None when the request
             fails.
         """
-
         url = f"{SCRYFALL_API_CARD_URL}{scryfall_id}?format=json"
         response = await self._client.get(url)
 
@@ -60,7 +58,6 @@ class ScryfallSource(ImageSource):
         Returns:
             bytes | None: The image bytes, or None when the request fails.
         """
-
         url = f"{SCRYFALL_API_CARD_URL}{scryfall_id}?format=image"
 
         if face is not None:

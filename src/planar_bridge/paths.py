@@ -39,7 +39,6 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
     Returns:
         DataPaths: The immutable set of absolute locations.
     """
-
     # TODO: rename PLANAR_BRIDGE_DIR to PLANAR_BRIDGE_PATH
     # Assign if PLANAR_BRIDGE_DIR is set
     data_directory = environment.get("PLANAR_BRIDGE_DIR")
@@ -77,6 +76,5 @@ def ensure_directories_exist(paths: DataPaths) -> None:
     Args:
         paths (DataPaths): The absolute locations to create.
     """
-
     paths.data_directory.mkdir(parents=True, exist_ok=True)
     paths.mtgjson_directory.mkdir(exist_ok=True)

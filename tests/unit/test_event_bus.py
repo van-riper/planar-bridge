@@ -9,7 +9,6 @@ from planar_bridge.events import EventBus, RunFinished, RunStarted
 
 def test_emit_delivers_the_event_to_a_subscriber() -> None:
     """A subscribed handler receives the exact event that was emitted."""
-
     received: list[object] = []
     bus = EventBus()
     bus.subscribe(received.append)
@@ -22,7 +21,6 @@ def test_emit_delivers_the_event_to_a_subscriber() -> None:
 
 def test_emit_fans_out_to_all_subscribers_in_order() -> None:
     """Every subscriber is invoked, in the order they subscribed."""
-
     calls: list[tuple[str, object]] = []
     bus = EventBus()
     bus.subscribe(lambda event: calls.append(("first", event)))
@@ -36,5 +34,4 @@ def test_emit_fans_out_to_all_subscribers_in_order() -> None:
 
 def test_emit_without_subscribers_does_not_raise() -> None:
     """Emitting with no subscribers is a silent no-op."""
-
     EventBus().emit(RunStarted())

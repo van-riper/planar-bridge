@@ -16,26 +16,22 @@ class FakeClock:
 
     def time(self) -> float:
         """Return the current fake time in seconds."""
-
         return self.now
 
     async def sleep(self, duration: float) -> None:
         """Record the sleep and advance the fake clock by its duration."""
-
         self.sleeps.append(duration)
         self.now += duration
 
 
 def test_non_positive_rate_is_rejected() -> None:
     """A rate of zero or below has no sensible interval and is rejected."""
-
     with pytest.raises(ValueError):
         RateLimiter(0)
 
 
 def test_first_acquire_does_not_wait() -> None:
     """The first acquire is granted immediately without sleeping."""
-
     clock = FakeClock()
     limiter = RateLimiter(10, clock=clock.time, sleeper=clock.sleep)
 
@@ -46,7 +42,6 @@ def test_first_acquire_does_not_wait() -> None:
 
 def test_serial_acquires_are_spaced_by_the_interval() -> None:
     """Back-to-back acquires are spaced by one over the rate."""
-
     clock = FakeClock()
     limiter = RateLimiter(10, clock=clock.time, sleeper=clock.sleep)
 
@@ -63,7 +58,6 @@ def test_serial_acquires_are_spaced_by_the_interval() -> None:
 
 def test_idle_gap_does_not_bank_credit() -> None:
     """A long idle gap does not let later acquires fire early in a burst."""
-
     clock = FakeClock()
     limiter = RateLimiter(10, clock=clock.time, sleeper=clock.sleep)
 

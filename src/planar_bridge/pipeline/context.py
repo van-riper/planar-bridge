@@ -61,7 +61,6 @@ class CardObject:  # pylint: disable=too-few-public-methods
             set_directory (Path): The set's image directory.
             config (AppConfig): Resolved filtering configuration.
         """
-
         self.card: CardFields = build_card_fields(card_dict, config)
 
         row: CardRow | None = repository.get_card(self.card.filename)
@@ -91,7 +90,6 @@ class CardObject:  # pylint: disable=too-few-public-methods
         Returns:
             CardRow: The row to persist for this card.
         """
-
         return CardRow(
             filename=self.card.filename,
             set_code=self.set_code,
@@ -118,12 +116,10 @@ class SetObject:  # pylint: disable=too-few-public-methods
             config (AppConfig): Resolved filtering configuration.
             paths (DataPaths): The resolved data paths.
         """
-
         self.record: SetRecord = build_set_record(set_dict, config)
         self.set_directory: Path = paths.data_directory / self.record.set_code
         self.progress: tuple[int, int] = (0, len(self.record.card_entries))
 
     def increase_progress(self) -> None:
         """Advance the count of cards handled in this set by one."""
-
         self.progress = (self.progress[0] + 1, self.progress[1])

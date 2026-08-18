@@ -48,7 +48,6 @@ async def pull_card(
         network failure yields FAILED rather than raising, so one bad card does
         not stop the run.
     """
-
     if card_obj.card.is_bad:
         return CardOutcome.SKIPPED, False
 
@@ -92,7 +91,6 @@ async def pull_set(
         run_position (tuple[int, int]): This set's (count, total) position in
             the run; the reporter formats it into the run-level progress label.
     """
-
     run_count, run_total = run_position
 
     context.bus.emit(
@@ -124,7 +122,6 @@ async def _handle_card(
     card_entry: CardData,
 ) -> None:
     """Download one card and record and report its outcome."""
-
     set_obj.increase_progress()
 
     card_obj = CardObject(
@@ -177,7 +174,6 @@ def _selected_codes(
     Returns:
         list[str]: The codes to walk, keeping the reader's order.
     """
-
     if not only_sets:
         return list(set_codes)
 
@@ -194,7 +190,6 @@ async def _pull_sets(
     Each set is loaded from the bulk reader only when its turn comes, so just
     one set's cards sit in memory at a time.
     """
-
     selected = _selected_codes(bulk.set_codes(), context.options.only_sets)
     set_total = len(selected)
 

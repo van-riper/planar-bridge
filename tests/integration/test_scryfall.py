@@ -15,7 +15,6 @@ def build_source(
     items: list[httpx.Response],
 ) -> tuple[ScryfallSource, httpx.AsyncClient, list[str]]:
     """Build a ScryfallSource over a MockTransport that records its URLs."""
-
     queue = list(items)
     captured_urls: list[str] = []
 
@@ -30,7 +29,6 @@ def build_source(
 
 def test_image_status_returns_the_reported_status() -> None:
     """The image_status field is read from the card JSON."""
-
     source, httpx_client, _ = build_source(
         [httpx.Response(200, json={"image_status": "highres_scan"})]
     )
@@ -45,7 +43,6 @@ def test_image_status_returns_the_reported_status() -> None:
 
 def test_image_status_requests_the_json_format() -> None:
     """The status query targets the card's JSON representation."""
-
     source, httpx_client, captured_urls = build_source(
         [httpx.Response(200, json={"image_status": "lowres"})]
     )
@@ -63,7 +60,6 @@ def test_image_status_requests_the_json_format() -> None:
 
 def test_image_status_is_none_on_failure() -> None:
     """A failed status query yields None."""
-
     source, httpx_client, _ = build_source([httpx.Response(404)])
 
     async def scenario() -> str | None:
@@ -76,7 +72,6 @@ def test_image_status_is_none_on_failure() -> None:
 
 def test_download_image_returns_the_content() -> None:
     """A successful image request returns the raw bytes."""
-
     source, httpx_client, _ = build_source(
         [httpx.Response(200, content=b"image-bytes")]
     )
@@ -91,7 +86,6 @@ def test_download_image_returns_the_content() -> None:
 
 def test_download_image_requests_the_image_format() -> None:
     """A single-faced download targets the image representation."""
-
     source, httpx_client, captured_urls = build_source(
         [httpx.Response(200, content=b"image-bytes")]
     )
@@ -109,7 +103,6 @@ def test_download_image_requests_the_image_format() -> None:
 
 def test_download_image_appends_the_face_for_two_sided_cards() -> None:
     """A two-faced download names the requested face in the URL."""
-
     source, httpx_client, captured_urls = build_source(
         [httpx.Response(200, content=b"back-bytes")]
     )
@@ -127,7 +120,6 @@ def test_download_image_appends_the_face_for_two_sided_cards() -> None:
 
 def test_download_image_is_none_on_failure() -> None:
     """A failed image request yields None."""
-
     source, httpx_client, _ = build_source([httpx.Response(404)])
 
     async def scenario() -> bytes | None:

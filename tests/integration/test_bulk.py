@@ -129,7 +129,6 @@ def test_set_codes_lists_every_set_in_sorted_order(
     connection: sqlite3.Connection,
 ) -> None:
     """set_codes returns all set codes, ordered for a stable run sequence."""
-
     _create_schema(connection)
     _insert_set(connection, "BBB")
     _insert_set(connection, "AAA")
@@ -143,7 +142,6 @@ def test_load_set_returns_the_set_metadata(
     connection: sqlite3.Connection,
 ) -> None:
     """A loaded set carries the omit-decision fields the domain reads."""
-
     _create_schema(connection)
     _insert_set(
         connection, "TST", type="funny", isOnlineOnly=1, isForeignOnly=None
@@ -161,7 +159,6 @@ def test_load_set_nests_scryfall_id_under_identifiers(
     connection: sqlite3.Connection,
 ) -> None:
     """The joined scryfallId is nested where build_card_fields reads it."""
-
     _create_schema(connection)
     _insert_set(connection, "TST")
     _insert_card(connection, scryfall_id="scry-xyz")
@@ -176,7 +173,6 @@ def test_load_set_splits_comma_space_list_fields(
     connection: sqlite3.Connection,
 ) -> None:
     """otherFaceIds and promoTypes split on the comma and strip the space."""
-
     _create_schema(connection)
     _insert_set(connection, "TST")
     _insert_card(
@@ -195,7 +191,6 @@ def test_load_set_empty_list_fields_become_empty_lists(
     connection: sqlite3.Connection,
 ) -> None:
     """A NULL list field reconstructs as an empty list, not None."""
-
     _create_schema(connection)
     _insert_set(connection, "TST")
     _insert_card(connection, otherFaceIds=None, promoTypes=None)
@@ -210,7 +205,6 @@ def test_load_set_passes_boolean_flags_through(
     connection: sqlite3.Connection,
 ) -> None:
     """The 1/NULL flags pass through unchanged for the domain's truthiness."""
-
     _create_schema(connection)
     _insert_set(connection, "TST")
     _insert_card(connection, isReprint=1, isFunny=None)
@@ -225,7 +219,6 @@ def test_load_set_includes_tokens_with_a_synthesized_online_flag(
     connection: sqlite3.Connection,
 ) -> None:
     """Tokens load from their own tables; the absent flag becomes None."""
-
     _create_schema(connection)
     _insert_set(connection, "TST")
     _insert_token(connection, scryfall_id="scry-tok")
@@ -241,7 +234,6 @@ def test_load_set_keeps_cards_and_tokens_separate(
     connection: sqlite3.Connection,
 ) -> None:
     """A set's cards and tokens land in their own lists, not commingled."""
-
     _create_schema(connection)
     _insert_set(connection, "TST")
     _insert_card(connection, uuid="card-uuid")
@@ -257,7 +249,6 @@ def test_load_set_filters_by_set_code(
     connection: sqlite3.Connection,
 ) -> None:
     """Only the requested set's cards are returned, not another set's."""
-
     _create_schema(connection)
     _insert_set(connection, "AAA")
     _insert_set(connection, "BBB")
@@ -271,7 +262,6 @@ def test_load_set_filters_by_set_code(
 
 def test_open_reads_a_file_database(tmp_path: Path) -> None:
     """open() connects to a real file and reads a set back."""
-
     database_path = tmp_path / "AllPrintings.sqlite"
     builder = sqlite3.connect(database_path)
     _create_schema(builder)
@@ -287,7 +277,6 @@ def test_open_reads_a_file_database(tmp_path: Path) -> None:
 
 def test_open_is_read_only(tmp_path: Path) -> None:
     """open() refuses writes, protecting the bulk file from mutation."""
-
     database_path = tmp_path / "AllPrintings.sqlite"
     builder = sqlite3.connect(database_path)
     _create_schema(builder)
@@ -305,7 +294,6 @@ def test_close_closes_the_connection(
     connection: sqlite3.Connection,
 ) -> None:
     """After close, the underlying connection can no longer be used."""
-
     _create_schema(connection)
     reader = BulkReader(connection)
 

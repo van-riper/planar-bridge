@@ -48,7 +48,6 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         Args:
             event (Event): The event to render.
         """
-
         if isinstance(event, MetadataCheckStarted):
             self.__render(_INFO, "Comparing local & source files...")
         elif isinstance(event, VersionMismatch):
@@ -114,7 +113,6 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         Returns:
             str: The formatted label, such as ``(45.0%)`` or ``(45.0%)>``.
         """
-
         label = f"({format(count / total, '.1%').zfill(5).rjust(5)})"
 
         if count == total:

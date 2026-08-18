@@ -32,7 +32,6 @@ class MtgjsonSource(MetadataSource):
             client (AsyncHttpClient): The rate-limited client used for every
                 MTGJSON request.
         """
-
         self._client = client
 
     async def fetch_metadata(self) -> MetadataInfo | None:
@@ -42,7 +41,6 @@ class MtgjsonSource(MetadataSource):
             MetadataInfo | None: The remote build date and normalized version,
             or None when the request fails.
         """
-
         url = f"{MTGJSON_API_URL}Meta.json"
         response = await self._client.get(url)
 
@@ -67,7 +65,6 @@ class MtgjsonSource(MetadataSource):
             bytes | None: The decompressed bytes (SQLite for AllPrintings, JSON
             for Meta), or None when the request fails.
         """
-
         url = f"{MTGJSON_API_URL}{BULK_TARGETS[target]}.gz"
         response = await self._client.get(url)
 

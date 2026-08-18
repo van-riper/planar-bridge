@@ -47,7 +47,6 @@ def card_face(layout: str, side: str | None) -> Face | None:
         Face | None: "front" for side "a" and "back" for side "b" on two-sided
         layouts, or None for any other layout.
     """
-
     if layout not in layouts.LAYOUT_TWOSIDED:
         return None
 
@@ -75,7 +74,6 @@ def card_filename(uuid: str, layout: str, related_uuids: list[str]) -> str:
     Returns:
         str: The filename stem (no extension).
     """
-
     if layout not in layouts.LAYOUT_COMBINED:
         return uuid
 
@@ -106,7 +104,6 @@ def card_is_bad(card_data: CardData, config: AppConfig, layout: str) -> bool:
     Returns:
         bool: True if the card should be skipped.
     """
-
     # TODO: all of these conditions should be configurable in the future
 
     is_reprint = card_data.get("isReprint") and not config.pull_reprints
@@ -153,7 +150,6 @@ def build_card_fields(card_data: CardData, config: AppConfig) -> CardFields:
     Returns:
         CardFields: The immutable derived facts for the card.
     """
-
     uuid: str = card_data["uuid"]
     scryfall_id: str = card_data["identifiers"]["scryfallId"]
 

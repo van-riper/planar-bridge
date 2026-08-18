@@ -27,7 +27,6 @@ class RecordingLimiter:
 
     async def acquire(self) -> None:
         """Record one acquisition."""
-
         self.acquisitions += 1
 
 
@@ -39,7 +38,6 @@ class RecordingSleeper:
 
     async def __call__(self, delay: float) -> None:
         """Record a requested delay without waiting."""
-
         self.delays.append(delay)
 
 
@@ -51,7 +49,6 @@ def build_client(
     policy: RetryPolicy | None = None,
 ) -> tuple[AsyncHttpClient, httpx.AsyncClient, dict[str, int]]:
     """Build an AsyncHttpClient over a scripted MockTransport."""
-
     queue = list(items)
     calls = {"count": 0}
 
@@ -78,13 +75,11 @@ def build_client(
 )
 def test_is_retryable_status(status_code: int, expected: bool) -> None:
     """Transient server statuses are retryable; client errors are not."""
-
     assert is_retryable_status(status_code) is expected
 
 
 def test_backoff_grows_exponentially_from_the_base() -> None:
     """Backoff doubles with each attempt before any cap or jitter."""
-
     delay = backoff_seconds(
         2,
         base_seconds=1.0,
@@ -98,7 +93,6 @@ def test_backoff_grows_exponentially_from_the_base() -> None:
 
 def test_backoff_is_capped_at_the_maximum() -> None:
     """A large attempt count is clamped to the maximum backoff."""
-
     delay = backoff_seconds(
         10,
         base_seconds=1.0,
@@ -112,7 +106,6 @@ def test_backoff_is_capped_at_the_maximum() -> None:
 
 def test_backoff_adds_jitter_above_the_capped_delay() -> None:
     """Jitter extends the capped delay by up to the jitter fraction."""
-
     delay = backoff_seconds(
         2,
         base_seconds=1.0,
@@ -126,7 +119,6 @@ def test_backoff_adds_jitter_above_the_capped_delay() -> None:
 
 def test_get_returns_the_response_on_success() -> None:
     """A 200 response is returned to the caller."""
-
     client, httpx_client, calls = build_client(
         [httpx.Response(200, content=b"ok")]
     )
@@ -173,7 +165,6 @@ def test_get_follows_a_redirect() -> None:
 
 def test_get_retries_a_retryable_status_then_succeeds() -> None:
     """A 503 is retried until a success arrives, sleeping between tries."""
-
     limiter = RecordingLimiter()
     sleeper = RecordingSleeper()
     client, httpx_client, calls = build_client(
@@ -202,7 +193,6 @@ def test_get_retries_a_retryable_status_then_succeeds() -> None:
 
 def test_get_retries_a_transport_error_then_succeeds() -> None:
     """A dropped connection is treated as retryable."""
-
     client, httpx_client, calls = build_client(
         [httpx.ConnectError("boom"), httpx.Response(200, content=b"ok")]
     )
@@ -220,7 +210,6 @@ def test_get_retries_a_transport_error_then_succeeds() -> None:
 
 def test_get_gives_up_immediately_on_a_fatal_status() -> None:
     """A 404 is not retried; the client gives up at once."""
-
     sleeper = RecordingSleeper()
     client, httpx_client, calls = build_client(
         [httpx.Response(404)], sleeper=sleeper
@@ -240,7 +229,6 @@ def test_get_gives_up_immediately_on_a_fatal_status() -> None:
 
 def test_get_gives_up_after_the_maximum_attempts() -> None:
     """A persistent retryable failure stops after the attempt budget."""
-
     sleeper = RecordingSleeper()
     client, httpx_client, calls = build_client(
         [httpx.Response(503) for _ in range(4)],

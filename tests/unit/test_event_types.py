@@ -30,7 +30,6 @@ from planar_bridge.events import (
 
 def test_marker_events_take_no_fields() -> None:
     """Signal-only events construct with no arguments and are Events."""
-
     for marker in (
         RunStarted(),
         MetadataCheckStarted(),
@@ -42,7 +41,6 @@ def test_marker_events_take_no_fields() -> None:
 
 def test_events_are_immutable() -> None:
     """A frozen event rejects attribute assignment after construction."""
-
     event = VersionMismatch(source_version="5.2.1")
     with raises(FrozenInstanceError):
         event.source_version = "9.9.9"  # type: ignore
@@ -50,7 +48,6 @@ def test_events_are_immutable() -> None:
 
 def test_card_events_share_a_common_base() -> None:
     """CardDownloaded and CardUpgraded subclass CardEvent (and Event)."""
-
     fields = {
         "set_code": "LEA",
         "run_count": 4,
@@ -68,7 +65,6 @@ def test_card_events_share_a_common_base() -> None:
 
 def test_lifecycle_events_carry_their_payloads() -> None:
     """Set, bulk, skip, fail, and finish events expose their fields."""
-
     assert BulkDataLoaded(date="2026-06-01").date == "2026-06-01"
     assert (
         SetStarted(

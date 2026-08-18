@@ -5,7 +5,6 @@ from planar_bridge.domain import layouts
 
 def test_categories_are_frozensets() -> None:
     """Each layout category is an immutable frozenset."""
-
     assert isinstance(layouts.LAYOUT_COMBINED, frozenset)
     assert isinstance(layouts.LAYOUT_TWOSIDED, frozenset)
     assert isinstance(layouts.LAYOUT_TOKEN, frozenset)
@@ -14,7 +13,6 @@ def test_categories_are_frozensets() -> None:
 
 def test_categories_are_pairwise_disjoint() -> None:
     """A layout string belongs to at most one category."""
-
     categories = [
         layouts.LAYOUT_COMBINED,
         layouts.LAYOUT_TWOSIDED,
@@ -29,7 +27,6 @@ def test_categories_are_pairwise_disjoint() -> None:
 
 def test_known_members_are_categorized() -> None:
     """Representative layouts land in their expected categories."""
-
     assert "split" in layouts.LAYOUT_COMBINED
     assert "transform" in layouts.LAYOUT_TWOSIDED
     assert "token" in layouts.LAYOUT_TOKEN

@@ -47,7 +47,6 @@ class BulkReader(BulkSource):
             connection (sqlite3.Connection): An open connection to the bulk
                 database (a file in production, ``:memory:`` in tests).
         """
-
         self._connection = connection
         self._connection.row_factory = sqlite3.Row
 
@@ -64,18 +63,15 @@ class BulkReader(BulkSource):
         Returns:
             BulkReader: A reader wrapping a read-only connection to that file.
         """
-
         connection = sqlite3.connect(f"file:{database_path}?mode=ro", uri=True)
         return cls(connection)
 
     def __enter__(self) -> "BulkReader":
         """Enter a context that closes the reader on exit."""
-
         return self
 
     def __exit__(self, *exc_info: object) -> None:
         """Close the reader when the context block exits."""
-
         self.close()
 
     def set_codes(self) -> tuple[str, ...]:
@@ -87,7 +83,6 @@ class BulkReader(BulkSource):
         Returns:
             tuple[str, ...]: All set codes, ascending.
         """
-
         rows = self._connection.execute(
             "SELECT code FROM sets ORDER BY code"
         ).fetchall()
@@ -104,7 +99,6 @@ class BulkReader(BulkSource):
             SetData: The set's omit-decision fields plus its ``cards`` and
             ``tokens`` lists, each card carrying a nested ``identifiers`` dict.
         """
-
         set_row = self._connection.execute(
             "SELECT code, type, isOnlineOnly, isForeignOnly "
             "FROM sets WHERE code = ?",
@@ -122,14 +116,12 @@ class BulkReader(BulkSource):
 
     def _load_entries(self, query: str, set_code: str) -> list[CardData]:
         """Run a card/token query for one set and map each row to a dict."""
-
         rows = self._connection.execute(query, (set_code,)).fetchall()
 
         return [_row_to_card(row) for row in rows]
 
     def close(self) -> None:
         """Close the underlying database connection."""
-
         self._connection.close()
 
 
@@ -144,7 +136,6 @@ def _row_to_card(row: sqlite3.Row) -> CardData:
         CardData: The card with split list fields, pass-through boolean flags,
         and the ``scryfallId`` nested under ``identifiers``.
     """
-
     return {
         "uuid": row["uuid"],
         "name": row["name"],
@@ -172,7 +163,6 @@ def _split_list(value: str | None) -> list[str]:
     Returns:
         list[str]: The members, stripped of whitespace, or an empty list.
     """
-
     if not value:
         return []
 

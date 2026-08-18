@@ -30,7 +30,6 @@ def is_retryable_status(status_code: int) -> bool:
         bool: True for transient rate-limit and server faults, False for
         permanent client errors.
     """
-
     return status_code in RETRYABLE_STATUS_CODES
 
 
@@ -58,7 +57,6 @@ def backoff_seconds(
     Returns:
         float: The number of seconds to wait before retrying.
     """
-
     exponential = base_seconds * (2**attempt)
     capped = min(exponential, maximum_seconds)
     jitter = capped * jitter_fraction * random_source()
@@ -94,7 +92,6 @@ class RetryPolicy:
         Returns:
             float: Seconds to wait before the next retry.
         """
-
         return backoff_seconds(
             attempt,
             base_seconds=self.base_seconds,
@@ -126,7 +123,6 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
             sleeper (Callable[[float], Awaitable[None]]): Awaitable sleep.
                 Injected for deterministic testing.
         """
-
         self._client = client
         self._limiter = limiter
         self._policy = policy
@@ -146,7 +142,6 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
             httpx.Response | None: The successful response, or None when the
             request fails fatally or exhausts its retries.
         """
-
         for attempt in range(self._policy.max_attempts):
 
             await self._limiter.acquire()

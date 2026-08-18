@@ -11,7 +11,6 @@ from planar_bridge.options import RunOptions
 
 def test_defaults_are_a_full_permissive_run() -> None:
     """No arguments yields the default RunOptions: a full, prompted run."""
-
     options = parse_args([])
 
     assert options == RunOptions()
@@ -23,7 +22,6 @@ def test_defaults_are_a_full_permissive_run() -> None:
 
 def test_toggle_flags_parse_into_run_options() -> None:
     """The boolean and language flags map onto their RunOptions fields."""
-
     options = parse_args(["--assume-yes", "--dry-run", "--language", "ja"])
 
     assert options.assume_yes is True
@@ -33,7 +31,6 @@ def test_toggle_flags_parse_into_run_options() -> None:
 
 def test_set_is_repeatable_and_uppercased() -> None:
     """--set accepts repeats and normalizes each code to upper case."""
-
     options = parse_args(["--set", "lea", "--set", "leb"])
 
     assert options.only_sets == frozenset({"LEA", "LEB"})
@@ -41,5 +38,4 @@ def test_set_is_repeatable_and_uppercased() -> None:
 
 def test_short_yes_flag_is_an_alias() -> None:
     """-y is accepted as the short form of --assume-yes."""
-
     assert parse_args(["-y"]).assume_yes is True
