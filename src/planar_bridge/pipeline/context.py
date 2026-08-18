@@ -8,7 +8,7 @@ these objects hold no I/O beyond reading the catalog.
 """
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 from ..aliases import CardData, SetData
@@ -96,7 +96,7 @@ class CardObject:  # pylint: disable=too-few-public-methods
             uuid=self.card.uuid,
             is_high_resolution=is_high_resolution,
             relative_path=self.relative_path,
-            updated_at=datetime.now(timezone.utc).isoformat(),
+            updated_at=datetime.now(UTC).isoformat(),
         )
 
 

@@ -172,7 +172,7 @@ def test_load_set_nests_scryfall_id_under_identifiers(
 def test_load_set_splits_comma_space_list_fields(
     connection: sqlite3.Connection,
 ) -> None:
-    """otherFaceIds and promoTypes split on the comma and strip the space."""
+    """OtherFaceIds and promoTypes split on the comma and strip the space."""
     _create_schema(connection)
     _insert_set(connection, "TST")
     _insert_card(

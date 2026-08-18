@@ -30,7 +30,7 @@ def normalize_version(version: str) -> str:
     Returns:
         str: The version with any build suffix removed.
     """
-    return version.split("+")[0]
+    return version.split("+", maxsplit=1)[0]
 
 
 def version_matches_pin(
