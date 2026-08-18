@@ -47,13 +47,13 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
     if data_directory is None:
         match platform:
             case "linux" | "darwin":
-                base_path = environment["HOME"] + "/.local/share"
+                base_path = Path(environment["HOME"]) / ".local" / "share"
             case "win32":
-                base_path = environment["APPDATA"]
+                base_path = Path(environment["APPDATA"])
             case _:
                 raise RuntimeError(f"platform '{platform}' is not supported")
 
-        data_directory = base_path + "/planar-bridge"
+        data_directory = base_path / "planar-bridge"
 
     data_directory = Path(data_directory).absolute()
     mtgjson_directory = Path(data_directory / ".mtgjson")
