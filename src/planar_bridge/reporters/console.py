@@ -49,32 +49,32 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
             event: The event to render.
         """
         if isinstance(event, MetadataCheckStarted):
-            self.__render(_INFO, "Comparing local & source files...")
+            self._render(_INFO, "Comparing local & source files...")
         elif isinstance(event, VersionMismatch):
-            self.__render(_WARNING, self.__version_message(event))
+            self._render(_WARNING, self._version_message(event))
         elif isinstance(event, BulkDownloadStarted):
-            self.__render(_INFO, "Downloading bulk files...")
+            self._render(_INFO, "Downloading bulk files...")
         elif isinstance(event, BulkDataLoaded):
-            self.__render(_INFO, f"Loading bulk data ({event.date})...")
+            self._render(_INFO, f"Loading bulk data ({event.date})...")
         elif isinstance(event, SetStarted):
-            self.__render(_LOAD_SET, self.__set_message(event))
+            self._render(_LOAD_SET, self._set_message(event))
         elif isinstance(event, SetSkipped):
-            self.__render(_SKIP_SET, event.set_code)
+            self._render(_SKIP_SET, event.set_code)
         elif isinstance(event, CardDownloaded):
-            self.__render(_NEW_CARD, self.__card_message(event))
+            self._render(_NEW_CARD, self._card_message(event))
         elif isinstance(event, CardUpgraded):
-            self.__render(_ENHANCED, self.__card_message(event))
+            self._render(_ENHANCED, self._card_message(event))
         elif isinstance(event, CardFailed):
             message = f"Failed to download a card in {event.set_code}"
-            self.__render(_ERROR, message)
+            self._render(_ERROR, message)
         elif isinstance(event, RunFinished):
-            self.__render(_INFO, "Finished successfully.")
-            self.__render(_INFO, self.__remaining_message(event))
+            self._render(_INFO, "Finished successfully.")
+            self._render(_INFO, self._remaining_message(event))
         elif isinstance(event, Interrupted):
             message = "Interrupted (Ctrl-C), exiting. Progress is saved."
-            self.__render(_ERROR, message)
+            self._render(_ERROR, message)
 
-    def __version_message(self, event: VersionMismatch) -> str:
+    def _version_message(self, event: VersionMismatch) -> str:
 
         return (
             "MTGJSON has been updated to v"
@@ -83,23 +83,23 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
             + constants.VERSION_WARNING
         )
 
-    def __set_message(self, event: SetStarted) -> str:
+    def _set_message(self, event: SetStarted) -> str:
 
-        run = self.__progress(event.run_count, event.run_total, arrow=False)
+        run = self._progress(event.run_count, event.run_total, arrow=False)
 
         return (
             f"{run} {event.set_code.ljust(6)} "
             f"AllHighRes: {event.is_all_high_resolution}"
         )
 
-    def __card_message(self, event: CardEvent) -> str:
+    def _card_message(self, event: CardEvent) -> str:
 
-        run = self.__progress(event.run_count, event.run_total, arrow=False)
-        within = self.__progress(event.set_count, event.set_total, arrow=True)
+        run = self._progress(event.run_count, event.run_total, arrow=False)
+        within = self._progress(event.set_count, event.set_total, arrow=True)
 
         return f"{run} {event.set_code.ljust(6)} {within} {event.display_label}"
 
-    def __progress(self, count: int, total: int, *, arrow: bool) -> str:
+    def _progress(self, count: int, total: int, *, arrow: bool) -> str:
         """Format a count over a total as a padded percentage label.
 
         Args:
@@ -119,13 +119,13 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
 
         return label
 
-    def __remaining_message(self, event: RunFinished) -> str:
+    def _remaining_message(self, event: RunFinished) -> str:
 
         return "Remaining sets with low res scans: " + (", ").join(
             event.low_resolution_set_codes
         )
 
-    def __render(self, category: tuple[str, str], message: str) -> None:
+    def _render(self, category: tuple[str, str], message: str) -> None:
 
         color, label = category
         prefix = f"{color}{label}{Fore.RESET}:"
