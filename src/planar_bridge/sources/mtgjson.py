@@ -2,8 +2,7 @@
 
 The source knows MTGJSON's URL shapes and that its bulk files arrive gzipped.
 It reports the remote build metadata as a domain MetadataInfo and returns
-decompressed bulk payloads, leaving the file write to the pipeline. It replaces
-the network halves of the old MetaObject.__fetch_source and pull_bulk.
+decompressed bulk payloads, leaving the file write to the pipeline.
 """
 
 import gzip
