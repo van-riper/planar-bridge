@@ -3,7 +3,9 @@
 import asyncio
 
 import httpx
+import pytest
 
+from planar_bridge.aliases import Face
 from planar_bridge.engine.client import AsyncHttpClient
 from planar_bridge.engine.limiter import RateLimiter
 from planar_bridge.sources.scryfall import ScryfallSource
@@ -29,9 +31,9 @@ def build_source(
 
 def test_image_status_returns_the_reported_status() -> None:
     """The image_status field is read from the card JSON."""
-    source, httpx_client, _ = build_source(
-        [httpx.Response(200, json={"image_status": "highres_scan"})]
-    )
+    source, httpx_client, _ = build_source([
+        httpx.Response(200, json={"image_status": "highres_scan"})
+    ])
 
     async def scenario() -> str | None:
         status = await source.image_status(SCRYFALL_ID)
@@ -43,9 +45,9 @@ def test_image_status_returns_the_reported_status() -> None:
 
 def test_image_status_requests_the_json_format() -> None:
     """The status query targets the card's JSON representation."""
-    source, httpx_client, captured_urls = build_source(
-        [httpx.Response(200, json={"image_status": "lowres"})]
-    )
+    source, httpx_client, captured_urls = build_source([
+        httpx.Response(200, json={"image_status": "lowres"})
+    ])
 
     async def scenario() -> None:
         await source.image_status(SCRYFALL_ID)
@@ -72,9 +74,9 @@ def test_image_status_is_none_on_failure() -> None:
 
 def test_download_image_returns_the_content() -> None:
     """A successful image request returns the raw bytes."""
-    source, httpx_client, _ = build_source(
-        [httpx.Response(200, content=b"image-bytes")]
-    )
+    source, httpx_client, _ = build_source([
+        httpx.Response(200, content=b"image-bytes")
+    ])
 
     async def scenario() -> bytes | None:
         content = await source.download_image(SCRYFALL_ID)
@@ -84,38 +86,31 @@ def test_download_image_returns_the_content() -> None:
     assert asyncio.run(scenario()) == b"image-bytes"
 
 
-def test_download_image_requests_the_image_format() -> None:
-    """A single-faced download targets the image representation."""
-    source, httpx_client, captured_urls = build_source(
-        [httpx.Response(200, content=b"image-bytes")]
-    )
+@pytest.mark.parametrize(
+    ("face", "expected_url"),
+    [
+        (None, "https://api.scryfall.com/cards/scry-1?format=image"),
+        (
+            "back",
+            "https://api.scryfall.com/cards/scry-1?format=image&face=back",
+        ),
+    ],
+)
+def test_download_image_requests_the_right_url(
+    face: Face | None, expected_url: str
+) -> None:
+    """A single-faced download omits face; a two-faced one names it."""
+    source, httpx_client, captured_urls = build_source([
+        httpx.Response(200, content=b"image-bytes")
+    ])
 
     async def scenario() -> None:
-        await source.download_image(SCRYFALL_ID)
+        await source.download_image(SCRYFALL_ID, face=face)
         await httpx_client.aclose()
 
     asyncio.run(scenario())
 
-    assert captured_urls == [
-        "https://api.scryfall.com/cards/scry-1?format=image"
-    ]
-
-
-def test_download_image_appends_the_face_for_two_sided_cards() -> None:
-    """A two-faced download names the requested face in the URL."""
-    source, httpx_client, captured_urls = build_source(
-        [httpx.Response(200, content=b"back-bytes")]
-    )
-
-    async def scenario() -> None:
-        await source.download_image(SCRYFALL_ID, face="back")
-        await httpx_client.aclose()
-
-    asyncio.run(scenario())
-
-    assert captured_urls == [
-        "https://api.scryfall.com/cards/scry-1?format=image&face=back"
-    ]
+    assert captured_urls == [expected_url]
 
 
 def test_download_image_is_none_on_failure() -> None:
