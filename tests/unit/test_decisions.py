@@ -1,12 +1,19 @@
 """Unit tests for the pure download-decision module."""
 
-from planar_bridge.domain.decisions import DownloadDecision, decide_download
+import pytest
+
+from planar_bridge.domain.decisions import (
+    PLACEHOLDER_STATUSES,
+    DownloadDecision,
+    decide_download,
+)
 
 
-def test_placeholder_status_is_not_downloaded() -> None:
-    """A placeholder image is never downloaded."""
+@pytest.mark.parametrize("image_status", sorted(PLACEHOLDER_STATUSES))
+def test_placeholder_statuses_are_not_downloaded(image_status: str) -> None:
+    """A placeholder or missing image is never downloaded."""
     decision = decide_download(
-        image_status="placeholder",
+        image_status=image_status,
         local_is_high_resolution=None,
         image_exists=False,
     )
@@ -14,17 +21,6 @@ def test_placeholder_status_is_not_downloaded() -> None:
     assert decision == DownloadDecision(
         should_download=False, source_is_high_resolution=False
     )
-
-
-def test_missing_status_is_not_downloaded() -> None:
-    """A missing image is never downloaded."""
-    decision = decide_download(
-        image_status="missing",
-        local_is_high_resolution=None,
-        image_exists=False,
-    )
-
-    assert decision.should_download is False
 
 
 def test_new_high_resolution_card_is_downloaded() -> None:
