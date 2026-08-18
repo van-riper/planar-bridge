@@ -45,13 +45,12 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
 
     # Fallback to system data folders otherwise
     if data_directory is None:
-        match platform:
-            case "linux" | "darwin":
-                base_path = Path(environment["HOME"]) / ".local" / "share"
-            case "win32":
-                base_path = Path(environment["APPDATA"])
-            case _:
-                raise RuntimeError(f"platform '{platform}' is not supported")
+        if platform in {"linux", "darwin"}:
+            base_path = Path(environment["HOME"]) / ".local" / "share"
+        elif platform == "win32":
+            base_path = Path(environment["APPDATA"])
+        else:
+            raise RuntimeError(f"platform '{platform}' is not supported")
 
         data_directory = base_path / "planar-bridge"
 
