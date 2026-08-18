@@ -582,9 +582,9 @@ def test_pull_all_runs_end_to_end(
     source_db = tmp_path / "bulk-source.sqlite"
     _write_bulk_sqlite(source_db)
     bulk_gz = gzip.compress(source_db.read_bytes())
-    meta_bytes = json.dumps(
-        {"meta": {"date": "2026-06-05", "version": "5.3.0"}}
-    ).encode()
+    meta_bytes = json.dumps({
+        "meta": {"date": "2026-06-05", "version": "5.3.0"}
+    }).encode()
 
     def handler(request: httpx.Request) -> httpx.Response:
         url = str(request.url)
@@ -615,11 +615,11 @@ def test_pull_all_runs_end_to_end(
     asyncio.run(run.pull_all(bus, RunOptions(only_sets=frozenset({"TST"}))))
 
     assert any(isinstance(e, CardDownloaded) for e in received)
-    assert paths_has_image(tmp_path)
+    assert has_image(tmp_path)
     with CatalogRepository.open(tmp_path / "catalog.sqlite") as repository:
         assert repository.get_card("uuid-1") is not None
 
 
-def paths_has_image(data_directory: Path) -> bool:
+def has_image(data_directory: Path) -> bool:
     """True when at least one downloaded scan exists under the data dir."""
     return any(data_directory.rglob("*.jpg"))
