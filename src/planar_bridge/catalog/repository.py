@@ -65,7 +65,11 @@ class CatalogRepository:
         return cls(sqlite3.connect(database_path))
 
     def __enter__(self) -> "CatalogRepository":
-        """Enter a context that closes the repository on exit."""
+        """Enter a context that closes the repository on exit.
+
+        Returns:
+            CatalogRepository: This repository.
+        """
         return self
 
     def __exit__(self, *exc_info: object) -> None:
