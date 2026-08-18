@@ -135,7 +135,7 @@ def card_is_bad(card_data: CardData, config: AppConfig, layout: str) -> bool:
     promos_crosscheck: set[str] = set(config.exempt_promos) & set(promos)
     is_promo_bad = len(promos_crosscheck) > 0
 
-    is_bad = (
+    bad_conditions = (
         is_reprint,
         is_language_bad,
         is_name_bad,
@@ -145,7 +145,7 @@ def card_is_bad(card_data: CardData, config: AppConfig, layout: str) -> bool:
         is_promo_bad,
     )
 
-    return any(is_bad)
+    return any(bad_conditions)
 
 
 def build_card_fields(card_data: CardData, config: AppConfig) -> CardFields:
