@@ -124,7 +124,7 @@ def test_filename_joins_sorted_faces_for_combined_layout() -> None:
 
 def test_filename_requires_related_uuids_for_combined_layout() -> None:
     """A combined layout with no related UUIDs is a programming error."""
-    with raises(AssertionError):
+    with raises(ValueError):
         card_model.card_filename("u2", "split", [])
 
 

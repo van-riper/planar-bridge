@@ -77,12 +77,16 @@ def card_filename(uuid: str, layout: str, related_uuids: list[str]) -> str:
 
     Returns:
         str: The filename stem (no extension).
+
+    Raises:
+        ValueError: If a combined layout has no related UUIDs.
     """
     if layout not in layouts.LAYOUT_COMBINED:
         return uuid
 
-    # Combined-face cards should always have related uuids
-    assert related_uuids
+    if not related_uuids:
+        message = f"combined layout {layout!r} has no related UUIDs"
+        raise ValueError(message)
 
     combined_uuids = [uuid, *related_uuids]
     combined_uuids.sort()
