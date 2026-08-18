@@ -28,11 +28,11 @@ class PullContext:
     """The run-wide dependencies threaded through the set and card loops.
 
     Attributes:
-        repository (CatalogRepository): The catalog of stored card state.
-        scryfall_source (ImageSource): The card-image source.
-        config (AppConfig): Resolved filtering configuration.
-        bus (EventBus): The event bus for set and card events.
-        options (RunOptions): The per-run command-line switches.
+        repository: The catalog of stored card state.
+        scryfall_source: The card-image source.
+        config: Resolved filtering configuration.
+        bus: The event bus for set and card events.
+        options: The per-run command-line switches.
     """
 
     repository: CatalogRepository
