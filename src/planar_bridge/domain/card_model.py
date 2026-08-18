@@ -46,12 +46,16 @@ def card_face(layout: str, side: str | None) -> Face | None:
     Returns:
         Face | None: "front" for side "a" and "back" for side "b" on two-sided
         layouts, or None for any other layout.
+
+    Raises:
+        ValueError: If a two-sided layout's side is neither "a" nor "b".
     """
     if layout not in layouts.LAYOUT_TWOSIDED:
         return None
 
-    # Two-sided cards should either be side "a" or side "b"
-    assert side in ("a", "b")
+    if side not in {"a", "b"}:
+        message = f"unexpected side {side!r} for two-sided layout {layout!r}"
+        raise ValueError(message)
 
     # TODO: needs a better way to map "a" to "front" and "b" to "back"
     return "front" if side == "a" else "back"
