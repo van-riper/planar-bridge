@@ -40,7 +40,6 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
         The immutable set of absolute locations.
     """
     # TODO: rename PLANAR_BRIDGE_DIR to PLANAR_BRIDGE_PATH
-    # Assign if PLANAR_BRIDGE_DIR is set
     data_directory = environment.get("PLANAR_BRIDGE_DIR")
 
     # Fallback to system data folders otherwise
