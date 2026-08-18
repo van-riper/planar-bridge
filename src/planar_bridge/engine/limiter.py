@@ -70,7 +70,7 @@ class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
             self._next_available_time = (
                 scheduled_time + self._minimum_interval_seconds
             )
-            delay: float = scheduled_time - now
+            delay_seconds: float = scheduled_time - now
 
-        if delay > 0:
-            await self._sleeper(delay)
+        if delay_seconds > 0:
+            await self._sleeper(delay_seconds)
