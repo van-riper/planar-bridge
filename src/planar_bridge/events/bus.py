@@ -13,7 +13,7 @@ from collections.abc import Callable
 
 from .types import Event
 
-EventHandler = Callable[[Event], None]
+type EventHandler = Callable[[Event], None]
 
 
 class EventBus:
