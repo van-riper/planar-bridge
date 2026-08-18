@@ -1,10 +1,8 @@
-"""The pipeline's context objects: run-wide, per-set, and per-card state.
+"""Holds the run-wide, per-set, and per-card state for the pull loops.
 
-PullContext bundles the run-wide dependencies. CardObject and
-SetObject hold the per-card and per-set runtime state (catalog lookups,
-image paths, and progress) derived from the pure domain models. The network
-work lives in sources/ and the download decision in domain.decisions;
-these objects hold no I/O beyond reading the catalog.
+The network work lives in sources/, and the download decision in
+domain.decisions; these objects hold no I/O beyond reading the
+catalog.
 """
 
 from dataclasses import dataclass
