@@ -62,10 +62,10 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
         mtgjson_directory=mtgjson_directory,
         bulk_path=Path(mtgjson_directory / "AllPrintings.sqlite"),
         metadata_path=Path(mtgjson_directory / "Meta.json"),
+        # TODO: rename config.toml to planar-bridge.toml
         config_path=Path(data_directory / "config.toml"),
         database_path=Path(data_directory / "catalog.sqlite"),
     )
-    # TODO: rename config.toml to planar-bridge.toml
 
 
 def ensure_directories_exist(paths: DataPaths) -> None:
