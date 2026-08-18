@@ -33,3 +33,12 @@ testpaths = ["tests"]
 
 [tool.ruff]
 extend = "ruff.pythonicator.toml"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "assert",
+    "docstring-missing-returns",
+    "implicit-namespace-package",
+    "private-member-access",
+]
+"src/planar_bridge/reporters/console.py" = ["print"]
