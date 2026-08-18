@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "pythonicator@pythonicator": true
+  }
+}
