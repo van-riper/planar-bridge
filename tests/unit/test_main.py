@@ -15,6 +15,11 @@ def test_run_exits_cleanly_on_keyboard_interrupt(
     """Ctrl-C is caught, reported as Interrupted, and exits with code 130."""
 
     def fake_run(coro: Any) -> None:
+        """Discard the coroutine and simulate a Ctrl-C during the run.
+
+        Raises:
+            KeyboardInterrupt: Always, in place of running the coroutine.
+        """
         coro.close()  # the pull_all coroutine is never awaited here
         raise KeyboardInterrupt
 

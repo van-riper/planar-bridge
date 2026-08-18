@@ -11,6 +11,7 @@ class FakeClock:
     """A controllable clock and sleeper for deterministic limiter tests."""
 
     def __init__(self) -> None:
+        """Start the clock at zero with no sleeps recorded."""
         self.now = 0.0
         self.sleeps: list[float] = []
 
@@ -46,6 +47,7 @@ def test_serial_acquires_are_spaced_by_the_interval() -> None:
     limiter = RateLimiter(10, clock=clock.time, sleeper=clock.sleep)
 
     async def scenario() -> None:
+        """Acquire the limiter three times back to back."""
         await limiter.acquire()
         await limiter.acquire()
         await limiter.acquire()
@@ -62,6 +64,7 @@ def test_idle_gap_does_not_bank_credit() -> None:
     limiter = RateLimiter(10, clock=clock.time, sleeper=clock.sleep)
 
     async def scenario() -> None:
+        """Acquire the limiter, jump the clock forward, then acquire again."""
         await limiter.acquire()
         clock.now = 1.0
         await limiter.acquire()

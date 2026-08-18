@@ -21,6 +21,11 @@ def build_source(
     captured_urls: list[str] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
+        """Record the requested URL.
+
+        Returns:
+            The next queued response.
+        """
         captured_urls.append(str(request.url))
         return queue.pop(0)
 
@@ -36,6 +41,11 @@ def test_image_status_returns_the_reported_status() -> None:
     ])
 
     async def scenario() -> str | None:
+        """Query the image status.
+
+        Returns:
+            The reported status value.
+        """
         status = await source.image_status(SCRYFALL_ID)
         await httpx_client.aclose()
         return status
@@ -50,6 +60,7 @@ def test_image_status_requests_the_json_format() -> None:
     ])
 
     async def scenario() -> None:
+        """Query the image status so the requested URL can be captured."""
         await source.image_status(SCRYFALL_ID)
         await httpx_client.aclose()
 
@@ -65,6 +76,11 @@ def test_image_status_is_none_on_failure() -> None:
     source, httpx_client, _ = build_source([httpx.Response(404)])
 
     async def scenario() -> str | None:
+        """Query the image status.
+
+        Returns:
+            None, since the query fails.
+        """
         status = await source.image_status(SCRYFALL_ID)
         await httpx_client.aclose()
         return status
@@ -79,6 +95,11 @@ def test_download_image_returns_the_content() -> None:
     ])
 
     async def scenario() -> bytes | None:
+        """Download the card image.
+
+        Returns:
+            The returned image bytes.
+        """
         content = await source.download_image(SCRYFALL_ID)
         await httpx_client.aclose()
         return content
@@ -105,6 +126,7 @@ def test_download_image_requests_the_right_url(
     ])
 
     async def scenario() -> None:
+        """Download the card image so the requested URL can be captured."""
         await source.download_image(SCRYFALL_ID, face=face)
         await httpx_client.aclose()
 
@@ -118,6 +140,11 @@ def test_download_image_is_none_on_failure() -> None:
     source, httpx_client, _ = build_source([httpx.Response(404)])
 
     async def scenario() -> bytes | None:
+        """Download the card image.
+
+        Returns:
+            None, since the request fails.
+        """
         content = await source.download_image(SCRYFALL_ID)
         await httpx_client.aclose()
         return content

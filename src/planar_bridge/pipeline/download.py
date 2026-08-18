@@ -106,6 +106,11 @@ async def pull_set(
     semaphore = asyncio.Semaphore(constants.MAX_CONCURRENT_DOWNLOADS)
 
     async def handle(card_entry: CardData) -> None:
+        """Download one card entry while holding the semaphore.
+
+        Args:
+            card_entry: The raw card dict to download.
+        """
         async with semaphore:
             await _handle_card(set_obj, context, run_position, card_entry)
 

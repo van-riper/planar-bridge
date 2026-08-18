@@ -20,7 +20,7 @@ class EventBus:
     """Dispatches emitted events to every registered handler."""
 
     def __init__(self) -> None:
-
+        """Create an event bus with no handlers registered yet."""
         self._handlers: list[EventHandler] = []
 
     def subscribe(self, handler: EventHandler) -> None:

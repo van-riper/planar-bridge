@@ -20,6 +20,11 @@ def build_source(
     captured_urls: list[str] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
+        """Record the requested URL.
+
+        Returns:
+            The next queued response.
+        """
         captured_urls.append(str(request.url))
         return queue.pop(0)
 
@@ -38,6 +43,11 @@ def test_fetch_metadata_returns_the_parsed_info() -> None:
     ])
 
     async def scenario() -> MetadataInfo | None:
+        """Fetch the metadata.
+
+        Returns:
+            The parsed metadata info.
+        """
         info = await source.fetch_metadata()
         await httpx_client.aclose()
         return info
@@ -54,6 +64,7 @@ def test_fetch_metadata_requests_the_meta_endpoint() -> None:
     ])
 
     async def scenario() -> None:
+        """Fetch the metadata so the requested URL can be captured."""
         await source.fetch_metadata()
         await httpx_client.aclose()
 
@@ -67,6 +78,11 @@ def test_fetch_metadata_is_none_on_failure() -> None:
     source, httpx_client, _ = build_source([httpx.Response(404)])
 
     async def scenario() -> MetadataInfo | None:
+        """Fetch the metadata.
+
+        Returns:
+            None, since the query fails.
+        """
         info = await source.fetch_metadata()
         await httpx_client.aclose()
         return info
@@ -82,6 +98,11 @@ def test_download_bulk_decompresses_the_payload() -> None:
     ])
 
     async def scenario() -> bytes | None:
+        """Download the bulk file.
+
+        Returns:
+            Its decompressed bytes.
+        """
         content = await source.download_bulk("AllPrintings")
         await httpx_client.aclose()
         return content
@@ -105,6 +126,7 @@ def test_download_bulk_requests_the_right_url(
     ])
 
     async def scenario() -> None:
+        """Download the bulk file so the requested URL can be captured."""
         await source.download_bulk(target)
         await httpx_client.aclose()
 
@@ -118,6 +140,11 @@ def test_download_bulk_is_none_on_failure() -> None:
     source, httpx_client, _ = build_source([httpx.Response(404)])
 
     async def scenario() -> bytes | None:
+        """Download the bulk file.
+
+        Returns:
+            None, since the download fails.
+        """
         content = await source.download_bulk("Meta")
         await httpx_client.aclose()
         return content

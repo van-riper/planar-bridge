@@ -36,6 +36,11 @@ def test_ask_yes_no_treats_eof_as_no(
     """A closed input stream declines rather than raising."""
 
     def raise_eof(_: str) -> str:
+        """Simulate a closed input stream.
+
+        Raises:
+            EOFError: Always, in place of returning input.
+        """
         raise EOFError
 
     monkeypatch.setattr("builtins.input", raise_eof)
@@ -64,6 +69,11 @@ def test_approval_for_assume_yes_skips_the_prompt(
     """--assume-yes yields an approval that proceeds without prompting."""
 
     def fail_if_prompted(_: str) -> str:
+        """Fail the test if the approval calls input() after all.
+
+        Raises:
+            AssertionError: Always, since input() must not be called.
+        """
         raise AssertionError("input() must not be called under --assume-yes")
 
     monkeypatch.setattr("builtins.input", fail_if_prompted)

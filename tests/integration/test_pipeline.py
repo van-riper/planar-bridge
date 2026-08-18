@@ -38,6 +38,7 @@ class StubScryfall:
         image_status: str | None = "highres_scan",
         download_result: bytes | None = b"image-bytes",
     ) -> None:
+        """Store the canned image status and download result to return."""
         self._image_status = image_status
         self._download_result = download_result
 
@@ -60,6 +61,7 @@ class StubMtgjson:
         info: MetadataInfo | None,
         download_result: bytes | None = b"{}",
     ) -> None:
+        """Store the canned metadata info and download result to return."""
         self._info = info
         self._download_result = download_result
 
@@ -76,6 +78,7 @@ class StubBulk:
     """A bulk source double backed by an in-memory dict of set entries."""
 
     def __init__(self, sets: dict[str, dict[str, Any]]) -> None:
+        """Store the configured set entries, keyed by set code."""
         self._sets = sets
 
     def set_codes(self) -> tuple[str, ...]:
@@ -532,6 +535,14 @@ def test_pull_all_runs_end_to_end(
     }).encode()
 
     def handler(request: httpx.Request) -> httpx.Response:
+        """Route each stubbed request to the response its URL implies.
+
+        Returns:
+            The canned response matching the request URL.
+
+        Raises:
+            AssertionError: The request URL matches none of the routes.
+        """
         url = str(request.url)
         if url.endswith("Meta.json"):
             return httpx.Response(200, content=meta_bytes)
@@ -548,6 +559,11 @@ def test_pull_all_runs_end_to_end(
     original_client = httpx.AsyncClient
 
     def fake_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
+        """Build the real AsyncClient wired to the stubbed transport.
+
+        Returns:
+            The real AsyncClient, with the transport swapped for the stub.
+        """
         kwargs["transport"] = httpx.MockTransport(handler)
         return original_client(*args, **kwargs)
 

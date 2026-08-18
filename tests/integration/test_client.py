@@ -23,6 +23,7 @@ class RecordingLimiter:
     """A limiter double that counts how often it is acquired."""
 
     def __init__(self) -> None:
+        """Start with no acquisitions recorded."""
         self.acquisitions = 0
 
     async def acquire(self) -> None:
@@ -34,6 +35,7 @@ class RecordingSleeper:
     """A sleeper double that records the delays it is asked to wait."""
 
     def __init__(self) -> None:
+        """Start with no delays recorded."""
         self.delays: list[float] = []
 
     async def __call__(self, delay: float) -> None:
@@ -53,6 +55,7 @@ def build_client(
     calls = {"count": 0}
 
     def handler(request: httpx.Request) -> httpx.Response:
+        """Return the next queued response or raise the next queued error."""
         calls["count"] += 1
         item = queue.pop(0)
         if isinstance(item, Exception):
@@ -124,6 +127,11 @@ def test_get_returns_the_response_on_success() -> None:
     ])
 
     async def scenario() -> httpx.Response | None:
+        """Issue the GET request.
+
+        Returns:
+            The successful response.
+        """
         response = await client.get(URL)
         await httpx_client.aclose()
         return response
@@ -143,6 +151,11 @@ def test_get_follows_a_redirect() -> None:
     """
 
     def handler(request: httpx.Request) -> httpx.Response:
+        """Redirect the image path once, then serve the final image.
+
+        Returns:
+            A redirect for the image path, else the final response.
+        """
         if request.url.path == "/image":
             return httpx.Response(
                 302, headers={"Location": "https://files.test/final"}
@@ -153,6 +166,11 @@ def test_get_follows_a_redirect() -> None:
     client = AsyncHttpClient(httpx_client, RecordingLimiter())
 
     async def scenario() -> httpx.Response | None:
+        """Issue the GET request.
+
+        Returns:
+            The response after following the redirect.
+        """
         response = await client.get("https://example.test/image")
         await httpx_client.aclose()
         return response
@@ -178,6 +196,11 @@ def test_get_retries_a_retryable_status_then_succeeds() -> None:
     )
 
     async def scenario() -> httpx.Response | None:
+        """Issue the GET request.
+
+        Returns:
+            The response after the retried statuses clear.
+        """
         response = await client.get(URL)
         await httpx_client.aclose()
         return response
@@ -199,6 +222,11 @@ def test_get_retries_a_transport_error_then_succeeds() -> None:
     ])
 
     async def scenario() -> httpx.Response | None:
+        """Issue the GET request.
+
+        Returns:
+            The response after the transport error clears.
+        """
         response = await client.get(URL)
         await httpx_client.aclose()
         return response
@@ -217,6 +245,11 @@ def test_get_gives_up_immediately_on_a_fatal_status() -> None:
     )
 
     async def scenario() -> httpx.Response | None:
+        """Issue the GET request.
+
+        Returns:
+            None, since the fatal status is not retried.
+        """
         response = await client.get(URL)
         await httpx_client.aclose()
         return response
@@ -238,6 +271,11 @@ def test_get_gives_up_after_the_maximum_attempts() -> None:
     )
 
     async def scenario() -> httpx.Response | None:
+        """Issue the GET request.
+
+        Returns:
+            None, since the attempt budget runs out first.
+        """
         response = await client.get(URL)
         await httpx_client.aclose()
         return response
