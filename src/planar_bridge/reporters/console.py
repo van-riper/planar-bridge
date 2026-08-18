@@ -80,7 +80,7 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
             "MTGJSON has been updated to v"
             + event.source_version
             + "\n"
-            + constants.VERS_WARNING
+            + constants.VERSION_WARNING
         )
 
     def __set_message(self, event: SetStarted) -> str:

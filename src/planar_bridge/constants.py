@@ -1,6 +1,6 @@
 """Pinned versions and tunables shared across the pull pipeline."""
 
-MTGJSON_VERS: str = "5.3.0"
+MTGJSON_VERSION: str = "5.3.0"
 
 # Held under Scryfall's ~10 requests-per-second limit (Terms of Use). The
 # shared RateLimiter enforces this across all in-flight requests; load-bearing,
@@ -20,10 +20,8 @@ HTTP_HEADERS: dict[str, str] = {
     "Accept": "application/json;q=0.9,*/*;q=0.8",
 }
 
-VERS_WARNING: str = ("\n").join(
-    (
-        "Planar Bridge is only expected to work with v" + MTGJSON_VERS,
-        "Make sure there are no conflicts before proceeding!",
-        "MTGJSON changelog: https://mtgjson.com/changelogs/mtgjson-v5/",
-    )
-)
+VERSION_WARNING: str = ("\n").join((
+    "Planar Bridge is only expected to work with v" + MTGJSON_VERSION,
+    "Make sure there are no conflicts before proceeding!",
+    "MTGJSON changelog: https://mtgjson.com/changelogs/mtgjson-v5/",
+))

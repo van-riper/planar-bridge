@@ -9,7 +9,7 @@ import re
 
 from pytest import CaptureFixture
 
-from planar_bridge.constants import VERS_WARNING
+from planar_bridge.constants import VERSION_WARNING
 from planar_bridge.events import (
     BulkDataLoaded,
     BulkDownloadStarted,
@@ -65,7 +65,7 @@ def test_version_mismatch_warns_with_the_changelog_block(
     """A mismatch warns and reproduces the multi-line version notice."""
     lines = emitted(capsys, VersionMismatch(source_version="5.2.3"))
     assert lines[0] == "WARNING: MTGJSON has been updated to v5.2.3"
-    assert lines[1:] == ["WARNING: " + w for w in VERS_WARNING.splitlines()]
+    assert lines[1:] == ["WARNING: " + w for w in VERSION_WARNING.splitlines()]
 
 
 def test_set_started_is_a_load_set_line(capsys: CaptureFixture[str]) -> None:

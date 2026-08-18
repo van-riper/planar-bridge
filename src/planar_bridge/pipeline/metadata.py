@@ -87,7 +87,7 @@ async def pull_meta(
         raise RuntimeError
 
     local_info = _read_local_metadata(paths)
-    if not version_matches_pin(local_info, constants.MTGJSON_VERS):
+    if not version_matches_pin(local_info, constants.MTGJSON_VERSION):
         _resolve_version_drift(bus, source_info.version, approve_version)
 
     # Fetch Meta.json only when it is missing; an existing copy is kept.
