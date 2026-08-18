@@ -1,0 +1,178 @@
+# Source of truth for the enforced pythonicator ruff config.
+# https://github.com/van-riper/pythonicator
+#
+# A personal `~/.config/ruff/` config extends the installed copy of this
+# file, and any repo (this plugin's own included) can copy it in and extend
+# it locally for a version-controlled config (see the pythonicator README).
+
+required-version = ">=0.15"
+
+line-length = 80
+preview = true
+src = ["src", "tests"]
+
+[format]
+preview = true
+docstring-code-format = true
+
+[lint]
+select = [
+    # "AIR",      # Airflow: Apache Airflow best practices and deprecations
+    "ERA",      # eradicate: finds commented-out code
+    # "FAST",     # FastAPI: FastAPI-specific best practices
+    "YTT",      # flake8-2020: misuse of sys.version checks broken after 2020
+    "ANN",      # flake8-annotations: missing or incomplete type annotations
+    "ASYNC",    # flake8-async: async/await pitfalls and blocking calls
+    "S",        # flake8-bandit: common security vulnerabilities
+    "BLE",      # flake8-blind-except: catching overly broad exceptions
+    "FBT",      # flake8-boolean-trap: confusing boolean positional arguments
+    "B",        # flake8-bugbear: likely bugs and design problems
+    "A",        # flake8-builtins: shadowing of Python builtins
+    "COM",      # flake8-commas: trailing comma placement
+    "C4",       # flake8-comprehensions: simpler list, set, and dict comprehensions
+    # "CPY",      # flake8-copyright: missing copyright notices
+    "DTZ",      # flake8-datetimez: timezone-naive datetime usage
+    "T10",      # flake8-debugger: leftover breakpoint or debugger calls
+    # "DJ",       # flake8-django: Django-specific conventions
+    "EM",       # flake8-errmsg: exception message string formatting
+    "EXE",      # flake8-executable: shebang and executable-file issues
+    # "FIX",      # flake8-fixme: leftover FIXME, TODO, and XXX markers
+    "FA",       # flake8-future-annotations: missing 'from __future__ import annotations'
+    # "INT",      # flake8-gettext: gettext translation string issues
+    "ISC",      # flake8-implicit-str-concat: unintended implicit string concatenation
+    "ICN",      # flake8-import-conventions: standard import aliases such as np and pd
+    "LOG",      # flake8-logging: correct logging module usage
+    "G",        # flake8-logging-format: logging format string issues
+    "INP",      # flake8-no-pep420: missing __init__.py in packages
+    "PIE",      # flake8-pie: miscellaneous code simplifications
+    "T20",      # flake8-print: leftover print statements
+    # "PYI",      # flake8-pyi: type stub (.pyi) conventions
+    "PT",       # flake8-pytest-style: pytest style and best practices
+    "Q",        # flake8-quotes: consistent quote style
+    "RSE",      # flake8-raise: unnecessary parentheses on raised exceptions
+    "RET",      # flake8-return: return statement consistency
+    "SLF",      # flake8-self: access to private members
+    "SIM",      # flake8-simplify: simplify code constructs
+    "SLOT",     # flake8-slots: missing __slots__ definitions
+    "TID",      # flake8-tidy-imports: banned and relative import rules
+    "TD",       # flake8-todos: TODO comment formatting
+    "TC",       # flake8-type-checking: move imports into TYPE_CHECKING blocks
+    "ARG",      # flake8-unused-arguments: unused function arguments
+    "PTH",      # flake8-use-pathlib: prefer pathlib over os.path
+    "FLY",      # flynt: convert .format and % formatting to f-strings
+    "I",        # isort: import sorting and grouping
+    "C90",      # mccabe: cyclomatic complexity limits
+    # "NPY",      # NumPy-specific rules: NumPy deprecations and best practices
+    # "PD",       # pandas-vet: pandas anti-patterns
+    "N",        # pep8-naming: PEP 8 naming conventions
+    "PERF",     # Perflint: performance anti-patterns
+    "E",        # pycodestyle: PEP 8 style errors
+    "W",        # pycodestyle: PEP 8 style warnings
+    "DOC",      # pydoclint: docstring agrees with the function signature
+    "D",        # pydocstyle: docstring style conventions
+    "F",        # Pyflakes: logical errors and undefined names
+    "PGH",      # pygrep-hooks: miscellaneous grep-based lint checks
+    "PL",       # Pylint: broad set of Pylint checks
+    # "PLC",      # Pylint: convention checks
+    # "PLE",      # Pylint: error checks
+    # "PLR",      # Pylint: refactor checks
+    # "PLW",      # Pylint: warning checks
+    "UP",       # pyupgrade: upgrade syntax for newer Python versions
+    "FURB",     # refurb: modernize and refine code patterns
+    "RUF",      # Ruff-specific rules: Ruff's own additional checks
+    "TRY",      # tryceratops: exception handling anti-patterns
+]
+
+ignore = [
+    # Magic numbers are fine for the most part.
+    "PLR2004",  # magic-value-comparison
+
+    # TODO comments don't need an author or issue link.
+    "TD002",    # missing-todo-author
+    "TD003",    # missing-todo-link
+
+    # Rules that conflict with the ruff formatter.
+    "W191",     # tab-indentation
+    "E111",     # indentation-with-invalid-multiple
+    "E114",     # indentation-with-invalid-multiple-comment
+    "E117",     # over-indented
+    "D203",     # incorrect-blank-line-before-class
+    "D206",     # docstring-tab-indentation
+    "D300",     # triple-single-quotes
+    "Q000",     # bad-quotes-inline-string
+    "Q001",     # bad-quotes-multiline-string
+    "Q002",     # bad-quotes-docstring
+    "Q003",     # avoidable-escaped-quote
+    "Q004",     # unnecessary-escaped-quote
+    "COM812",   # missing-trailing-comma
+    "COM819",   # prohibited-trailing-comma
+]
+
+unfixable = [
+    # Flag unused imports, never autofix: the per-edit hook runs after every
+    # single Edit, so an import added ahead of the code that uses it (a
+    # common split across two edits) reads as unused mid-sequence and gets
+    # silently deleted before the usage lands. check_stop.py's end-of-session
+    # sweep still catches a genuinely-dead import; it just won't get erased
+    # out from under work still in progress.
+    "F401",
+    # Flag an unused noqa, never autofix: a noqa added ahead of the code that
+    # will need it (the violation doesn't exist yet mid-sequence) reads as
+    # stale and gets silently stripped before it has anything to suppress.
+    "RUF100",
+    # Flag an empty TYPE_CHECKING block, never autofix: one staged ahead of
+    # the type-only import that will populate it reads as dead scaffolding
+    # and gets silently removed before it holds anything.
+    "TC005",
+    # Flag a lone pass/... placeholder, never autofix: agents routinely stub
+    # a body with one and swap in the real implementation on the next edit;
+    # autofixing it away breaks that exact-match replacement.
+    "PIE790",
+    # Flag a collapsible nested if, never autofix: merging `if a: if b:` into
+    # `if a and b:` before the inner condition grows its own elif/else
+    # forecloses that branch structure mid-sequence.
+    "SIM102",
+    # Flag a manual write-loop, never autofix: collapsing it into writelines
+    # before the next edit adds per-line processing removes the loop body
+    # that processing was going to live in.
+    "FURB122",
+    # Flag a manual set-mutation loop, same reason as FURB122: collapsing
+    # it into set.update before the next edit adds a filter or transform
+    # removes the loop body that logic was going to live in.
+    "FURB142",
+    # Flag a redundant else after return/raise/continue/break, never
+    # autofix: dedenting the else body before the next edit adds to it
+    # reshapes code an exact-match Edit may still be anchored on.
+    "RET505",
+    "RET506",
+    "RET507",
+    "RET508",
+]
+
+[lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.pylint]
+max-nested-blocks = 4
+
+# No [lint.per-file-ignores] here on purpose: ruff anchors those globs to
+# the directory of the file that declares them, not the extending project's
+# root, so they'd silently stop matching the moment this file is copied
+# somewhere else. Declare per-file-ignores in the project's own pyproject.toml
+# or ruff.toml (the file with `extend = "ruff.pythonicator.toml"`) instead.
+#
+# Common examples, for reference (uncomment and adjust in your own config,
+# using `[tool.ruff.lint.per-file-ignores]` instead if that config lives in
+# pyproject.toml):
+#
+# [lint.per-file-ignores]
+# "tests/*.py" = ["S101"]         # asserts are fine in tests
+# "tests/fixtures/*.py" = ["ALL"] # fixtures are deliberately non-conforming
+# "__init__.py" = ["F401"]        # re-exports look like unused imports
+# "__main__.py" = ["T201"]        # CLI entrypoints legitimately print

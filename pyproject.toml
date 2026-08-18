@@ -36,3 +36,6 @@ line-length = 80
 
 [tool.pylint.format]
 max-line-length = 80
+
+[tool.ruff]
+extend = "ruff.pythonicator.toml"
