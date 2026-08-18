@@ -85,7 +85,7 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
 
     def __set_message(self, event: SetStarted) -> str:
 
-        run = self.__progress(event.run_count, event.run_total, False)
+        run = self.__progress(event.run_count, event.run_total, arrow=False)
 
         return (
             f"{run} {event.set_code.ljust(6)} "
@@ -94,12 +94,12 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
 
     def __card_message(self, event: CardEvent) -> str:
 
-        run = self.__progress(event.run_count, event.run_total, False)
-        within = self.__progress(event.set_count, event.set_total, True)
+        run = self.__progress(event.run_count, event.run_total, arrow=False)
+        within = self.__progress(event.set_count, event.set_total, arrow=True)
 
         return f"{run} {event.set_code.ljust(6)} {within} {event.display_label}"
 
-    def __progress(self, count: int, total: int, arrow: bool) -> str:
+    def __progress(self, count: int, total: int, *, arrow: bool) -> str:
         """Format a count over a total as a padded percentage label.
 
         Args:
