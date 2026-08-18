@@ -1,3 +1,5 @@
+"""Resolve and create the data directory's filesystem locations."""
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
