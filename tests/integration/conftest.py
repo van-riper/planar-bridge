@@ -1,7 +1,7 @@
 """Shared fixtures for the integration test suite."""
 
 import sqlite3
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from typing import Any
 
 import pytest
@@ -10,7 +10,7 @@ from planar_bridge.config.loader import AppConfig
 
 
 @pytest.fixture
-def connection():
+def connection() -> Iterator[sqlite3.Connection]:
     """Yield an in-memory SQLite connection, closed after the test."""
     conn = sqlite3.connect(":memory:")
     yield conn
