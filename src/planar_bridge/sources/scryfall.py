@@ -2,8 +2,7 @@
 
 The source knows Scryfall's URL shapes and response format. It reports a card's
 image status and downloads its image bytes, leaving the download decision to
-domain.decisions and the file write to the pipeline. It replaces the
-network halves of the old CardObject.parse_source_state and download.
+domain.decisions and the file write to the pipeline.
 """
 
 from planar_bridge.aliases import Face
