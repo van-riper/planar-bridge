@@ -30,7 +30,7 @@ class VersionMismatch(Event):
     """The source MTGJSON version differs from the pinned version.
 
     Attributes:
-        source_version (str): The newer MTGJSON version reported by the source.
+        source_version: The newer MTGJSON version reported by the source.
     """
 
     source_version: str
@@ -46,7 +46,7 @@ class BulkDataLoaded(Event):
     """The bulk set data has been read into memory.
 
     Attributes:
-        date (str): The build date of the loaded bulk data.
+        date: The build date of the loaded bulk data.
     """
 
     date: str
@@ -57,10 +57,10 @@ class SetStarted(Event):
     """Processing of one set has begun.
 
     Attributes:
-        set_code (str): The set's MTGJSON code.
-        run_count (int): This set's position in the run (sets handled so far).
-        run_total (int): The total number of sets in the run.
-        is_all_high_resolution (bool): True when every recorded scan in the
+        set_code: The set's MTGJSON code.
+        run_count: This set's position in the run (sets handled so far).
+        run_total: The total number of sets in the run.
+        is_all_high_resolution: True when every recorded scan in the
             set is already high resolution.
     """
 
@@ -75,7 +75,7 @@ class SetSkipped(Event):
     """A set was omitted from the run.
 
     Attributes:
-        set_code (str): The omitted set's MTGJSON code.
+        set_code: The omitted set's MTGJSON code.
     """
 
     set_code: str
@@ -86,12 +86,12 @@ class CardEvent(Event):
     """Shared payload for the two card-image outcomes that report a line.
 
     Attributes:
-        set_code (str): The card's set code.
-        run_count (int): The set's position in the run (sets handled so far).
-        run_total (int): The total number of sets in the run.
-        set_count (int): The card's position in its set (cards handled so far).
-        set_total (int): The total number of cards in the set.
-        display_label (str): The card's human-readable label.
+        set_code: The card's set code.
+        run_count: The set's position in the run (sets handled so far).
+        run_total: The total number of sets in the run.
+        set_count: The card's position in its set (cards handled so far).
+        set_total: The total number of cards in the set.
+        display_label: The card's human-readable label.
     """
 
     set_code: str
@@ -117,7 +117,7 @@ class CardSkipped(Event):
     """A card needed no download (bad card or already up to date).
 
     Attributes:
-        set_code (str): The skipped card's set code.
+        set_code: The skipped card's set code.
     """
 
     set_code: str
@@ -128,7 +128,7 @@ class CardFailed(Event):
     """A card image could not be retrieved after exhausting retries.
 
     Attributes:
-        set_code (str): The failed card's set code.
+        set_code: The failed card's set code.
     """
 
     set_code: str
@@ -139,7 +139,7 @@ class RunFinished(Event):
     """The run completed successfully.
 
     Attributes:
-        low_resolution_set_codes (tuple[str, ...]): Set codes that still hold
+        low_resolution_set_codes: Set codes that still hold
             at least one low-resolution scan after the run.
     """
 
