@@ -67,7 +67,7 @@ def test_derived_paths_sit_under_data_directory() -> None:
     assert paths.mtgjson_directory == Path("/data/pb/.mtgjson")
     assert paths.bulk_path == Path("/data/pb/.mtgjson/AllPrintings.sqlite")
     assert paths.metadata_path == Path("/data/pb/.mtgjson/Meta.json")
-    assert paths.config_path == Path("/data/pb/config.toml")
+    assert paths.config_path == Path("/data/pb/planar-bridge.toml")
 
 
 def test_database_path_sits_under_data_directory() -> None:

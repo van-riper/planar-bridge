@@ -1,6 +1,6 @@
 """Built-in configuration defaults and the language code map.
 
-`load_config` layers a user's config.toml over these values.
+`load_config` layers a user's planar-bridge.toml over these values.
 """
 
 DEFAULT_PULL_REPRINTS: bool = False

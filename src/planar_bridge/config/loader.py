@@ -40,15 +40,15 @@ def load_config(
     config_path: Path | None,
     language_override: str | None = None,
 ) -> AppConfig:
-    """Build an AppConfig by layering config.toml over the defaults.
+    """Build an AppConfig by layering planar-bridge.toml over the defaults.
 
     Reads config_path when provided and present, overlays it on the
     built-in defaults, maps the card_language code to MTGJSON's full
     language name, and freezes the exempt/pardon collections.
 
     Args:
-        config_path: Path to a user config.toml, or None. A missing or None
-            path falls back to the defaults alone.
+        config_path: Path to a user planar-bridge.toml, or None. A missing
+            or None path falls back to the defaults alone.
         language_override: A language code that, when given, takes
             precedence over the file value and the default (the CLI's
             --language).

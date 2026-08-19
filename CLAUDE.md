@@ -44,12 +44,12 @@ The data directory is resolved in `paths.py::load_paths()` and created on demand
 
 Inside the data dir: `.mtgjson/` holds the MTGJSON bulk database (`AllPrintings.sqlite`) and
 its metadata (`Meta.json`); each set lives in `<SET_CODE>/` (tokens under
-`<SET_CODE>/tokens/`); `catalog.sqlite` is the per-card resolution catalog; `config.toml` is
-read from the data dir root. This differs from the `imgs/` + `json/` tree shown in older
+`<SET_CODE>/tokens/`); `catalog.sqlite` is the per-card resolution catalog; `planar-bridge.toml`
+is read from the data dir root. This differs from the `imgs/` + `json/` tree shown in older
 versions of the README.
 
-`config.toml` is optional and layered over `config.defaults.DEFAULT_*` values in
-`config/loader.py::load_config()`. See `config.example.toml`.
+`planar-bridge.toml` is optional and layered over `config.defaults.DEFAULT_*` values in
+`config/loader.py::load_config()`. See `planar-bridge.example.toml`.
 
 ## Architecture
 

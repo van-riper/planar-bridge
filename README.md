@@ -88,7 +88,7 @@ planar-bridge/                 (the data directory)
 │  ├─ AllPrintings.sqlite
 │  └─ Meta.json
 ├─ catalog.sqlite
-├─ config.toml
+├─ planar-bridge.toml
 ├─ LEA/
 │  ├─ tokens/
 │  │  ├─ 01234567-89ab-cdef-0123-456789abcdef.jpg
@@ -128,8 +128,8 @@ $ uv run ty check                  # type-check
 
 ## Configuration
 
-If you want to configure Planar Bridge, copy `config.example.toml` from this
-repo to `config.toml` inside your data directory (see
+If you want to configure Planar Bridge, copy `planar-bridge.example.toml`
+from this repo to `planar-bridge.toml` inside your data directory (see
 [Data directory](#data-directory) above).
 
 Configuration options let you enable reprints, set a preferred card language,

@@ -17,6 +17,6 @@ htmlcov/
 .vscode/
 
 # Local config & data
-config.toml
+planar-bridge.toml
 imgs/
 json/

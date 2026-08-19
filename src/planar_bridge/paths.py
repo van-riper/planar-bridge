@@ -15,7 +15,7 @@ class DataPaths:
         mtgjson_directory (Path): Holds the MTGJSON bulk and meta files.
         bulk_path (Path): AllPrintings.sqlite inside mtgjson_directory.
         metadata_path (Path): Meta.json inside mtgjson_directory.
-        config_path (Path): config.toml inside data_directory.
+        config_path (Path): planar-bridge.toml inside data_directory.
         database_path (Path): catalog.sqlite (the SQLite catalog) inside
             data_directory.
     """
@@ -45,7 +45,6 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
         RuntimeError: If PLANAR_BRIDGE_DIR is unset and the platform is
             neither linux, darwin, nor win32.
     """
-    # TODO: rename PLANAR_BRIDGE_DIR to PLANAR_BRIDGE_PATH
     data_directory = environment.get("PLANAR_BRIDGE_DIR")
 
     # Fallback to system data folders otherwise
@@ -68,8 +67,7 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
         mtgjson_directory=mtgjson_directory,
         bulk_path=Path(mtgjson_directory / "AllPrintings.sqlite"),
         metadata_path=Path(mtgjson_directory / "Meta.json"),
-        # TODO: rename config.toml to planar-bridge.toml
-        config_path=Path(data_directory / "config.toml"),
+        config_path=Path(data_directory / "planar-bridge.toml"),
         database_path=Path(data_directory / "catalog.sqlite"),
     )
 
