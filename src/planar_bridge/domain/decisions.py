@@ -19,11 +19,11 @@ class DownloadDecision:
     """Immutable verdict for one card's image.
 
     Attributes:
-        should_download (bool): True when the image must be fetched, whether as
-            a first download or a resolution upgrade.
-        source_is_high_resolution (bool): True when Scryfall reports the source
-            scan as high-resolution. Meaningful only when a usable scan exists;
-            it is False for placeholder and missing statuses.
+        should_download: True when the image must be fetched, whether as a
+            first download or a resolution upgrade.
+        source_is_high_resolution: True when Scryfall reports the source
+            scan as high-resolution. Meaningful only when a usable scan
+            exists; it is False for placeholder and missing statuses.
     """
 
     should_download: bool

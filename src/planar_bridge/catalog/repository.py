@@ -60,7 +60,7 @@ class CatalogRepository:
             database_path: Where the SQLite catalog file lives.
 
         Returns:
-            CatalogRepository: A repository wrapping a connection to that file.
+            A repository wrapping a connection to that file.
         """
         return cls(sqlite3.connect(database_path))
 
@@ -68,7 +68,7 @@ class CatalogRepository:
         """Enter a context that closes the repository on exit.
 
         Returns:
-            CatalogRepository: This repository.
+            This repository.
         """
         return self
 
@@ -185,10 +185,10 @@ def _row_to_card(row: sqlite3.Row) -> CardRow:
     """Build a CardRow from a database row, restoring the bool flag.
 
     Args:
-        row (sqlite3.Row): A row carrying every cards column.
+        row: A row carrying every cards column.
 
     Returns:
-        CardRow: The reconstructed card state.
+        The reconstructed card state.
     """
     return CardRow(
         filename=row["filename"],

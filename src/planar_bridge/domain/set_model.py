@@ -16,10 +16,10 @@ class SetRecord:
     """Immutable per-set facts derived from one MTGJSON set entry.
 
     Attributes:
-        set_code (str): MTGJSON set code.
-        is_omitted (bool): True when the whole set should be skipped.
-        card_entries (tuple[CardData, ...]): The set's cards followed by its
-            tokens, in that order.
+        set_code: MTGJSON set code.
+        is_omitted: True when the whole set should be skipped.
+        card_entries: The set's cards followed by its tokens, in that
+            order.
     """
 
     set_code: str

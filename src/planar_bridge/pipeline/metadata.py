@@ -52,9 +52,9 @@ def _resolve_version_drift(
     supplies it), so the pipeline stays free of any console interaction.
 
     Args:
-        bus (EventBus): The event bus the warning is emitted on.
-        source_version (str): The newer MTGJSON version reported by the source.
-        approve_version (Callable[[], bool]): Returns True to proceed.
+        bus: The event bus the warning is emitted on.
+        source_version: The newer MTGJSON version reported by the source.
+        approve_version: Returns True to proceed.
 
     Raises:
         KeyboardInterrupt: When the approval declines to proceed.

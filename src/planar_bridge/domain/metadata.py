@@ -12,8 +12,8 @@ class MetadataInfo:
     """One MTGJSON metadata entry.
 
     Attributes:
-        date (str): The build date of the metadata.
-        version (str): The MTGJSON version, with any build suffix removed.
+        date: The build date of the metadata.
+        version: The MTGJSON version, with any build suffix removed.
     """
 
     date: str

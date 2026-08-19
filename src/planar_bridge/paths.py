@@ -11,12 +11,12 @@ class DataPaths:
     """Absolute filesystem locations for the data directory.
 
     Attributes:
-        data_directory (Path): Root directory for all stored data.
-        mtgjson_directory (Path): Holds the MTGJSON bulk and meta files.
-        bulk_path (Path): AllPrintings.sqlite inside mtgjson_directory.
-        metadata_path (Path): Meta.json inside mtgjson_directory.
-        config_path (Path): planar-bridge.toml inside data_directory.
-        database_path (Path): catalog.sqlite (the SQLite catalog) inside
+        data_directory: Root directory for all stored data.
+        mtgjson_directory: Holds the MTGJSON bulk and meta files.
+        bulk_path: AllPrintings.sqlite inside mtgjson_directory.
+        metadata_path: Meta.json inside mtgjson_directory.
+        config_path: planar-bridge.toml inside data_directory.
+        database_path: catalog.sqlite (the SQLite catalog) inside
             data_directory.
     """
 

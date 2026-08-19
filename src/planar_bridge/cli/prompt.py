@@ -12,10 +12,10 @@ def _ask_yes_no(question: str) -> bool:
     """Prompt for a yes/no answer, re-prompting until it is y or n.
 
     Args:
-        question (str): The question to show; a [y/n] hint is appended.
+        question: The question to show; a [y/n] hint is appended.
 
     Returns:
-        bool: True for y, False for n. A closed input stream (EOF) declines.
+        True for y, False for n. A closed input stream (EOF) declines.
     """
     while True:
         try:

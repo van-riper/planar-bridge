@@ -111,12 +111,12 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         """Format a count over a total as a padded percentage label.
 
         Args:
-            count (int): The number done so far.
-            total (int): The total to reach.
-            arrow (bool): When True, append a > arrow (set-level lines).
+            count: The number done so far.
+            total: The total to reach.
+            arrow: When True, append a > arrow (set-level lines).
 
         Returns:
-            str: The formatted label, such as (45.0%) or (45.0%)>.
+            The formatted label, such as (45.0%) or (45.0%)>.
         """
         percent = format(count / total, ".1%")
         percent = percent.zfill(_PERCENT_LABEL_WIDTH)

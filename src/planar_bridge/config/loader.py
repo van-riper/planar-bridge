@@ -18,14 +18,12 @@ class AppConfig:
     """Resolved, immutable application configuration.
 
     Attributes:
-        pull_reprints (bool): Whether to download cards flagged as reprints.
-        card_language (str): MTGJSON full language name to keep
-            (e.g. "English").
-        pardoned_sets (frozenset[str]): Set codes kept even when
-            an exempt rule matches.
-        exempt_sets (frozenset[str]): Set codes to skip entirely.
-        exempt_promos (frozenset[str]): Promo types that disqualify a card.
-        exempt_types (frozenset[str]): Set types to skip entirely.
+        pull_reprints: Whether to download cards flagged as reprints.
+        card_language: MTGJSON full language name to keep (e.g. "English").
+        pardoned_sets: Set codes kept even when an exempt rule matches.
+        exempt_sets: Set codes to skip entirely.
+        exempt_promos: Promo types that disqualify a card.
+        exempt_types: Set types to skip entirely.
     """
 
     pull_reprints: bool

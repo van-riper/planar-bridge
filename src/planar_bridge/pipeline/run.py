@@ -38,9 +38,9 @@ async def _download_bulk_database(
     run reuses the bulk already on disk rather than re-downloading it.
 
     Args:
-        paths (DataPaths): The resolved data paths.
-        mtgjson_source (MetadataSource): The MTGJSON source.
-        bus (EventBus): The event bus the download banner is emitted on.
+        paths: The resolved data paths.
+        mtgjson_source: The MTGJSON source.
+        bus: The event bus the download banner is emitted on.
 
     Raises:
         RuntimeError: When the download fails.

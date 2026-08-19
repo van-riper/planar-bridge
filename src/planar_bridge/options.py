@@ -14,12 +14,12 @@ class RunOptions:
     """Per-run switches resolved from the command line.
 
     Attributes:
-        assume_yes (bool): Skip the version-mismatch prompt and proceed.
-        dry_run (bool): Run the full decision logic but write nothing to disk.
-        only_sets (frozenset[str]): Restrict the run to these set codes; an
-            empty set means every set is eligible.
-        language (str | None): Override the configured card-language code, or
-            None to keep the configured value.
+        assume_yes: Skip the version-mismatch prompt and proceed.
+        dry_run: Run the full decision logic but write nothing to disk.
+        only_sets: Restrict the run to these set codes; an empty set means
+            every set is eligible.
+        language: Override the configured card-language code, or None to
+            keep the configured value.
     """
 
     assume_yes: bool = False

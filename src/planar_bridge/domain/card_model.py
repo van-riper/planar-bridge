@@ -17,13 +17,13 @@ class CardFields:
     """Immutable per-card facts derived from one MTGJSON card entry.
 
     Attributes:
-        uuid (str): MTGJSON card UUID.
-        scryfall_id (str): Scryfall identifier used to build image URLs.
-        layout (str): MTGJSON layout string (e.g. "normal", "transform").
-        face (Face | None): "front"/"back" for two-sided cards, else None.
-        display_label (str): Human-readable "uuid | name" log label.
-        filename (str): Stem of the stored image file (no extension).
-        is_bad (bool): True when the card should not be downloaded.
+        uuid: MTGJSON card UUID.
+        scryfall_id: Scryfall identifier used to build image URLs.
+        layout: MTGJSON layout string (e.g. "normal", "transform").
+        face: "front"/"back" for two-sided cards, else None.
+        display_label: Human-readable "uuid | name" log label.
+        filename: Stem of the stored image file (no extension).
+        is_bad: True when the card should not be downloaded.
     """
 
     uuid: str

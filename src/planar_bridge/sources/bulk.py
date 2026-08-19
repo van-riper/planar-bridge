@@ -61,7 +61,7 @@ class BulkReader(BulkSource):
             database_path: Where the AllPrintings.sqlite file lives.
 
         Returns:
-            BulkReader: A reader wrapping a read-only connection to that file.
+            A reader wrapping a read-only connection to that file.
         """
         connection = sqlite3.connect(f"file:{database_path}?mode=ro", uri=True)
 
@@ -139,12 +139,12 @@ def _row_to_card(row: sqlite3.Row) -> CardData:
     """Rebuild one JSON-shaped card/token dict from a projected row.
 
     Args:
-        row (sqlite3.Row): A row from the card or token query, carrying the
-            common columns plus the joined scryfallId.
+        row: A row from the card or token query, carrying the common
+            columns plus the joined scryfallId.
 
     Returns:
-        CardData: The card with split list fields, pass-through boolean flags,
-        and the scryfallId nested under identifiers.
+        The card with split list fields, pass-through boolean flags, and
+        the scryfallId nested under identifiers.
     """
     return {
         "uuid": row["uuid"],
@@ -168,10 +168,10 @@ def _split_list(value: str | None) -> list[str]:
     or empty value means there are no members.
 
     Args:
-        value (str | None): The raw column value.
+        value: The raw column value.
 
     Returns:
-        list[str]: The members, stripped of whitespace, or an empty list.
+        The members, stripped of whitespace, or an empty list.
     """
     if not value:
         return []

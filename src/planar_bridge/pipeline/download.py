@@ -171,12 +171,12 @@ def _selected_codes(
     """Return the set codes to process, restricted by --set when given.
 
     Args:
-        set_codes (tuple[str, ...]): Every set code, in the bulk reader's order.
-        only_sets (frozenset[str]): The requested set codes; an empty set
-            means no restriction.
+        set_codes: Every set code, in the bulk reader's order.
+        only_sets: The requested set codes; an empty set means no
+            restriction.
 
     Returns:
-        list[str]: The codes to walk, keeping the reader's order.
+        The codes to walk, keeping the reader's order.
     """
     if not only_sets:
         return list(set_codes)
