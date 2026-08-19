@@ -76,7 +76,7 @@ def build_client(
     "status_code, expected",
     [(429, True), (500, True), (503, True), (404, False), (403, False)],
 )
-def test_is_retryable_status(status_code: int, expected: bool) -> None:
+def test_is_retryable_status(status_code: int, *, expected: bool) -> None:
     """Transient server statuses are retryable; client errors are not."""
     assert is_retryable_status(status_code) is expected
 

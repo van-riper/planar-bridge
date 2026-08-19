@@ -14,7 +14,7 @@ from planar_bridge.cli.prompt import (
     [("y", True), ("Y", True), (" y ", True), ("n", False), ("N", False)],
 )
 def test_ask_yes_no_accepts_y_or_n(
-    monkeypatch: pytest.MonkeyPatch, text: str, expected: bool
+    monkeypatch: pytest.MonkeyPatch, text: str, *, expected: bool
 ) -> None:
     """A y or n answer (any case, surrounding space) returns its bool."""
     monkeypatch.setattr("builtins.input", lambda _: text)

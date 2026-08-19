@@ -78,7 +78,7 @@ class CardObject:  # pylint: disable=too-few-public-methods
             data_directory
         ).as_posix()
 
-    def to_row(self, is_high_resolution: bool) -> CardRow:
+    def to_row(self, *, is_high_resolution: bool) -> CardRow:
         """Build the catalog row recording this card's stored resolution.
 
         Args:

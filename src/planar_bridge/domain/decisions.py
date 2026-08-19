@@ -32,6 +32,7 @@ class DownloadDecision:
 
 def decide_download(
     image_status: str,
+    *,
     local_is_high_resolution: bool | None,
     image_exists: bool,
 ) -> DownloadDecision:

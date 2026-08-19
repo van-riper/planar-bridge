@@ -58,7 +58,9 @@ async def pull_card(
         return CardOutcome.FAILED, False
 
     decision = decide_download(
-        image_status, card_obj.local_state, card_obj.path_exists
+        image_status,
+        local_is_high_resolution=card_obj.local_state,
+        image_exists=card_obj.path_exists,
     )
     if not decision.should_download:
         return CardOutcome.SKIPPED, False
@@ -143,7 +145,9 @@ async def _handle_card(
         return
 
     if not context.options.dry_run:
-        context.repository.upsert_card(card_obj.to_row(source_state))
+        context.repository.upsert_card(
+            card_obj.to_row(is_high_resolution=source_state)
+        )
 
     run_count, run_total = run_position
     set_count, set_total = set_obj.progress
