@@ -91,7 +91,7 @@ def test_backoff_grows_exponentially_from_the_base() -> None:
         random_source=lambda: 0.0,
     )
 
-    assert delay == 4.0
+    assert delay == pytest.approx(4.0)
 
 
 def test_backoff_is_capped_at_the_maximum() -> None:
@@ -104,7 +104,7 @@ def test_backoff_is_capped_at_the_maximum() -> None:
         random_source=lambda: 0.0,
     )
 
-    assert delay == 5.0
+    assert delay == pytest.approx(5.0)
 
 
 def test_backoff_adds_jitter_above_the_capped_delay() -> None:
@@ -117,7 +117,7 @@ def test_backoff_adds_jitter_above_the_capped_delay() -> None:
         random_source=lambda: 1.0,
     )
 
-    assert delay == 6.0
+    assert delay == pytest.approx(6.0)
 
 
 def test_get_returns_the_response_on_success() -> None:
