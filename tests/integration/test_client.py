@@ -73,7 +73,7 @@ def build_client(
 
 
 @pytest.mark.parametrize(
-    "status_code, expected",
+    ("status_code", "expected"),
     [(429, True), (500, True), (503, True), (404, False), (403, False)],
 )
 def test_is_retryable_status(status_code: int, *, expected: bool) -> None:

@@ -10,7 +10,7 @@ from planar_bridge.cli.prompt import (
 
 
 @pytest.mark.parametrize(
-    "text, expected",
+    ("text", "expected"),
     [("y", True), ("Y", True), (" y ", True), ("n", False), ("N", False)],
 )
 def test_ask_yes_no_accepts_y_or_n(

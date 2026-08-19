@@ -7,7 +7,7 @@ render them.
 
 from dataclasses import FrozenInstanceError
 
-from pytest import raises
+import pytest
 
 from planar_bridge.events import (
     BulkDataLoaded,
@@ -42,7 +42,7 @@ def test_marker_events_take_no_fields() -> None:
 def test_events_are_immutable() -> None:
     """A frozen event rejects attribute assignment after construction."""
     event = VersionMismatch(source_version="5.2.1")
-    with raises(FrozenInstanceError):
+    with pytest.raises(FrozenInstanceError):
         event.source_version = "9.9.9"  # type: ignore
 
 

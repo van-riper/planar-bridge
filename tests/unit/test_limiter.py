@@ -27,7 +27,7 @@ class FakeClock:
 
 def test_non_positive_rate_is_rejected() -> None:
     """A rate of zero or below has no sensible interval and is rejected."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="must be positive"):
         RateLimiter(0)
 
 

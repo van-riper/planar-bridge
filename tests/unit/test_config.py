@@ -50,7 +50,7 @@ def test_unknown_language_code_raises(tmp_path: Path) -> None:
     """An unrecognized card_language raises ValueError."""
     config_path = tmp_path / "config.toml"
     config_path.write_text('card_language = "xx"\n', encoding="UTF-8")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="not supported"):
         load_config(config_path)
 
 
@@ -64,5 +64,5 @@ def test_language_override_beats_file_and_default(tmp_path: Path) -> None:
 
 def test_unknown_language_override_raises(tmp_path: Path) -> None:
     """An unrecognized override code raises ValueError like the file path."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="not supported"):
         load_config(tmp_path / "absent.toml", language_override="xx")

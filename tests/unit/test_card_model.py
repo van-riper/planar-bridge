@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from pytest import raises
+import pytest
 
 from planar_bridge.config.loader import AppConfig
 from planar_bridge.domain import card_model
@@ -124,7 +124,7 @@ def test_filename_joins_sorted_faces_for_combined_layout() -> None:
 
 def test_filename_requires_related_uuids_for_combined_layout() -> None:
     """A combined layout with no related UUIDs is a programming error."""
-    with raises(ValueError):
+    with pytest.raises(ValueError, match="has no related UUIDs"):
         card_model.card_filename("u2", "split", [])
 
 
