@@ -24,6 +24,8 @@ from planar_bridge.sources.scryfall import ScryfallSource
 
 REQUEST_TIMEOUT_SECONDS = 30.0
 
+_DEFAULT_RUN_OPTIONS = RunOptions()
+
 
 async def _download_bulk_database(
     paths: DataPaths,
@@ -57,7 +59,7 @@ async def _download_bulk_database(
 
 async def pull_all(
     bus: EventBus,
-    options: RunOptions = RunOptions(),
+    options: RunOptions = _DEFAULT_RUN_OPTIONS,
     approve_version: Callable[[], bool] = _always_approve,
 ) -> None:
     """Run the whole pull: metadata check, then every set's downloads.

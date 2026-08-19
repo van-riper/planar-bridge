@@ -39,7 +39,7 @@ def backoff_seconds(
     base_seconds: float,
     maximum_seconds: float,
     jitter_fraction: float,
-    random_source: Callable[[], float] = random,
+    random_source: Callable[[], float] = random,  # ruff: ignore[suspicious-non-cryptographic-random-usage]
 ) -> float:
     """Compute the backoff delay before the next retry.
 
@@ -81,7 +81,7 @@ class RetryPolicy:
     base_seconds: float = 1.0
     maximum_seconds: float = 30.0
     jitter_fraction: float = 0.25
-    random_source: Callable[[], float] = random
+    random_source: Callable[[], float] = random  # ruff: ignore[suspicious-non-cryptographic-random-usage]
 
     def backoff_seconds_for(self, attempt: int) -> float:
         """Return the backoff delay for the attempt that just failed.
@@ -101,6 +101,9 @@ class RetryPolicy:
         )
 
 
+_DEFAULT_RETRY_POLICY = RetryPolicy()
+
+
 class AsyncHttpClient:  # pylint: disable=too-few-public-methods
     """Rate-limited async HTTP client with capped, jittered retries."""
 
@@ -109,7 +112,7 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
         client: httpx.AsyncClient,
         limiter: Limiter,
         *,
-        policy: RetryPolicy = RetryPolicy(),
+        policy: RetryPolicy = _DEFAULT_RETRY_POLICY,
         sleeper: Sleeper = asyncio.sleep,
     ) -> None:
         """Build a client over an httpx session and a shared limiter.
@@ -147,14 +150,13 @@ class AsyncHttpClient:  # pylint: disable=too-few-public-methods
             try:
                 response = await self._client.get(url, follow_redirects=True)
                 response.raise_for_status()
-                return response
-
             except httpx.HTTPStatusError as error:
                 if not is_retryable_status(error.response.status_code):
                     return None
-
             except httpx.TransportError:
                 pass
+            else:
+                return response
 
             if attempt + 1 < self._policy.max_attempts:
                 await self._sleeper(self._policy.backoff_seconds_for(attempt))
