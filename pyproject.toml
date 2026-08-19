@@ -43,6 +43,6 @@ extend = "ruff.pythonicator.toml"
     "private-member-access",
 ]
 "src/planar_bridge/reporters/console.py" = ["print"]
-# _TOKEN_QUERY trips the hardcoded-password heuristic on its name alone;
-# it is a SQL query.
+# One of the token-card query constants here trips the hardcoded-password
+# heuristic on its name alone; it is SQL, not a secret.
 "src/planar_bridge/sources/bulk.py" = ["hardcoded-password-string"]
