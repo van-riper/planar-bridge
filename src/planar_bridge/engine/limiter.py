@@ -43,10 +43,11 @@ class RateLimiter(Limiter):  # pylint: disable=too-few-public-methods
             ValueError: If max_requests_per_second is not positive.
         """
         if max_requests_per_second <= 0:
-            raise ValueError(
+            message = (
                 "max_requests_per_second must be positive, got "
                 f"{max_requests_per_second}"
             )
+            raise ValueError(message)
 
         self._minimum_interval_seconds: float = 1.0 / max_requests_per_second
         self._clock: Callable[[], float] = clock

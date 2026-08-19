@@ -51,7 +51,8 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
         elif platform == "win32":
             base_path = Path(environment["APPDATA"])
         else:
-            raise RuntimeError(f"platform '{platform}' is not supported")
+            message = f"platform '{platform}' is not supported"
+            raise RuntimeError(message)
 
         data_directory = base_path / "planar-bridge"
 

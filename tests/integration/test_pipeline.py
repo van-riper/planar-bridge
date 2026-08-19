@@ -554,7 +554,8 @@ def test_pull_all_runs_end_to_end(
             return httpx.Response(200, json={"image_status": "highres_scan"})
         if "format=image" in url:
             return httpx.Response(200, content=b"image-bytes")
-        raise AssertionError(f"unexpected request: {url}")
+        message = f"unexpected request: {url}"
+        raise AssertionError(message)
 
     original_client = httpx.AsyncClient
 

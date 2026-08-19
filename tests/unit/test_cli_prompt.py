@@ -74,7 +74,8 @@ def test_approval_for_assume_yes_skips_the_prompt(
         Raises:
             AssertionError: Always, since input() must not be called.
         """
-        raise AssertionError("input() must not be called under --assume-yes")
+        message = "input() must not be called under --assume-yes"
+        raise AssertionError(message)
 
     monkeypatch.setattr("builtins.input", fail_if_prompted)
     assert approval_for(assume_yes=True)() is True

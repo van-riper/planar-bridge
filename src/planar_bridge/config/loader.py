@@ -70,7 +70,8 @@ def load_config(
     language_name = LANGUAGE_MAP.get(language_code)
 
     if language_name is None:
-        raise ValueError(f"language code '{language_code}' not supported")
+        message = f"language code '{language_code}' not supported"
+        raise ValueError(message)
 
     filter_lists = DEFAULT_FILTER_LISTS | file_data
 
