@@ -30,69 +30,99 @@ uv run ruff format src tests
 uv run ty check
 ```
 
-The test suite currently holds only an import smoke test; real coverage arrives with the
-domain-extraction work (see the rewrite plan).
+181 tests cover the whole `src/` tree at 99% line coverage; `ruff check` and `ty check`
+are both clean on the current tree.
 
 ## Runtime layout & environment
 
-The data directory is resolved once at import time in `paths.py` and **must already exist**
-or startup raises `FileNotFoundError`. Resolution order:
+The data directory is resolved in `paths.py::load_paths()` and created on demand (`mkdir
+-p`, via `ensure_directories_exist()`) rather than required to pre-exist. Resolution order:
 
 1. `$PLANAR_BRIDGE_DIR`
-2. `$XDG_DATA_HOME/planar-bridge` (POSIX) or `%AppData%/planar-bridge` (Windows)
+2. `$HOME/.local/share/planar-bridge` (Linux/macOS) or `%APPDATA%/planar-bridge` (Windows) —
+   note this reads `$HOME`/`$APPDATA` directly, not `$XDG_DATA_HOME`.
 
-Inside the data dir: `.json/` holds `AllPrintings.json` + `Meta.json`; each set lives in
-`<SET_CODE>/` (tokens under `<SET_CODE>/tokens/`); `config.toml` is read from here.
-Note: this differs from the older `imgs/` + `json/` tree shown in the README.
+Inside the data dir: `.mtgjson/` holds the MTGJSON bulk database (`AllPrintings.sqlite`) and
+its metadata (`Meta.json`); each set lives in `<SET_CODE>/` (tokens under
+`<SET_CODE>/tokens/`); `catalog.sqlite` is the per-card resolution catalog; `config.toml` is
+read from the data dir root. This differs from the `imgs/` + `json/` tree shown in older
+versions of the README.
 
-`config.toml` is optional and layered over `constants.DEFAULT_CONFIG`. See `config.example.toml`.
+`config.toml` is optional and layered over `config.defaults.DEFAULT_*` values in
+`config/loader.py::load_config()`. See `config.example.toml`.
 
 ## Architecture
 
-The pull pipeline is a three-level loop, driven entirely by MTGJSON's `AllPrintings.json`:
+The pull pipeline is a three-level loop, driven by MTGJSON's `AllPrintings.sqlite`:
 
-- **`pull.py`** — orchestration. `pull_all()` → `pull_meta()` (refresh bulk files if
-  outdated) → iterate sets → `pull_set()` → iterate cards → `pull_card()`. The control
-  flow leans on MTGJSON's data shape and on the `.states.json` cache to decide what to skip.
-- **`objects.py`** — the domain model, where almost all logic lives:
-  - `MetaObject` — compares local vs. remote MTGJSON `date`/`version`. Same date →
-    `SystemExit` (nothing to do). Version drift → interactive `y/N` prompt.
-  - `SetObject` — wraps one set entry; computes `to_omit` (exempt types/sets, online/foreign
-    only), merges `cards` + `tokens`, tracks progress, installs the SIGINT handler.
-  - `CardFields` — derives per-card facts from the raw dict: `is_bad` (reprints, wrong
-    language, funny, online-only, bad/blacklisted layouts, exempt promos), `filename`
-    (combined layouts join all `otherFaceIds` UUIDs with `_`), and `face` for two-sided cards.
-  - `CardObject` — does the network work: `parse_source_state()` queries Scryfall for
-    `image_status`, decides whether a download/upgrade is needed; `download()` fetches the
-    image (appending `&face=` for two-sided layouts).
-  - `StatesObject` — reads/writes `.states.json`, the per-set map of `filename -> is_highres`.
-    `is_all_highres()` lets a fully-upgraded set be skipped on later runs.
-- **`constants.py`** — the pinned `MTGJSON_VERS`, the request `TIMEOUT` (rate limiting), layout
-  category lists, language map, and `DEFAULT_CONFIG`.
-- **`config.py`** — loads `config.toml`, overlays it on defaults, maps the language code to
-  MTGJSON's full language name. Exposes a module-level singleton `CONFIG`.
-- **`utils.py`** — colorized `status()` logger (integer levels 0–6), `handle_response()`
-  (retries HTTP errors 4× with escalating backoff, returns `None` on giving up), progress
-  string formatting.
+- **`pipeline/run.py`** — the composition root. `pull_all()` builds the shared `httpx`
+  client, rate limiter, and sources, then calls `pull_meta()` and walks every set.
+- **`pipeline/metadata.py`** — `pull_meta()`: compares the local MTGJSON version against
+  `constants.MTGJSON_VERSION`; on drift, emits `VersionMismatch` and consults an
+  `approve_version` callback (the CLI's `--assume-yes` flag or an interactive `y/n` prompt
+  from `cli/prompt.py`) before continuing. Refetches `Meta.json` only when it is missing.
+- **`pipeline/download.py`** — `_pull_sets()` → `pull_set()` → `pull_card()`. Cards within a
+  set download concurrently under an `asyncio.Semaphore` bounded by
+  `constants.MAX_CONCURRENT_DOWNLOADS`.
+- **`pipeline/context.py`** — `PullContext` (run-wide dependencies), `SetObject` (a set's
+  record, image directory, and progress counter), `CardObject` (a card's derived facts,
+  image path, and catalog state).
+- **`domain/`** — pure, I/O-free functions reading MTGJSON dicts and the resolved
+  `AppConfig`:
+  - `card_model.py` — `build_card_fields()`; `card_is_bad()` (reprints, wrong language,
+    funny, online-only, bad layouts, exempt promos); `card_filename()` (combined layouts —
+    split/flip/adventure/aftermath — join every face UUID with `_`); `card_face()` for
+    two-sided layouts.
+  - `set_model.py` — `build_set_record()`; `set_is_omitted()` (exempt types/sets,
+    foreign/online-only, unless pardoned).
+  - `decisions.py` — `decide_download()`, the pure upgrade/skip decision from Scryfall's
+    reported image status plus local state.
+  - `metadata.py` — `version_matches_pin()`, `normalize_version()`.
+  - `layouts.py` — the layout category sets (`LAYOUT_TWOSIDED`, `LAYOUT_COMBINED`,
+    `LAYOUT_BAD`, `LAYOUT_TOKEN`).
+- **`catalog/`** — the only layer that knows SQLite. `repository.py::CatalogRepository`
+  persists one row per card (`filename`, `set_code`, `uuid`, `is_high_resolution`,
+  `relative_path`, `updated_at`) in `catalog.sqlite`, replacing the old per-set
+  `.states.json` files; `upsert_card()` commits immediately. `schema.py` holds the DDL and
+  `SCHEMA_VERSION`.
+- **`sources/`** — `bulk.py::BulkReader` is an anti-corruption layer over
+  `AllPrintings.sqlite`, projecting cards/tokens back into the JSON-shaped dicts the domain
+  expects; `mtgjson.py` and `scryfall.py` wrap the two network APIs behind the `ports.py`
+  protocols (`MetadataSource`, `ImageSource`, `BulkSource`).
+- **`engine/`** — `client.py::AsyncHttpClient` wraps `httpx` with retry/backoff
+  (`RetryPolicy`); `limiter.py::RateLimiter` enforces the shared requests-per-second cap
+  across concurrent requests.
+- **`events/`** + **`reporters/console.py`** — the engine emits typed, data-only `Event`
+  subclasses (`SetStarted`, `CardDownloaded`, `CardFailed`, `RunFinished`, ...) on an
+  `EventBus`; `ConsoleReporter` is the only place that knows about color, timestamps, and
+  message text, so a future non-console reporter can subscribe to the same stream.
+- **`cli/`** — `args.py` (argparse → `RunOptions`), `main.py` (the console-script entry
+  point, Python-version guard, Ctrl-C handling), `prompt.py` (the version-drift `y/n`
+  prompt — the only `input()` call in the program).
+- **`constants.py`** — the pinned `MTGJSON_VERSION`, `MAX_REQUESTS_PER_SECOND`,
+  `MAX_CONCURRENT_DOWNLOADS`, and the Scryfall `HTTP_HEADERS`.
 
 ### State & resumability
 
-The program is designed to be killed and resumed. Progress is persisted entirely in each
-set's `.states.json`. `write_states()` is called on normal completion, on download failure
-(then `raise RuntimeError`), and from the SIGINT handler (Ctrl-C) — so a card is only marked
-done once its scan is confirmed. On restart, cards already at the recorded resolution with an
-existing file are skipped without hitting the network.
+The program is designed to be killed and resumed. Progress is persisted in
+`catalog.sqlite`: `CatalogRepository.upsert_card()` commits immediately after each card, so a
+card is only marked done once its scan is confirmed. On restart, `pull_card()` skips a card
+without hitting the network when the catalog already records it at the current resolution
+and its image file still exists on disk.
 
 ### Rate limiting — do not remove
 
-`constants.TIMEOUT` (0.33s) is `sleep`'d before every Scryfall request to honor Scryfall's
+`constants.MAX_REQUESTS_PER_SECOND` (9.0) is enforced by `engine.limiter.RateLimiter`,
+shared across all in-flight requests, to hold every Scryfall request under Scryfall's
 50–100ms / ~10-req-per-second limit. The README's Terms of Use explicitly forbids removing
-or shortening this; doing so risks an IP ban. Treat it as load-bearing.
+or loosening this; doing so risks an IP ban. Treat it as load-bearing.
 
 ## Conventions
 
-- New modules use package-relative imports (e.g. `from .pull import ...`) and live under
+- New modules use absolute, package-rooted imports (e.g.
+  `from planar_bridge.config.loader import AppConfig`) and live under
   `src/planar_bridge/`, matching the generously blank-line-spaced function bodies already in
   the codebase.
-- `MTGJSON_VERS` in `constants.py` is the version the code is validated against; bumping it is
-  a deliberate act, since `MetaObject.is_outdated()` warns the user on any mismatch.
+- `MTGJSON_VERSION` in `constants.py` is the version the code is validated against; bumping
+  it is a deliberate act, since `domain.metadata.version_matches_pin()` warns the user on
+  any mismatch.
