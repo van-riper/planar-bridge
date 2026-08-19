@@ -52,7 +52,8 @@ async def _download_bulk_database(
 
     content = await mtgjson_source.download_bulk("AllPrintings")
     if content is None:
-        raise RuntimeError
+        message = "failed to download AllPrintings.sqlite from MTGJSON"
+        raise RuntimeError(message)
 
     paths.bulk_path.write_bytes(content)
 

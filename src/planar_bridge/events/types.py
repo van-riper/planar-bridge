@@ -149,3 +149,14 @@ class RunFinished(Event):
 @dataclass(frozen=True, kw_only=True)
 class Interrupted(Event):
     """The run received SIGINT (Ctrl-C) and is saving state before exiting."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class RunFailed(Event):
+    """The run aborted after a source could not be reached.
+
+    Attributes:
+        message: A human-readable description of what failed.
+    """
+
+    message: str

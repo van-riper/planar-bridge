@@ -20,6 +20,7 @@ from planar_bridge.events import (
     Event,
     Interrupted,
     MetadataCheckStarted,
+    RunFailed,
     RunFinished,
     RunStarted,
     SetSkipped,
@@ -81,3 +82,7 @@ def test_lifecycle_events_carry_their_payloads() -> None:
     assert RunFinished(
         low_resolution_set_codes=("LEA", "LEB"),
     ).low_resolution_set_codes == ("LEA", "LEB")
+    assert (
+        RunFailed(message="failed to fetch MTGJSON metadata").message
+        == "failed to fetch MTGJSON metadata"
+    )

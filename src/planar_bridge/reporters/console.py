@@ -23,6 +23,7 @@ from planar_bridge.events import (
     Event,
     Interrupted,
     MetadataCheckStarted,
+    RunFailed,
     RunFinished,
     SetSkipped,
     SetStarted,
@@ -76,6 +77,8 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
         elif isinstance(event, Interrupted):
             message = "Interrupted (Ctrl-C), exiting. Progress is saved."
             self._render(_ERROR, message)
+        elif isinstance(event, RunFailed):
+            self._render(_ERROR, event.message)
 
     @staticmethod
     def _version_message(event: VersionMismatch) -> str:

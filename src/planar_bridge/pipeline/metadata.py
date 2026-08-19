@@ -93,7 +93,8 @@ async def pull_meta(
 
     source_info = await mtgjson_source.fetch_metadata()
     if source_info is None:
-        raise RuntimeError
+        message = "failed to fetch MTGJSON metadata"
+        raise RuntimeError(message)
 
     local_info = _read_local_metadata(paths)
     if not version_matches_pin(local_info, constants.MTGJSON_VERSION):
@@ -105,5 +106,6 @@ async def pull_meta(
 
     content = await mtgjson_source.download_bulk("Meta")
     if content is None:
-        raise RuntimeError
+        message = "failed to download Meta.json from MTGJSON"
+        raise RuntimeError(message)
     paths.metadata_path.write_bytes(content)

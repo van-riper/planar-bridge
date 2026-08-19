@@ -32,6 +32,31 @@ def test_run_exits_cleanly_on_keyboard_interrupt(
     assert "Interrupted" in capsys.readouterr().out
 
 
+def test_run_exits_with_message_on_runtime_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """An unreachable source is reported and exits with a failure code."""
+
+    def fake_run(coro: Coroutine[object, object, object]) -> None:
+        """Discard the coroutine and simulate an unreachable source.
+
+        Raises:
+            RuntimeError: Always, in place of running the coroutine.
+        """
+        coro.close()  # the pull_all coroutine is never awaited here
+        message = "failed to fetch MTGJSON metadata"
+        raise RuntimeError(message)
+
+    monkeypatch.setattr(main.asyncio, "run", fake_run)
+
+    with pytest.raises(SystemExit) as exit_info:
+        main.run([])
+
+    assert exit_info.value.code == main.RUN_FAILED_EXIT_CODE
+    assert "failed to fetch MTGJSON metadata" in capsys.readouterr().out
+
+
 def test_module_entry_invokes_run(monkeypatch: pytest.MonkeyPatch) -> None:
     """Running python -m planar_bridge delegates to cli.main.run."""
     calls: list[bool] = []

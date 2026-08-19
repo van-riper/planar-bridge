@@ -408,7 +408,7 @@ def test_download_bulk_database_raises_when_download_fails(
         MetadataInfo(date="x", version="5.3.0"), download_result=None
     )
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError, match=r"AllPrintings\.sqlite"):
         asyncio.run(run._download_bulk_database(paths, source, EventBus()))
 
 
@@ -417,7 +417,7 @@ def test_pull_meta_raises_when_metadata_fetch_fails(tmp_path: Path) -> None:
     paths = load_paths({"PLANAR_BRIDGE_DIR": str(tmp_path)})
     source = StubMtgjson(None)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError, match="MTGJSON metadata"):
         asyncio.run(metadata.pull_meta(paths, source, EventBus()))
 
 
@@ -447,7 +447,7 @@ def test_pull_meta_raises_when_meta_download_fails(tmp_path: Path) -> None:
         MetadataInfo(date="x", version="5.3.0"), download_result=None
     )
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError, match=r"Meta\.json"):
         asyncio.run(metadata.pull_meta(paths, source, EventBus()))
 
 

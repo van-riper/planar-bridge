@@ -20,6 +20,7 @@ from planar_bridge.events import (
     Event,
     Interrupted,
     MetadataCheckStarted,
+    RunFailed,
     RunFinished,
     RunStarted,
     SetSkipped,
@@ -130,6 +131,14 @@ def test_interrupted_is_an_error_line(
     assert emitted(capsys, Interrupted()) == [
         "ERROR: Interrupted (Ctrl-C), exiting. Progress is saved."
     ]
+
+
+def test_run_failed_is_an_error_line(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A run-ending failure renders its message as an ERROR line."""
+    event = RunFailed(message="failed to fetch MTGJSON metadata")
+    assert emitted(capsys, event) == ["ERROR: failed to fetch MTGJSON metadata"]
 
 
 def test_silent_events_print_nothing(
