@@ -283,11 +283,13 @@ def test_open_is_read_only(tmp_path: Path) -> None:
     builder.commit()
     builder.close()
 
-    with BulkReader.open(database_path) as reader:
-        with pytest.raises(sqlite3.OperationalError):
-            reader._connection.execute(  # pylint: disable=protected-access
-                "INSERT INTO sets (code) VALUES ('NEW')"
-            )
+    with (
+        BulkReader.open(database_path) as reader,
+        pytest.raises(sqlite3.OperationalError),
+    ):
+        reader._connection.execute(  # pylint: disable=protected-access
+            "INSERT INTO sets (code) VALUES ('NEW')"
+        )
 
 
 def test_close_closes_the_connection(

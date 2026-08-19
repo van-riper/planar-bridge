@@ -43,7 +43,7 @@ def test_events_are_immutable() -> None:
     """A frozen event rejects attribute assignment after construction."""
     event = VersionMismatch(source_version="5.2.1")
     with pytest.raises(FrozenInstanceError):
-        event.source_version = "9.9.9"  # type: ignore
+        event.source_version = "9.9.9"  # ty: ignore[invalid-assignment]
 
 
 def test_card_events_share_a_common_base() -> None:

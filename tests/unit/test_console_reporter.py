@@ -34,10 +34,9 @@ _TIMESTAMP = re.compile(r"^\[\d{2}:\d{2}:\d{2}\] ")
 
 def visible_lines(captured: str) -> list[str]:
     """Strip ANSI color codes and the timestamp prefix from each line."""
-    cleaned = []
-    for raw in captured.splitlines():
-        cleaned.append(_TIMESTAMP.sub("", _ANSI.sub("", raw)))
-    return cleaned
+    return [
+        _TIMESTAMP.sub("", _ANSI.sub("", raw)) for raw in captured.splitlines()
+    ]
 
 
 def emitted(capsys: pytest.CaptureFixture[str], event: Event) -> list[str]:

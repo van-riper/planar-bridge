@@ -39,6 +39,7 @@ extend = "ruff.pythonicator.toml"
     "assert",
     "docstring-missing-returns",
     "implicit-namespace-package",
+    "import-private-name",
     "private-member-access",
 ]
 "src/planar_bridge/reporters/console.py" = ["print"]
