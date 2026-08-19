@@ -45,7 +45,7 @@ _ERROR = (str(Fore.RED), "ERROR")
 class ConsoleReporter:  # pylint: disable=too-few-public-methods
     """Subscribes to the event bus and prints the legacy colorized lines."""
 
-    def handle(self, event: Event) -> None:  # pylint: disable=too-many-branches
+    def handle(self, event: Event) -> None:  # ruff: ignore[complex-structure]
         """Render one event to stdout, or ignore it if it has no output.
 
         Args:
@@ -77,7 +77,8 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
             message = "Interrupted (Ctrl-C), exiting. Progress is saved."
             self._render(_ERROR, message)
 
-    def _version_message(self, event: VersionMismatch) -> str:
+    @staticmethod
+    def _version_message(event: VersionMismatch) -> str:
         return (
             "MTGJSON has been updated to v"
             + event.source_version
@@ -102,7 +103,8 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
             f"{within} {event.display_label}"
         )
 
-    def _progress(self, count: int, total: int, *, arrow: bool) -> str:
+    @staticmethod
+    def _progress(count: int, total: int, *, arrow: bool) -> str:
         """Format a count over a total as a padded percentage label.
 
         Args:
@@ -124,12 +126,14 @@ class ConsoleReporter:  # pylint: disable=too-few-public-methods
 
         return label
 
-    def _remaining_message(self, event: RunFinished) -> str:
+    @staticmethod
+    def _remaining_message(event: RunFinished) -> str:
         return "Remaining sets with low res scans: " + (", ").join(
             event.low_resolution_set_codes
         )
 
-    def _render(self, category: tuple[str, str], message: str) -> None:
+    @staticmethod
+    def _render(category: tuple[str, str], message: str) -> None:
         color, label = category
         prefix = f"{color}{label}{Fore.RESET}:"
         timestamp = f"[{Fore.CYAN}{strftime('%H:%M:%S')}{Fore.RESET}]"
