@@ -42,7 +42,7 @@ def _create_schema(connection: sqlite3.Connection) -> None:
 
 
 def _insert_set(
-    connection: sqlite3.Connection, code: str, **overrides: Any
+    connection: sqlite3.Connection, code: str, **overrides: object
 ) -> None:
     row: dict[str, Any] = {
         "code": code,
@@ -63,7 +63,7 @@ def _insert_card(
     *,
     set_code: str = "TST",
     scryfall_id: str | None = "scry-1",
-    **overrides: Any,
+    **overrides: object,
 ) -> None:
     row: dict[str, Any] = {
         "uuid": "uuid-1",
@@ -97,7 +97,7 @@ def _insert_token(
     *,
     set_code: str = "TST",
     scryfall_id: str | None = "scry-tok",
-    **overrides: Any,
+    **overrides: object,
 ) -> None:
     row: dict[str, Any] = {
         "uuid": "uuid-tok",

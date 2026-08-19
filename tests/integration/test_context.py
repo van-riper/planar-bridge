@@ -9,7 +9,7 @@ from planar_bridge.catalog.repository import CardRow, CatalogRepository
 from planar_bridge.pipeline.context import CardObject
 
 
-def make_row(**overrides: Any) -> CardRow:
+def make_row(**overrides: object) -> CardRow:
     """A CardRow matching the make_card defaults, overridable per test."""
     base: dict[str, Any] = {
         "filename": "uuid-1",

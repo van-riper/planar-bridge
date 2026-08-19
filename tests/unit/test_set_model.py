@@ -6,7 +6,7 @@ from planar_bridge.config.loader import AppConfig
 from planar_bridge.domain import set_model
 
 
-def make_config(**overrides: Any) -> AppConfig:
+def make_config(**overrides: object) -> AppConfig:
     """An AppConfig with permissive defaults, overridable per test."""
     base: dict[str, Any] = {
         "pull_reprints": False,
@@ -20,7 +20,7 @@ def make_config(**overrides: Any) -> AppConfig:
     return AppConfig(**base)
 
 
-def make_set(**overrides: Any) -> dict[str, Any]:
+def make_set(**overrides: object) -> dict[str, Any]:
     """A minimal, non-omitted MTGJSON set entry, overridable per test."""
     base: dict[str, Any] = {
         "code": "XLN",

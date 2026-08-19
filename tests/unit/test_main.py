@@ -1,7 +1,7 @@
 """Unit test for the CLI runner's interrupt handling."""
 
 import runpy
-from typing import Any
+from collections.abc import Coroutine
 
 import pytest
 
@@ -14,7 +14,7 @@ def test_run_exits_cleanly_on_keyboard_interrupt(
 ) -> None:
     """Ctrl-C is caught, reported as Interrupted, and exits with code 130."""
 
-    def fake_run(coro: Any) -> None:
+    def fake_run(coro: Coroutine[object, object, object]) -> None:
         """Discard the coroutine and simulate a Ctrl-C during the run.
 
         Raises:

@@ -567,7 +567,12 @@ def test_pull_all_runs_end_to_end(
 
     original_client = httpx.AsyncClient
 
-    def fake_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
+    # Forwards straight to httpx.AsyncClient, whose real signature is what
+    # actually constrains these arguments.
+    def fake_client(
+        *args: Any,  # ruff: ignore[any-type]
+        **kwargs: Any,  # ruff: ignore[any-type]
+    ) -> httpx.AsyncClient:
         """Build the real AsyncClient wired to the stubbed transport.
 
         Returns:

@@ -8,7 +8,7 @@ from planar_bridge.config.loader import AppConfig
 from planar_bridge.domain import card_model
 
 
-def make_config(**overrides: Any) -> AppConfig:
+def make_config(**overrides: object) -> AppConfig:
     """An AppConfig with permissive defaults, overridable per test."""
     base: dict[str, Any] = {
         "pull_reprints": False,
@@ -22,7 +22,7 @@ def make_config(**overrides: Any) -> AppConfig:
     return AppConfig(**base)
 
 
-def make_card(**overrides: Any) -> dict[str, Any]:
+def make_card(**overrides: object) -> dict[str, Any]:
     """A minimal, non-bad MTGJSON card entry, overridable per test."""
     base: dict[str, Any] = {
         "language": "English",

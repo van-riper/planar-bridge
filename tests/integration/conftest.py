@@ -21,7 +21,7 @@ def connection() -> Iterator[sqlite3.Connection]:
 def make_config() -> Callable[..., AppConfig]:
     """Return a factory for permissive AppConfigs, overridable per call."""
 
-    def _make_config(**overrides: Any) -> AppConfig:
+    def _make_config(**overrides: object) -> AppConfig:
         base: dict[str, Any] = {
             "pull_reprints": False,
             "card_language": "English",
@@ -40,7 +40,7 @@ def make_config() -> Callable[..., AppConfig]:
 def make_card() -> Callable[..., dict[str, Any]]:
     """Return a factory for minimal, non-bad MTGJSON card entries."""
 
-    def _make_card(**overrides: Any) -> dict[str, Any]:
+    def _make_card(**overrides: object) -> dict[str, Any]:
         base: dict[str, Any] = {
             "uuid": "uuid-1",
             "identifiers": {"scryfallId": "scry-1"},

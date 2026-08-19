@@ -9,7 +9,7 @@ import pytest
 from planar_bridge.catalog.repository import CardRow, CatalogRepository
 
 
-def make_card_row(**overrides: Any) -> CardRow:
+def make_card_row(**overrides: object) -> CardRow:
     """A CardRow with sensible defaults, overridable per test."""
     base: dict[str, Any] = {
         "filename": "abcd",
