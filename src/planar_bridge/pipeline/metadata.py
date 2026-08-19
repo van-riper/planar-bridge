@@ -15,7 +15,12 @@ from planar_bridge.sources.ports import MetadataSource
 
 
 def _read_local_metadata(paths: DataPaths) -> MetadataInfo | None:
-    """Read the on-disk MTGJSON metadata, or None when bulk data is absent."""
+    """Read the on-disk MTGJSON metadata, or None when bulk data is absent.
+
+    Returns:
+        The local build date and normalized version, or None when the
+        bulk database or metadata file is missing.
+    """
     if not (paths.bulk_path.exists() and paths.metadata_path.exists()):
         return None
 
@@ -28,7 +33,11 @@ def _read_local_metadata(paths: DataPaths) -> MetadataInfo | None:
 
 
 def _always_approve() -> bool:
-    """Approve a version drift without asking (the non-interactive default)."""
+    """Approve a version drift without asking (the non-interactive default).
+
+    Returns:
+        True, unconditionally.
+    """
     return True
 
 

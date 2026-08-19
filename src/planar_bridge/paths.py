@@ -40,6 +40,10 @@ def load_paths(environment: Mapping[str, str]) -> DataPaths:
 
     Returns:
         The immutable set of absolute locations.
+
+    Raises:
+        RuntimeError: If PLANAR_BRIDGE_DIR is unset and the platform is
+            neither linux, darwin, nor win32.
     """
     # TODO: rename PLANAR_BRIDGE_DIR to PLANAR_BRIDGE_PATH
     data_directory = environment.get("PLANAR_BRIDGE_DIR")

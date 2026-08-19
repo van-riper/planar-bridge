@@ -68,7 +68,11 @@ class BulkReader(BulkSource):
         return cls(connection)
 
     def __enter__(self) -> "BulkReader":
-        """Enter a context that closes the reader on exit."""
+        """Enter a context that closes the reader on exit.
+
+        Returns:
+            This reader.
+        """
         return self
 
     def __exit__(self, *exc_info: object) -> None:
@@ -117,7 +121,11 @@ class BulkReader(BulkSource):
         }
 
     def _load_entries(self, query: str, set_code: str) -> list[CardData]:
-        """Run a card/token query for one set and map each row to a dict."""
+        """Run a card/token query for one set and map each row to a dict.
+
+        Returns:
+            The set's cards or tokens as JSON-shaped dicts.
+        """
         rows = self._connection.execute(query, (set_code,)).fetchall()
 
         return [_row_to_card(row) for row in rows]
