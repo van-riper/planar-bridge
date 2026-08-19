@@ -113,12 +113,12 @@ def card_is_bad(card_data: CardData, config: AppConfig, layout: str) -> bool:
     # TODO: all of these conditions should be configurable in the future
     is_reprint = card_data.get("isReprint") and not config.pull_reprints
     # TODO: needs a better implementation of supporting oracle languages
-    is_language_bad = card_data["language"] not in [
+    is_language_bad = card_data["language"] not in {
         config.card_language,
         "Phyrexian",
         "Quenya",
-    ]
-    is_name_bad = card_data["name"] in ["Checklist", "Double-Faced"]
+    }
+    is_name_bad = card_data["name"] in {"Checklist", "Double-Faced"}
     is_layout_bad = layout in layouts.LAYOUT_BAD
     is_online_only = bool(card_data.get("isOnlineOnly"))
     is_funny = bool(card_data.get("isFunny"))
