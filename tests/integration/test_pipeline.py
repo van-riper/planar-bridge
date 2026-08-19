@@ -42,12 +42,17 @@ class StubScryfall:
         self._image_status = image_status
         self._download_result = download_result
 
-    async def image_status(self, scryfall_id: str) -> str | None:
+    async def image_status(
+        self,
+        scryfall_id: str,  # ruff: ignore[unused-method-argument]
+    ) -> str | None:
         """Return the canned image status (None models a failed query)."""
         return self._image_status
 
     async def download_image(
-        self, scryfall_id: str, face: str | None = None
+        self,
+        scryfall_id: str,  # ruff: ignore[unused-method-argument]
+        face: str | None = None,  # ruff: ignore[unused-method-argument]
     ) -> bytes | None:
         """Return the canned download result (bytes, or None for failure)."""
         return self._download_result
@@ -69,7 +74,10 @@ class StubMtgjson:
         """Return the canned metadata info (None models a failed fetch)."""
         return self._info
 
-    async def download_bulk(self, target: str) -> bytes | None:
+    async def download_bulk(
+        self,
+        target: str,  # ruff: ignore[unused-method-argument]
+    ) -> bytes | None:
         """Return the canned bulk bytes (None models a failed download)."""
         return self._download_result
 

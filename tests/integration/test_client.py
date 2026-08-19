@@ -54,7 +54,7 @@ def build_client(
     queue = list(items)
     calls = {"count": 0}
 
-    def handler(request: httpx.Request) -> httpx.Response:
+    def handler(_request: httpx.Request) -> httpx.Response:
         """Return the next queued response or raise the next queued error."""
         calls["count"] += 1
         item = queue.pop(0)
