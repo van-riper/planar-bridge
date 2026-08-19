@@ -15,8 +15,12 @@ from planar_bridge.events import EventBus, Interrupted
 from planar_bridge.pipeline import pull_all
 from planar_bridge.reporters.console import ConsoleReporter
 
-if version_info.major != 3 or version_info.minor < 13:
-    raise SystemExit("Python version must be at least 3.13")
+# The check stays even though pyproject.toml pins the minimum version:
+# it protects a direct script invocation under an interpreter that never
+# consulted that metadata.
+if version_info[:2] < (3, 13):  # ruff: ignore[outdated-version-block]
+    message = "Python version must be at least 3.13"
+    raise SystemExit(message)
 
 # Conventional shell exit code for a process ended by Ctrl-C (128 + SIGINT).
 INTERRUPT_EXIT_CODE = 130
