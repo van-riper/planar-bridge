@@ -56,7 +56,6 @@ def card_face(layout: str, side: str | None) -> Face | None:
         message = f"unexpected side {side!r} for two-sided layout {layout!r}"
         raise ValueError(message)
 
-    # TODO: needs a better way to map "a" to "front" and "b" to "back"
     return "front" if side == "a" else "back"
 
 
@@ -117,6 +116,8 @@ def card_is_bad(card_data: CardData, config: AppConfig, layout: str) -> bool:
         config.card_language,
         "Phyrexian",
         "Quenya",
+        "Dwarvish",
+        "Klingon",
     }
     is_name_bad = card_data["name"] in {"Checklist", "Double-Faced"}
     is_layout_bad = layout in layouts.LAYOUT_BAD
