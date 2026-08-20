@@ -16,7 +16,7 @@ MAX_CONCURRENT_DOWNLOADS: int = 8
 # User-Agent version alongside the project version. Refer to Scryfall's API
 # documentation for more info: https://scryfall.com/docs/api
 HTTP_HEADERS: dict[str, str] = {
-    "User-Agent": "planar-bridge/0.1.0",
+    "User-Agent": "planar-bridge/1.0.0",
     "Accept": "application/json;q=0.9,*/*;q=0.8",
 }
 
