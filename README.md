@@ -1,26 +1,28 @@
+<p align="center">
+  <img
+    width="256"
+    src="https://user-images.githubusercontent.com/64651989/159095590-39a9c3ce-4a44-46b1-a597-515a3b282015.png"
+    alt="Planar Bridge logo"
+  />
+</p>
+
 # Planar Bridge
 
-Planar Bridge is a cross-platform tool for downloading and maintaining locally
-stored high-quality card scans from Magic: the Gathering.
+Planar Bridge downloads and maintains a local library of high-quality card
+scans from Magic: the Gathering.
 
-All scans are obtained from [Scryfall](https://scryfall.com/) via their online
-card database. Bulk datasets used to drive the downloads come from
-[MTGJSON](https://mtgjson.com/).
+Scans come from [Scryfall](https://scryfall.com/), and the bulk set and card
+metadata that drives the downloads comes from [MTGJSON](https://mtgjson.com/).
 
-Planar Bridge also upgrades the resolution on cards when a higher resolution
-becomes available. If a low-resolution scan exists locally, Planar Bridge
-replaces it with a higher-resolution scan once Scryfall has one. This helps
-with cards from a newly spoiled set that have not been scanned at a crisp
-high resolution yet.
-
-Planar Bridge is currently unstable, so expect the config format and CLI to
-change before v1 is released.
+Planar Bridge also upgrades resolution over time. If a scan stored locally is
+low-res and Scryfall later publishes a high-res version, for instance once a
+newly spoiled set gets rescanned, Planar Bridge replaces the old file.
 
 ## Installation
 
-Planar Bridge is supported on Linux and macOS. It is expected (not yet tested)
-to function on Windows. It requires at least Python 3.13.0, so check your
-installed Python version if you are unsure:
+Planar Bridge runs on Linux and macOS. Windows should work too, though it
+hasn't been tested there yet. It requires Python 3.13 or later, so check your
+installed version if you're unsure:
 
 ```sh
 $ python3 -V
@@ -55,10 +57,13 @@ $ uv run planar-bridge
 ...
 ```
 
-Planar Bridge will then begin the download process. Keep in mind that with over
-600 categorized sets, downloading all card scans will take several hours even
-with the fastest internet connection. However, you can kill the program and
-start it later, and it will resume where it left off.
+Planar Bridge then begins the download process. Downloading every card scan
+can take several hours, even on a fast connection, but you can kill the
+program at any point and start it later. It resumes exactly where it left off.
+
+MTGJSON's bulk database is pinned to a specific version. If your locally
+cached copy has drifted from that version, Planar Bridge asks you to confirm
+before continuing; pass `-y` to skip that prompt.
 
 Useful flags:
 
@@ -78,6 +83,9 @@ order:
 1. `$PLANAR_BRIDGE_DIR`, if set
 2. `$HOME/.local/share/planar-bridge` (Linux/macOS) or
    `%APPDATA%/planar-bridge` (Windows)
+
+This reads `$HOME` and `%APPDATA%` directly; it does not check
+`$XDG_DATA_HOME`.
 
 Here is an example layout of that directory with some example set codes and
 phony UUIDs:
@@ -101,18 +109,17 @@ planar-bridge/                 (the data directory)
 └─ ...
 ```
 
-Planar Bridge names card image files according to that card's UUID from
-MTGJSON's database. Cards that share a single image across two faces (split,
-flip, adventure, aftermath layouts) are named by joining both UUIDs with `_`.
-At this time, there is no way to name a card file according to that card's
-name.
+Planar Bridge names card image files after that card's UUID from MTGJSON's
+database. Cards that share a single image across two faces (split, flip,
+adventure, aftermath layouts) are named by joining both UUIDs with `_`. At
+this time, there is no way to name a card file according to that card's name.
 
 `.mtgjson/` holds the MTGJSON bulk database (`AllPrintings.sqlite`) and its
 metadata (`Meta.json`), fetched once and reused on later runs.
 `catalog.sqlite` is a small SQLite database recording each downloaded card's
-resolution; it replaces what used to be a `.states.json` file per set, and is
-what lets a killed run resume from exactly where it left off. Do not modify or
-delete it, since it drives both resuming and resolution upgrades.
+resolution; it's what lets a killed run resume from exactly where it left off.
+Do not modify or delete it, since it drives both resuming and resolution
+upgrades.
 
 ## Development
 
@@ -137,21 +144,20 @@ and choose which sets, set types, and promo types to exclude from the
 download process. For more information on set and promo types, visit
 [MTGJSON](https://mtgjson.com/).
 
-For now, the configuration of Planar Bridge is limited, so if you have a
-suggestion for more options to configure, feel free to
+Configuration is limited for now. If you have a suggestion for more options,
+feel free to
 [open an issue](https://github.com/van-riper/planar-bridge/issues/new/).
 
 ## Terms of Use
 
 By downloading and running this program, you agree to Wizards of the Coast's
 [Fan Content Policy](https://company.wizards.com/en/legal/fancontentpolicy/) as
-well as Scryfall's [Terms of Service](https://scryfall.com/docs/terms/).
-If you have any questions about what you can/cannot do regarding these
-policies, carefully read each article and FAQ on the links to WotC's and
-Scryfall's terms and conditions.
+well as Scryfall's [Terms of Service](https://scryfall.com/docs/terms/). If
+you have any questions about what you can or cannot do under these policies,
+read the linked terms and FAQs carefully.
 
-This program has been made with the intent of respecting the 50 - 100
-millisecond request rate limit that Scryfall denotes on its website:
+This program respects the 50 - 100 millisecond request rate limit that
+Scryfall states on its website:
 
 > We kindly ask that you insert 50 – 100 milliseconds of delay between the
 > requests you send to the server at api.scryfall.com. (i.e., 10 requests per
@@ -168,15 +174,16 @@ Do not modify or remove this program's built-in rate limiter, which keeps
 every request to Scryfall under that limit. If you remove it, your IP address
 will likely get blocked, either temporarily or permanently.
 
-With that being said, Planar Bridge and its developers accept zero
-responsibility regarding incidents that breach WotC's, Scryfall's, and/or
-Planar Bridge's terms and conditions.
+With that said, Planar Bridge and its developers accept no responsibility for
+incidents that breach WotC's, Scryfall's, and/or Planar Bridge's terms and
+conditions.
 
 ## Credits
 
-Logo based on 'Portal' design made by [Lorc](https://lorcblog.blogspot.com/).
+Logo based on the 'Portal' design by [Lorc](https://lorcblog.blogspot.com/).
 
 ## License
 
-This project is developed under an MIT License. For more information, see
-[LICENSE](https://github.com/van-riper/planar-bridge/blob/main/LICENSE).
+This project is under the MIT License. See
+[LICENSE](https://github.com/van-riper/planar-bridge/blob/main/LICENSE) for
+details.
