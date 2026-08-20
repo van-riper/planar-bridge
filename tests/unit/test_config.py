@@ -66,3 +66,15 @@ def test_unknown_language_override_raises(tmp_path: Path) -> None:
     """An unrecognized override code raises ValueError like the file path."""
     with pytest.raises(ValueError, match="not supported"):
         load_config(tmp_path / "absent.toml", language_override="xx")
+
+
+@pytest.mark.parametrize(
+    "toml_value",
+    ['exempt_sets = "MB1"', "exempt_sets = 5", "exempt_sets = { a = 1 }"],
+)
+def test_non_list_filter_value_raises(toml_value: str, tmp_path: Path) -> None:
+    """A filter-list config value that isn't a list raises TypeError."""
+    config_path = tmp_path / "planar-bridge.toml"
+    config_path.write_text(toml_value + "\n", encoding="UTF-8")
+    with pytest.raises(TypeError, match="exempt_sets must be a list"):
+        load_config(config_path)

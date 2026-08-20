@@ -12,6 +12,13 @@ from planar_bridge.config.defaults import (
     LANGUAGE_MAP,
 )
 
+_FILTER_LIST_KEYS = (
+    "pardoned_sets",
+    "exempt_sets",
+    "exempt_promos",
+    "exempt_types",
+)
+
 
 @dataclass(frozen=True, kw_only=True)
 class AppConfig:
@@ -32,6 +39,27 @@ class AppConfig:
     exempt_sets: frozenset[str]
     exempt_promos: frozenset[str]
     exempt_types: frozenset[str]
+
+
+def _validate_filter_lists(filter_lists: dict[str, Any]) -> None:
+    """Raise on a filter-list config value that is not a list.
+
+    A string is iterable, so a typo omitting a TOML array's brackets
+    (e.g. `exempt_sets = "MB1"`) would otherwise pass through as a
+    frozenset of that string's characters with no error at all.
+
+    Args:
+        filter_lists: The merged filter lists, keyed by config field name.
+
+    Raises:
+        TypeError: If any of the filter-list values is not a list.
+    """
+    for key in _FILTER_LIST_KEYS:
+        value = filter_lists[key]
+        if not isinstance(value, list):
+            type_name = type(value).__name__
+            message = f"{key} must be a list of strings, got {type_name}"
+            raise TypeError(message)
 
 
 def load_config(
@@ -72,6 +100,7 @@ def load_config(
         raise ValueError(message)
 
     filter_lists = DEFAULT_FILTER_LISTS | file_data
+    _validate_filter_lists(filter_lists)
 
     return AppConfig(
         pull_reprints=pull_reprints,

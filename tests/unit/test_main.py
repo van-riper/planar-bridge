@@ -82,6 +82,31 @@ def test_run_exits_with_message_on_value_error(
     assert "language code 'xx' not supported" in capsys.readouterr().out
 
 
+def test_run_exits_with_message_on_type_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A malformed config value is reported and exits with a failure code."""
+
+    def fake_run(coro: Coroutine[object, object, object]) -> None:
+        """Discard the coroutine and simulate a malformed filter list.
+
+        Raises:
+            TypeError: Always, in place of running the coroutine.
+        """
+        coro.close()  # an unawaited coroutine here would raise a warning
+        message = "exempt_sets must be a list of strings, got str"
+        raise TypeError(message)
+
+    monkeypatch.setattr(main.asyncio, "run", fake_run)
+
+    with pytest.raises(SystemExit) as exit_info:
+        main.run([])
+
+    assert exit_info.value.code == main.RUN_FAILED_EXIT_CODE
+    assert "exempt_sets must be a list" in capsys.readouterr().out
+
+
 def test_module_entry_invokes_run(monkeypatch: pytest.MonkeyPatch) -> None:
     """Running python -m planar_bridge delegates to cli.main.run."""
     calls: list[bool] = []
