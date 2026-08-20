@@ -153,6 +153,12 @@ def test_face_is_back_for_side_b() -> None:
     assert card_model.card_face("transform", "b") == "back"
 
 
+def test_face_requires_a_or_b_for_twosided_layout() -> None:
+    """A two-sided layout with an unrecognized side is a programming error."""
+    with pytest.raises(ValueError, match="unexpected side"):
+        card_model.card_face("transform", "c")
+
+
 # --- build_card_fields ---------------------------------------------------
 
 
