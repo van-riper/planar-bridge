@@ -44,7 +44,7 @@ def test_run_exits_with_message_on_runtime_error(
         Raises:
             RuntimeError: Always, in place of running the coroutine.
         """
-        coro.close()  # the pull_all coroutine is never awaited here
+        coro.close()  # an unawaited coroutine here would raise a warning
         message = "failed to fetch MTGJSON metadata"
         raise RuntimeError(message)
 
