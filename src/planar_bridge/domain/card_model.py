@@ -11,6 +11,11 @@ from planar_bridge.aliases import CardData, Face
 from planar_bridge.config.loader import AppConfig
 from planar_bridge.domain import layouts
 
+# Rejects a value that could escape its intended directory or URL path
+# segment once concatenated with "/": empty, a bare "." or "..", or
+# anything carrying a path separator.
+_PATH_SEPARATORS = frozenset("/\\")
+
 
 @dataclass(frozen=True, kw_only=True)
 class CardFields:
@@ -33,6 +38,22 @@ class CardFields:
     display_label: str
     filename: str
     is_bad: bool
+
+
+def _validate_identifier(value: str, field: str) -> None:
+    """Raise if a value is unsafe to use in a filename or URL path.
+
+    Args:
+        value: The identifier to check.
+        field: The name of the field being validated, for the message.
+
+    Raises:
+        ValueError: If value is empty, is a bare "." or "..", or contains
+            a path separator.
+    """
+    if not value or value in {".", ".."} or _PATH_SEPARATORS & set(value):
+        message = f"{field} {value!r} is not a safe identifier"
+        raise ValueError(message)
 
 
 def card_face(layout: str, side: str | None) -> Face | None:
@@ -152,13 +173,17 @@ def build_card_fields(card_data: CardData, config: AppConfig) -> CardFields:
         The immutable derived facts for the card.
     """
     uuid: str = card_data["uuid"]
+    _validate_identifier(uuid, "uuid")
     scryfall_id: str = card_data["identifiers"]["scryfallId"]
+    _validate_identifier(scryfall_id, "scryfallId")
     layout: str = card_data["layout"]
     side: str | None = card_data.get("side")
     face = card_face(layout, side)
     name: str = card_data["name"]
     display_label = f"{uuid} | {name}"
     related_uuids: list[str] = card_data.get("otherFaceIds", [])
+    for related_uuid in related_uuids:
+        _validate_identifier(related_uuid, "otherFaceIds entry")
     filename = card_filename(uuid, layout, related_uuids)
     is_bad = card_is_bad(card_data, config, layout)
 

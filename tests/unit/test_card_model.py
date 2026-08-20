@@ -159,6 +159,22 @@ def test_face_requires_a_or_b_for_twosided_layout() -> None:
         card_model.card_face("transform", "c")
 
 
+# --- _validate_identifier -------------------------------------------------
+
+
+@pytest.mark.parametrize("value", ["", ".", "..", "a/b", "a\\b", "../escape"])
+def test_validate_identifier_rejects_unsafe_values(value: str) -> None:
+    """An empty, dot-only, or path-separator-carrying value is rejected."""
+    with pytest.raises(ValueError, match="not a safe identifier"):
+        card_model._validate_identifier(value, "uuid")
+
+
+@pytest.mark.parametrize("value", ["abc", "u1", "uuid-1", "01234567-89ab"])
+def test_validate_identifier_accepts_safe_values(value: str) -> None:
+    """A plain identifier with no path-escape characters is accepted."""
+    card_model._validate_identifier(value, "uuid")
+
+
 # --- build_card_fields ---------------------------------------------------
 
 
@@ -182,3 +198,38 @@ def test_build_card_fields_assembles_derived_facts() -> None:
     assert fields.display_label == "abc | Delver of Secrets"
     assert fields.filename == "abc"
     assert fields.is_bad is False
+
+
+def test_build_card_fields_rejects_unsafe_uuid() -> None:
+    """A uuid containing a path separator is a programming error."""
+    card_data = make_card(
+        uuid="../escape",
+        layout="normal",
+        identifiers={"scryfallId": "scry-1"},
+    )
+    with pytest.raises(ValueError, match="not a safe identifier"):
+        card_model.build_card_fields(card_data, make_config())
+
+
+def test_build_card_fields_rejects_unsafe_scryfall_id() -> None:
+    """A scryfallId containing a path separator is a programming error."""
+    card_data = make_card(
+        uuid="abc",
+        layout="normal",
+        identifiers={"scryfallId": "../escape"},
+    )
+    with pytest.raises(ValueError, match="not a safe identifier"):
+        card_model.build_card_fields(card_data, make_config())
+
+
+def test_build_card_fields_rejects_unsafe_related_uuid() -> None:
+    """An otherFaceIds entry containing a path separator is rejected."""
+    card_data = make_card(
+        uuid="abc",
+        layout="transform",
+        identifiers={"scryfallId": "scry-1"},
+        side="a",
+        otherFaceIds=["../escape"],
+    )
+    with pytest.raises(ValueError, match="not a safe identifier"):
+        card_model.build_card_fields(card_data, make_config())
