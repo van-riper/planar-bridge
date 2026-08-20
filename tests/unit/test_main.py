@@ -57,6 +57,31 @@ def test_run_exits_with_message_on_runtime_error(
     assert "failed to fetch MTGJSON metadata" in capsys.readouterr().out
 
 
+def test_run_exits_with_message_on_value_error(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A bad config value is reported and exits with a failure code."""
+
+    def fake_run(coro: Coroutine[object, object, object]) -> None:
+        """Discard the coroutine and simulate a bad configured language.
+
+        Raises:
+            ValueError: Always, in place of running the coroutine.
+        """
+        coro.close()  # an unawaited coroutine here would raise a warning
+        message = "language code 'xx' not supported"
+        raise ValueError(message)
+
+    monkeypatch.setattr(main.asyncio, "run", fake_run)
+
+    with pytest.raises(SystemExit) as exit_info:
+        main.run([])
+
+    assert exit_info.value.code == main.RUN_FAILED_EXIT_CODE
+    assert "language code 'xx' not supported" in capsys.readouterr().out
+
+
 def test_module_entry_invokes_run(monkeypatch: pytest.MonkeyPatch) -> None:
     """Running python -m planar_bridge delegates to cli.main.run."""
     calls: list[bool] = []

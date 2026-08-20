@@ -36,14 +36,17 @@ def run(argv: Sequence[str] | None = None) -> None:
     inside the coroutine, so the interrupt is caught here and reported through
     the event bus. Progress is already persisted per card, so nothing is lost.
     A source that could not be reached after retries surfaces as a
-    RuntimeError, reported the same way rather than as a raw traceback.
+    RuntimeError, and a bad --language or config value (including malformed
+    TOML) surfaces as a ValueError; both are reported the same way rather
+    than as a raw traceback.
 
     Args:
         argv: The argument vector, or None to read sys.argv.
 
     Raises:
         SystemExit: With the conventional interrupt code on Ctrl-C, or
-            RUN_FAILED_EXIT_CODE when a source could not be reached.
+            RUN_FAILED_EXIT_CODE when a source could not be reached or the
+            configuration is invalid.
     """
     options = parse_args(argv)
     approve_version = approval_for(assume_yes=options.assume_yes)
@@ -56,6 +59,6 @@ def run(argv: Sequence[str] | None = None) -> None:
     except KeyboardInterrupt:
         bus.emit(Interrupted())
         raise SystemExit(INTERRUPT_EXIT_CODE) from None
-    except RuntimeError as error:
+    except (RuntimeError, ValueError) as error:
         bus.emit(RunFailed(message=str(error)))
         raise SystemExit(RUN_FAILED_EXIT_CODE) from None
