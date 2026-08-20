@@ -2,20 +2,10 @@
 
 # Preferred language of downloaded cards.
 # (Keep in mind that many sets are only printed in English!)
-card_lang = "en"
+card_language = "en"
 
 # Download reprints (significantly increases amount of duplicate cards).
 pull_reprints = false
-
-# List of sets that should always be parsed.
-# The Secret Lair sets have new cards added over time, so they are listed here.
-continuous_sets = [
-    "SLC",
-    "SLD",
-    "SLP",
-    "SLU",
-    "SLX",
-]
 
 # List of sets that should not be downloaded.
 # These sets listed below are purely comprised of reprints.
@@ -64,7 +54,4 @@ exempt_types = [
 # List of sets that should be re-included if under an excluded type.
 pardoned_sets = [
     "30A",
-    "2X2",
-    "CLB",
-    "DBL",
 ]
