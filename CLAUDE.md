@@ -12,7 +12,7 @@ signature feature is *resolution upgrading*: if a locally stored scan is low-res
 
 ## Commands
 
-Requires Python >= 3.13 (enforced at startup in `__main__.py`). The project uses a src
+Requires Python >= 3.13 (enforced at startup in `cli/main.py`). The project uses a src
 layout (`src/planar_bridge/`) and is managed with [uv](https://docs.astral.sh/uv/).
 
 ```sh
@@ -30,7 +30,7 @@ uv run ruff format src tests
 uv run ty check
 ```
 
-181 tests cover the whole `src/` tree at 99% line coverage; `ruff check` and `ty check`
+188 tests cover the whole `src/` tree at 99% line coverage; `ruff check` and `ty check`
 are both clean on the current tree.
 
 ## Runtime layout & environment
