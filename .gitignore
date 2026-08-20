@@ -18,5 +18,3 @@ htmlcov/
 
 # Local config & data
 planar-bridge.toml
-imgs/
-json/
